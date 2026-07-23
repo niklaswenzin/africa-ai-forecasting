@@ -1,0 +1,6 @@
+# Python
+__pycache__/
+*.pyc
+
+# Umgebung / Secrets (API-Key liegt nur in der Umgebungsvariable, nie im Repo)
+.env
