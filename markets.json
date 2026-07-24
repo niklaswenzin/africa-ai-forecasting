@@ -1,32 +1,32 @@
 [
   {
-    "id": "2446890",
-    "question": "Will voter turnout be between 60% and 70% in the first round of the 2026 Zambian presidential elections?",
-    "market_p": 0.375,
+    "id": "620335",
+    "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+    "market_p": 0.8685,
     "africa": true
   },
   {
-    "id": "1250458",
-    "question": "Will South African inflation be between 2.9% and 3.2% in 2026?",
-    "market_p": 0.0475,
+    "id": "2063128",
+    "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
+    "market_p": 0.9455,
     "africa": true
   },
   {
-    "id": "561975",
-    "question": "Will Marco Rubio win the 2028 Republican presidential nomination?",
-    "market_p": 0.2795,
-    "africa": false
+    "id": "1076686",
+    "question": "Will Somaliland join the Abraham Accords before 2027?",
+    "market_p": 0.26,
+    "africa": true
   },
   {
-    "id": "601822",
-    "question": "Will Michelle Bolsonaro win the 2026 Brazilian presidential election?",
-    "market_p": 0.012,
-    "africa": false
+    "id": "668333",
+    "question": "Will Fernando Dias da Costa win the 2025 Guinea-Bissau presidential election?",
+    "market_p": 0.111,
+    "africa": true
   },
   {
-    "id": "559655",
-    "question": "Will Josh Shapiro win the 2028 Democratic presidential nomination?",
-    "market_p": 0.0525,
-    "africa": false
+    "id": "799982",
+    "question": "Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?",
+    "market_p": 0.9305,
+    "africa": true
   }
 ]

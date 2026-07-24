@@ -1,15 +1,19 @@
 """fetch_markets.py
 
 Laedt offene Fragen von der Polymarket Gamma API und speichert 5 davon
-als markets.json. Auswahl: bis zu 3 Fragen mit Afrika-Bezug (maximal eine
-pro Event) und aufgefuellt auf 5 mit den liquidesten globalen Wirtschafts-
-oder Politikfragen ohne Afrika-Bezug.
+als markets.json. Design: 5 Fragen mit Afrika-Bezug, maximal eine pro Event,
+keine Sport-Fragen. Bevorzugt werden Fragen mit einer Marktquote zwischen
+0.05 und 0.95 (nach Volumen sortiert); Extremwerte nur, falls sonst keine 5
+zusammenkommen. Bleiben nach allen Filtern weniger als 5 uebrig, speichern
+wir alle vorhandenen und melden die Luecke, statt mit anderen Themen aufzufuellen.
 
 Die API ist oeffentlich, es wird kein Key benoetigt.
 """
 
 import json
+import re
 import sys
+import time
 
 import requests
 
@@ -17,58 +21,140 @@ import requests
 
 BASE_URL = "https://gamma-api.polymarket.com"
 ENDPOINT = "/markets"
-ANZAHL = 5                 # so viele Fragen wollen wir am Ende speichern
-AFRIKA_MAX = 3             # hoechstens so viele Afrika-Fragen, Rest sind Fueller
-SEITEN = 20                # so viele Seiten a 100 Markets blaettern wir durch (API begrenzt den Offset)
+ANZAHL = 5                 # so viele Afrika-Fragen wollen wir am Ende speichern
+MODERAT_MIN = 0.05         # bevorzugte Quote: nicht extremer als diese Grenzen
+MODERAT_MAX = 0.95
+SEITEN = 21                # Seiten a 100 pro Sortierung (API deckelt den Offset bei 2000)
 PRO_SEITE = 100            # Maximum, das die API pro Request zurueckgibt
 
 # Manche Requests wurden ohne User-Agent mit 403 abgewiesen, darum setzen wir einen.
 HEADERS = {"User-Agent": "forecasting-mini/1.0"}
+TIMEOUT = 30               # Sekunden pro Anfrage, bevor sie als haengend gilt
+VERSUCHE = 3               # so oft probieren wir eine Anfrage bei Timeout erneut
 
-# Keywords, um Afrika-Bezug im Fragetext zu erkennen (alles klein geschrieben).
-# Bewusst KEINE generischen Woerter "africa"/"african": die matchen auch auf
-# "North Africa" und lieferten einen Fehltreffer (eine US-Iran-Frage). Wir
-# verlangen darum ein konkretes Land, einen Leadernamen oder eine eindeutige
-# Phrase wie "south africa"/"central african".
-AFRIKA_KEYWORDS = [
-    "nigeria", "kenya", "ethiopia", "egypt",
-    "south africa", "ghana", "sudan", "congo", "somalia", "zimbabwe",
-    "uganda", "tanzania", "morocco", "algeria", "angola", "senegal",
-    "rwanda", "zambia", "tunisia", "libya", "cameroon", "ivory coast",
-    "sahel", "ramaphosa", "tinubu", "ruto", "sisi", "akhannouch",
-    "central african",
+# Die API deckelt den Offset bei 2000, eine einzelne Abfrage erreicht also nur
+# ~2000 Markets. Weil es aber weit mehr offene Markets gibt und die serverseitige
+# Volumen-Sortierung ueber die Seiten hinweg unzuverlaessig ist, laden wir das
+# gleiche Fenster mit mehreren Sortierungen und vereinigen die Ergebnisse ueber
+# die id. So erwischen wir auch liquide Afrika-Markets, die eine einzelne
+# Sortierung verpasst.
+SORTIERUNGEN = [
+    {},                                             # unsortiert (Standard)
+    {"order": "volume", "ascending": "false"},      # groesstes Volumen zuerst
+    {"order": "volume", "ascending": "true"},       # kleinstes Volumen zuerst
+    {"order": "liquidity", "ascending": "false"},   # nach Liquiditaet
+    {"order": "startDate", "ascending": "false"},   # neueste zuerst
+    {"order": "endDate", "ascending": "true"},      # bald endende zuerst
 ]
 
-# Keywords fuer den Nicht-Afrika-Fueller: globale Wirtschaft oder Politik.
-GLOBAL_KEYWORDS = [
-    "election", "president", "fed", "interest rate", "inflation", "gdp",
-    "recession", "senate", "congress", "parliament", "war", "ceasefire",
-    "sanction", "tariff", "trade deal", "prime minister", "government",
-    "trump", "putin", "nato", "china", "russia", "ukraine",
+# Zuordnung Keyword -> Land, um Afrika-Bezug im Fragetext zu erkennen (alles
+# klein geschrieben). Auch Leader-Namen (z. B. "abiy ahmed" -> Aethiopien)
+# zeigen auf ihr Land, damit wir spaeter pro Land nur eine Frage nehmen.
+# Wir matchen auf Wortgrenzen, damit "niger" NICHT in "Nigeria" und "mali"
+# NICHT in "Somalia" faelschlich anschlaegt. Bewusst NICHT drin: das generische
+# "africa" (matcht "North Africa") und "chad" (matcht die Personen "Chad
+# Bianco"/"Chad Patrick", nicht den Staat).
+#
+# Reihenfolge wichtig: spezifischere Keywords zuerst, damit "south sudan" vor
+# "sudan" greift; land_von_market nimmt das erste passende Keyword.
+AFRIKA_LAND = {
+    "south sudan": "South Sudan",
+    "guinea-bissau": "Guinea-Bissau",
+    "central african": "Central African Republic",
+    "south africa": "South Africa",
+    "burkina faso": "Burkina Faso",
+    "sierra leone": "Sierra Leone",
+    "ivory coast": "Ivory Coast",
+    "somaliland": "Somaliland",
+    "nigeria": "Nigeria", "tinubu": "Nigeria",
+    "kenya": "Kenya", "ruto": "Kenya",
+    "ethiopia": "Ethiopia", "abiy ahmed": "Ethiopia",
+    "egypt": "Egypt",
+    "ghana": "Ghana",
+    "sudan": "Sudan",
+    "somalia": "Somalia",
+    "zimbabwe": "Zimbabwe",
+    "uganda": "Uganda",
+    "tanzania": "Tanzania",
+    "morocco": "Morocco", "akhannouch": "Morocco",
+    "algeria": "Algeria",
+    "angola": "Angola",
+    "senegal": "Senegal",
+    "rwanda": "Rwanda",
+    "zambia": "Zambia",
+    "tunisia": "Tunisia",
+    "libya": "Libya",
+    "cameroon": "Cameroon",
+    "gabon": "Gabon",
+    "mozambique": "Mozambique",
+    "malawi": "Malawi",
+    "botswana": "Botswana",
+    "namibia": "Namibia",
+    "mauritania": "Mauritania",
+    "liberia": "Liberia",
+    "congo": "Congo",
+    "mali": "Mali",
+    "niger": "Niger",
+    "togo": "Togo",
+    "benin": "Benin",
+    "eritrea": "Eritrea",
+    "djibouti": "Djibouti",
+    "madagascar": "Madagascar",
+    "lesotho": "Lesotho",
+    "eswatini": "Eswatini",
+    "ramaphosa": "South Africa",
+    "sahel": "Sahel",
+}
+
+# Aus dem Dict abgeleitete Liste aller Afrika-Keywords (einzige Quelle: AFRIKA_LAND).
+AFRIKA_KEYWORDS = list(AFRIKA_LAND.keys())
+
+# Sport-Begriffe: matcht einer davon, verwerfen wir den Markt als Afrika-Frage.
+# Grund: Laendernamen tauchen auch in Sport-Fragen auf (z. B. Cricket "T20
+# Namibia ... vs Uganda"). Die API liefert leider keine Kategorie/Tags, darum
+# diese Negativliste als einfacher, gut lesbarer Ersatz.
+SPORT_KEYWORDS = [
+    "cricket", "cup", "league", "fifa", "uefa", "nba", "nfl", "mlb",
+    "t20", "odi", "tournament", "quadrangular", " vs ", "vs.", " fc ", "match",
 ]
 
 
 # --- Daten laden -----------------------------------------------------------
 
-def lade_alle_offenen_markets():
-    """Blaettert durch die API und gibt eine Liste offener Markets zurueck.
+def hole_seite(params):
+    """Holt eine einzelne Seite und wiederholt bei Timeout bis zu VERSUCHE Mal.
 
-    Wir fragen mehrere Seiten ab, weil Afrika-Fragen weit hinten liegen und
-    nicht in den ersten 100 Markets nach Volumen auftauchen.
+    Ein einzelner haengender Request soll bei ~126 Anfragen nicht den ganzen
+    Lauf abbrechen. Andere Fehler (kein Timeout) reichen wir sofort weiter.
     """
-    alle = []
+    for versuch in range(1, VERSUCHE + 1):
+        try:
+            return requests.get(
+                BASE_URL + ENDPOINT, params=params, headers=HEADERS, timeout=TIMEOUT
+            )
+        except requests.exceptions.Timeout:
+            if versuch == VERSUCHE:
+                raise  # nach dem letzten Versuch klar scheitern lassen
+            print(
+                f"  Timeout, neuer Versuch {versuch + 1}/{VERSUCHE} ...",
+                file=sys.stderr,
+            )
+            time.sleep(2)  # kurz warten, dann erneut probieren
+
+
+def lade_seiten(sortierung):
+    """Blaettert eine einzelne Sortierung durch und gibt ihre Markets zurueck."""
+    markets = []
     for seite in range(SEITEN):
         offset = seite * PRO_SEITE
         params = {
-            "closed": "false",       # nur noch offene Fragen
-            "order": "volume",       # nach Handelsvolumen sortieren
-            "ascending": "false",    # die groessten zuerst
+            "closed": "false",   # nur noch offene Fragen
             "limit": PRO_SEITE,
             "offset": offset,
         }
-        antwort = requests.get(
-            BASE_URL + ENDPOINT, params=params, headers=HEADERS, timeout=30
-        )
+        params.update(sortierung)  # z. B. order=volume, ascending=false
+
+        antwort = hole_seite(params)
         # Die API begrenzt den Offset: zu hohe Werte liefern 422. Das ist kein
         # echter Fehler, sondern heisst "keine weiteren Seiten" -> aufhoeren.
         if antwort.status_code == 422:
@@ -80,30 +166,79 @@ def lade_alle_offenen_markets():
         if not seiten_daten:
             break  # keine weiteren Markets mehr, wir hoeren auf zu blaettern
 
-        alle.extend(seiten_daten)
+        markets.extend(seiten_daten)
 
-    print(f"{len(alle)} offene Markets geladen.")
+    return markets
+
+
+def lade_alle_offenen_markets():
+    """Laedt offene Markets ueber mehrere Sortierungen und vereinigt sie ueber die id.
+
+    Eine einzelne Abfrage erreicht wegen des Offset-Deckels nur ~2000 Markets,
+    und die serverseitige Volumen-Sortierung ist ueber die Seiten hinweg
+    unzuverlaessig. Darum kombinieren wir mehrere Sortierungen. Am Ende
+    sortieren wir clientseitig selbst nach Volumen, statt der API zu vertrauen.
+    """
+    nach_id = {}  # id -> market, dadurch werden Duplikate automatisch entfernt
+    for sortierung in SORTIERUNGEN:
+        for market in lade_seiten(sortierung):
+            nach_id[market["id"]] = market
+
+    alle = list(nach_id.values())
+    alle.sort(key=volumen, reverse=True)  # clientseitig: groesstes Volumen zuerst
+
+    print(f"{len(alle)} eindeutige offene Markets geladen (aus {len(SORTIERUNGEN)} Sortierungen).")
     return alle
 
 
 # --- Hilfsfunktionen fuer die Auswahl -------------------------------------
 
-def enthaelt_keyword(market, keywords):
-    """Prueft, ob eines der Keywords im (kleingeschriebenen) Fragetext steht."""
+def enthaelt_wort(market, keywords):
+    """Prueft, ob eines der Keywords als ganzes Wort im Fragetext steht.
+
+    Wortgrenzen (nicht bloss Teilstring), damit "niger" nicht in "Nigeria" und
+    "mali" nicht in "Somalia" faelschlich anschlaegt. Mehrwort-Phrasen wie
+    "south africa" funktionieren damit ebenfalls.
+    """
+    frage = market.get("question", "").lower()
+    for wort in keywords:
+        # (?<![a-z]) und (?![a-z]): links und rechts kein weiterer Buchstabe.
+        if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", frage):
+            return True
+    return False
+
+
+def enthaelt_teilstring(market, keywords):
+    """Prueft, ob eines der Keywords als Teilstring im Fragetext steht.
+
+    Fuer Sport-Begriffe wie " vs " oder "t20", die keine Wortgrenzen brauchen.
+    """
     frage = market.get("question", "").lower()
     return any(wort in frage for wort in keywords)
 
 
-def event_id(market):
-    """Gibt die Event-ID eines Markets zurueck, sonst None.
+def ist_sport(market):
+    """True, wenn die Frage nach Sport aussieht (Cricket, Cup, "vs" usw.)."""
+    return enthaelt_teilstring(market, SPORT_KEYWORDS)
 
-    Mehrere Markets zur selben Wahl (z. B. je Partei eine Ja/Nein-Frage)
-    teilen sich dieselbe Event-ID. Darueber erkennen wir Duplikate.
+
+def hat_afrika_bezug(market):
+    """True, wenn ein Afrika-Keyword vorkommt UND es keine Sport-Frage ist."""
+    return enthaelt_wort(market, AFRIKA_KEYWORDS) and not ist_sport(market)
+
+
+def land_von_market(market):
+    """Gibt das Land der Frage zurueck (erstes passendes Keyword aus AFRIKA_LAND).
+
+    Reihenfolge im Dict sorgt dafuer, dass spezifische Keywords zuerst greifen
+    (z. B. "south sudan" vor "sudan"). Fehlt ein Treffer, nehmen wir die id als
+    eigenes Land, damit so ein Markt nie faelschlich mit einem anderen zusammenfaellt.
     """
-    events = market.get("events") or []
-    if events:
-        return events[0].get("id")
-    return None
+    frage = market.get("question", "").lower()
+    for wort, land in AFRIKA_LAND.items():
+        if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", frage):
+            return land
+    return market.get("id")
 
 
 def volumen(market):
@@ -112,76 +247,84 @@ def volumen(market):
     return float(wert) if wert else 0.0
 
 
+def hole_market_p(market):
+    """Gibt die "Yes"-Quote eines Markets als Zahl zurueck, sonst None.
+
+    outcomes und outcomePrices kommen von der API als JSON-String (z. B.
+    '["Yes", "No"]' bzw. '["0.0045", "0.9955"]'), darum parsen wir sie mit
+    json.loads. Fehlt ein "Yes"-Outcome oder ist der Text ungueltig, gibt es
+    keine Quote (None).
+    """
+    try:
+        outcomes = json.loads(market.get("outcomes", "[]"))
+        preise = json.loads(market.get("outcomePrices", "[]"))
+    except (json.JSONDecodeError, TypeError):
+        return None
+
+    if "Yes" in outcomes:
+        index_yes = outcomes.index("Yes")
+        return float(preise[index_yes])
+    return None
+
+
+def ist_moderat(market):
+    """True, wenn die Quote existiert und nicht extrem ist (zwischen den Grenzen)."""
+    p = hole_market_p(market)
+    return p is not None and MODERAT_MIN <= p <= MODERAT_MAX
+
+
 # --- Auswahl ---------------------------------------------------------------
 
+def _hoechstes_volumen_pro_land(markets, gewaehlt, gesehene_laender):
+    """Geht Markets (schon nach Volumen sortiert) durch und nimmt je Land den ersten.
+
+    Arbeitet auf den uebergebenen Listen/Mengen weiter, damit ein erster Durchlauf
+    (moderate Quoten) und ein zweiter Durchlauf (Extremwerte) sich nicht in die
+    Quere kommen: ein Land, das schon vertreten ist, wird nie doppelt genommen.
+    """
+    for m in markets:
+        if len(gewaehlt) == ANZAHL:
+            break
+        land = land_von_market(m)
+        if land in gesehene_laender:
+            continue
+        gesehene_laender.add(land)
+        gewaehlt.append(m)
+
+
 def waehle_afrika(markets):
-    """Waehlt Afrika-Markets aus, maximal einen pro Event, nach Volumen sortiert."""
-    afrika = [m for m in markets if enthaelt_keyword(m, AFRIKA_KEYWORDS)]
+    """Waehlt bis zu ANZAHL Afrika-Fragen: max. eine pro Land, kein Sport.
+
+    Bevorzugt Quoten zwischen MODERAT_MIN und MODERAT_MAX (erster Durchlauf).
+    Nur wenn so keine ANZAHL zusammenkommen, sind Extremwerte erlaubt (zweiter
+    Durchlauf). Innerhalb jedes Durchlaufs entscheidet das Volumen.
+    """
+    afrika = [m for m in markets if hat_afrika_bezug(m)]
     afrika.sort(key=volumen, reverse=True)  # groesstes Volumen zuerst
 
+    moderate = [m for m in afrika if ist_moderat(m)]
+    extreme = [m for m in afrika if not ist_moderat(m)]
+
     gewaehlt = []
-    schon_gesehene_events = set()
-    for m in afrika:
-        eid = event_id(m)
-        # Nur den ersten (groessten) Markt je Event nehmen.
-        if eid is not None and eid in schon_gesehene_events:
-            continue
-        schon_gesehene_events.add(eid)
-        gewaehlt.append(m)
-
-    return gewaehlt
-
-
-def waehle_global_filler(markets, schon_gewaehlt, anzahl):
-    """Waehlt die liquidesten globalen Wirtschafts-/Politikfragen ohne Afrika-Bezug."""
-    schon_ids = {m.get("id") for m in schon_gewaehlt}
-
-    kandidaten = [
-        m for m in markets
-        if enthaelt_keyword(m, GLOBAL_KEYWORDS)   # Thema Wirtschaft/Politik
-        and not enthaelt_keyword(m, AFRIKA_KEYWORDS)  # aber kein Afrika-Bezug
-        and m.get("id") not in schon_ids          # nicht schon gewaehlt
-    ]
-    kandidaten.sort(key=volumen, reverse=True)
-
-    # Auch hier maximal einen Markt pro Event, damit wir nicht dreimal
-    # dieselbe Wahl (z. B. verschiedene Kandidaten) speichern.
-    gewaehlt = []
-    schon_gesehene_events = set()
-    for m in kandidaten:
-        eid = event_id(m)
-        if eid is not None and eid in schon_gesehene_events:
-            continue
-        schon_gesehene_events.add(eid)
-        gewaehlt.append(m)
-        if len(gewaehlt) == anzahl:
-            break
-
+    gesehene_laender = set()
+    _hoechstes_volumen_pro_land(moderate, gewaehlt, gesehene_laender)  # 1. bevorzugt
+    _hoechstes_volumen_pro_land(extreme, gewaehlt, gesehene_laender)   # 2. Notnagel
     return gewaehlt
 
 
 # --- Eintrag bauen ---------------------------------------------------------
 
-def baue_eintrag(market, hat_afrika_bezug):
+def baue_eintrag(market):
     """Macht aus einem rohen Market-Objekt einen schlanken Eintrag fuer markets.json.
 
-    outcomes und outcomePrices kommen von der API als JSON-String (z. B.
-    '["Yes", "No"]'), darum muessen wir sie mit json.loads erneut parsen.
-    Die "Yes"-Quote nehmen wir als aktuelle Marktwahrscheinlichkeit market_p.
+    Die Marktquote (market_p) holen wir ueber hole_market_p. Da wir nur noch
+    Afrika-Fragen speichern, ist "africa" immer True.
     """
-    outcomes = json.loads(market["outcomes"])          # z. B. ["Yes", "No"]
-    preise = json.loads(market["outcomePrices"])       # z. B. ["0.0045", "0.9955"]
-
-    market_p = None
-    if "Yes" in outcomes:
-        index_yes = outcomes.index("Yes")
-        market_p = float(preise[index_yes])
-
     return {
         "id": market["id"],
         "question": market["question"],
-        "market_p": market_p,
-        "africa": hat_afrika_bezug,
+        "market_p": hole_market_p(market),
+        "africa": True,
     }
 
 
@@ -190,22 +333,17 @@ def baue_eintrag(market, hat_afrika_bezug):
 def main():
     markets = lade_alle_offenen_markets()
 
-    # Afrika-Fragen waehlen und auf hoechstens AFRIKA_MAX begrenzen.
-    afrika = waehle_afrika(markets)[:AFRIKA_MAX]
-    print(f"{len(afrika)} Afrika-Fragen gewaehlt (max. eine pro Event).")
+    afrika = waehle_afrika(markets)
+    print(f"{len(afrika)} Afrika-Fragen gewaehlt (max. eine pro Land, kein Sport).")
 
-    # So viele globale Fueller, wie bis ANZAHL noch fehlen.
-    rest = ANZAHL - len(afrika)
-    filler = waehle_global_filler(markets, afrika, rest)
-    print(f"{len(filler)} globale Fueller-Fragen ergaenzt.")
+    eintraege = [baue_eintrag(m) for m in afrika]
 
-    # Eintraege bauen: Afrika-Fragen mit africa=True, Fueller mit africa=False.
-    eintraege = [baue_eintrag(m, True) for m in afrika]
-    eintraege += [baue_eintrag(m, False) for m in filler]
-
+    # Weniger als ANZAHL? Dann NICHT mit anderen Themen auffuellen, sondern die
+    # Luecke klar melden und nur die vorhandenen Fragen speichern.
     if len(eintraege) < ANZAHL:
         print(
-            f"Warnung: nur {len(eintraege)} statt {ANZAHL} Fragen gefunden.",
+            f"Warnung: nur {len(eintraege)} statt {ANZAHL} Afrika-Fragen gefunden. "
+            f"Es wird NICHT mit anderen Themen aufgefuellt.",
             file=sys.stderr,
         )
 
@@ -213,10 +351,9 @@ def main():
     with open("markets.json", "w", encoding="utf-8") as datei:
         json.dump(eintraege, datei, ensure_ascii=False, indent=2)
 
-    print(f"{len(eintraege)} Fragen in markets.json gespeichert.")
-    for e in eintraege:
-        markierung = "AFRIKA" if e["africa"] else "GLOBAL"
-        print(f"  [{markierung}] p={e['market_p']}  {e['question']}")
+    print(f"{len(eintraege)} Afrika-Fragen in markets.json gespeichert.")
+    for m in afrika:
+        print(f"  [{land_von_market(m)}] p={hole_market_p(m)}  {m['question']}")
 
 
 if __name__ == "__main__":
