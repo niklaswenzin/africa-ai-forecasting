@@ -318,13 +318,16 @@ def baue_eintrag(market):
     """Macht aus einem rohen Market-Objekt einen schlanken Eintrag fuer markets.json.
 
     Die Marktquote (market_p) holen wir ueber hole_market_p. Da wir nur noch
-    Afrika-Fragen speichern, ist "africa" immer True.
+    Afrika-Fragen speichern, ist "africa" immer True. "description" enthaelt die
+    Aufloesungskriterien der Frage (keine Quote) und wird spaeter in forecast.py
+    in den Prompt gegeben, damit das Modell die formalen Bedingungen kennt.
     """
     return {
         "id": market["id"],
         "question": market["question"],
         "market_p": hole_market_p(market),
         "africa": True,
+        "description": market.get("description", ""),
     }
 
 

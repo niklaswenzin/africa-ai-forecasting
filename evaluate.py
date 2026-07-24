@@ -77,10 +77,21 @@ def schreibe_csv(zeilen):
     zusaetzliche Leerzeilen zwischen die Datensaetze.
     """
     spalten = ["question", "model_p", "market_p", "diff"]
-    with open(RESULTS_DATEI, "w", newline="", encoding="utf-8") as datei:
-        writer = csv.DictWriter(datei, fieldnames=spalten)
-        writer.writeheader()
-        writer.writerows(zeilen)
+    try:
+        with open(RESULTS_DATEI, "w", newline="", encoding="utf-8") as datei:
+            writer = csv.DictWriter(datei, fieldnames=spalten)
+            writer.writeheader()
+            writer.writerows(zeilen)
+    except PermissionError:
+        # Unter Windows tritt das auf, wenn results.csv gerade in Excel o. Ae.
+        # geoeffnet ist. Klare Meldung statt Traceback, dann abbrechen.
+        print(
+            f"Fehler: {RESULTS_DATEI} kann nicht geschrieben werden. "
+            f"Ist die Datei gerade in Excel geoeffnet? Bitte schliessen und "
+            f"erneut ausfuehren.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 # --- Hauptablauf -----------------------------------------------------------

@@ -3,30 +3,35 @@
     "id": "620335",
     "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
     "market_p": 0.8685,
-    "africa": true
+    "africa": true,
+    "description": "This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Aziz Akhannouch's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes into effect.\n\nIf the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.\n\nThe resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used."
   },
   {
     "id": "2063128",
     "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
     "market_p": 0.9455,
-    "africa": true
+    "africa": true,
+    "description": "General elections are scheduled to be held in Ethiopia on June 1, 2026.\n\nThis market will resolve to the next individual who officially assumes the office of Prime Minister of Ethiopia following the 2026 General elections.\n\nTo count for resolution, the individual must be officially appointed and sworn in as Prime Minister of Ethiopia. Any interim or caretaker Prime Minister will not count toward the resolution of this market.\n\nIf no such Prime Minister takes office by December 31, 2028, 11:59 PM ET, this market will resolve to “Other”.\n\nThe primary resolution source for this market will be official information from the Government of Ethiopia; however, a consensus of credible reporting may also be used."
   },
   {
     "id": "1076686",
     "question": "Will Somaliland join the Abraham Accords before 2027?",
     "market_p": 0.26,
-    "africa": true
+    "africa": true,
+    "description": "This market will resolve to \"Yes\" if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nA formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.\n\nThe resolution source will be official government statements, however a consensus for credible reporting may also be used."
   },
   {
     "id": "668333",
     "question": "Will Fernando Dias da Costa win the 2025 Guinea-Bissau presidential election?",
     "market_p": 0.111,
-    "africa": true
+    "africa": true,
+    "description": "Presidential elections are scheduled to be held in Guinea-Bissau on November 23, 2025. If no candidate secures more than 50% of the valid votes in the first round, a second round will be held on November 30, 2025.\n\nThis market will resolve according to the listed candidate that wins this election. \n\nThis market includes any potential second round. If the result of this election isn't known by December 31, 2026, 11:59 PM ET, the market will resolve to \"Other\".\n\nThis market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/)."
   },
   {
     "id": "799982",
     "question": "Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?",
     "market_p": 0.9305,
-    "africa": true
+    "africa": true,
+    "description": "The 2025 Central African Republic general election is scheduled to be held on December 28, 2025, to elect the 140 members of the National Assembly (CAR’s unicameral parliament).\n\nThis market will resolve according to the party that controls the most seats in the Central African Republic National Assembly as a result of the next Central African parliamentary election.\n\nIf initial voting in the next Central African parliamentary election does not occur by June 30, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThis market may remain open to consider any second-round votes held to determine winners in individual single-member constituencies, as long as the remaining undecided seats can still change which party wins the most seats overall, or maximally until December 31, 2026, 11:59 PM ET, after which the market will resolve based on the results available at that time.\n\nIn the case of a tie between this party and any other for the most seats held, this market will resolve in favor of the party whose listed abbreviation comes first in alphabetical order.\n\nThis market’s resolution will be based solely on the number of seats won by this party, not any coalition of which it may be a part.\n\nThis market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/)."
   }
 ]

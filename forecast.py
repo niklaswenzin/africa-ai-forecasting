@@ -51,6 +51,9 @@ SYSTEM_PROMPT = (
     "Du bist ein sorgfaeltiger Prognostiker fuer Ja/Nein-Fragen zu Politik "
     "und Wirtschaft. Schaetze die Wahrscheinlichkeit, dass die Frage mit Ja "
     "aufgeloest wird.\n"
+    "Beachte die Aufloesungskriterien GENAU: pruefe insbesondere, ob eine "
+    "formale Bedingung erfuellt sein muss (z. B. ein offiziell unterzeichnetes "
+    "Abkommen), und nicht nur eine Absichtserklaerung.\n"
     "Du DARFST die Web-Suche nutzen, wenn aktuelle Fakten die Antwort "
     "veraendern wuerden. Stuetze dich dabei auf Ereignisse und Nachrichten, "
     "NICHT auf Wettquoten oder Prediction-Markets.\n"
@@ -95,6 +98,22 @@ def lade_markets():
     """Liest markets.json und gibt die Liste der Fragen zurueck."""
     with open(MARKETS_DATEI, "r", encoding="utf-8") as datei:
         return json.load(datei)
+
+
+# --- Prompt bauen ----------------------------------------------------------
+
+def baue_user_prompt(markt):
+    """Baut die User-Nachricht aus Frage und Aufloesungskriterien.
+
+    Die Kriterien (description) sind die Regeln der Frage, NICHT die Marktquote,
+    und duerfen darum in den Prompt. Fehlt die description, geben wir nur die
+    Frage.
+    """
+    frage = markt["question"]
+    kriterien = markt.get("description", "").strip()
+    if not kriterien:
+        return frage
+    return f"Frage: {frage}\n\nAufloesungskriterien:\n{kriterien}"
 
 
 # --- Modell fragen ---------------------------------------------------------
@@ -230,9 +249,10 @@ def main():
     forecasts = []
     for i, markt in enumerate(markets, start=1):
         frage = markt["question"]
+        prompt = baue_user_prompt(markt)  # Frage + Aufloesungskriterien
         print(f"[{i}/{len(markets)}] Frage an das Modell: {frage}")
 
-        daten, num_searches = hole_forecast(client, frage)
+        daten, num_searches = hole_forecast(client, prompt)
         if daten is None:
             print("  Warnung: keine gueltige Prognose erhalten, ueberspringe.",
                   file=sys.stderr)
