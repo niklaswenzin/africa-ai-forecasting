@@ -1,7 +1,7 @@
 """fetch_markets.py
 
 Laedt offene Fragen von der Polymarket Gamma API und speichert 5 davon
-als markets.json. Design: 5 Fragen mit Afrika-Bezug, maximal eine pro Event,
+als markets.json. Design: 5 Fragen mit Afrika-Bezug, maximal eine pro Land,
 keine Sport-Fragen. Bevorzugt werden Fragen mit einer Marktquote zwischen
 0.05 und 0.95 (nach Volumen sortiert); Extremwerte nur, falls sonst keine 5
 zusammenkommen. Bleiben nach allen Filtern weniger als 5 uebrig, speichern

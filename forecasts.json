@@ -1,0 +1,37 @@
+[
+  {
+    "id": "620335",
+    "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+    "probability": 0.15,
+    "reasoning": "Aziz Akhannouch became Prime Minister after the 2021 elections and his RNI party leads the governing coalition. The next Moroccan parliamentary elections are scheduled for 2026, so he could potentially be replaced after those elections if his party loses. However, incumbents often maintain power, and mid-term removals of Prime Ministers in Morocco are rare given the King's stabilizing role in politics.",
+    "confidence": "medium"
+  },
+  {
+    "id": "2063128",
+    "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
+    "probability": 0.85,
+    "reasoning": "Abiy Ahmed is the current Prime Minister of Ethiopia and has been in power since 2018. He won the 2021 elections with a large majority and his Prosperity Party dominates Ethiopian politics. Barring an extraordinary political upheaval, coup, or health event, he is very likely to continue as PM for the foreseeable future.",
+    "confidence": "high"
+  },
+  {
+    "id": "1076686",
+    "question": "Will Somaliland join the Abraham Accords before 2027?",
+    "probability": 0.04,
+    "reasoning": "The Abraham Accords are normalization agreements between Arab/Muslim-majority states and Israel, brokered by the US. Somaliland is an unrecognized territory seeking international legitimacy, and while it has shown pragmatic foreign policy, joining the Abraham Accords would be highly controversial domestically and would not directly advance its primary goal of international recognition. There is no credible reporting or diplomatic momentum suggesting such a move is being considered.",
+    "confidence": "high"
+  },
+  {
+    "id": "668333",
+    "question": "Will Fernando Dias da Costa win the 2025 Guinea-Bissau presidential election?",
+    "probability": 0.25,
+    "reasoning": "Fernando Dias da Costa (Gabú) is a significant political figure in Guinea-Bissau, but presidential elections there are highly competitive and unpredictable, often requiring runoff rounds. Without specific polling data or clear frontrunner status, his chances are uncertain; historically, incumbents and well-connected candidates have advantages but outcomes are volatile in Guinea-Bissau's fragile political environment.",
+    "confidence": "low"
+  },
+  {
+    "id": "799982",
+    "question": "Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?",
+    "probability": 0.55,
+    "reasoning": "The United Hearts Movement (Mouvement Cœurs Unis) is the ruling party of President Touadéra in the Central African Republic and has dominated recent elections with significant support. Incumbent ruling parties in CAR have historically leveraged state resources and security arrangements to maintain electoral advantages. However, the CAR's fragile security situation, fragmented opposition, and limited electoral data make precise predictions difficult.",
+    "confidence": "low"
+  }
+]
