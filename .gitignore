@@ -6,5 +6,5 @@ __pycache__/
 .env
 
 # Interne Planungsnotizen, gehoeren nicht ins oeffentliche Repo
-PROJEKT_forecasting_mini.md
-PLAN_dashboard.md
+PROJEKT_*.md
+PLAN_*.md
