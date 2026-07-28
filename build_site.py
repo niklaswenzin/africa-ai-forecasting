@@ -206,7 +206,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1160px; margin: 0 auto; }
+.wrap { max-width: 1020px; margin: 0 auto; }
 
 /* Kopf */
 header { margin-bottom: 1.5rem; }
@@ -289,15 +289,17 @@ h1 {
 }
 .tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
 
-/* Grid */
+/* Grid: zwei breite Spalten statt drei schmaler. Die Fragetexte sind lang
+   ("Will Platforma Reupblicana No Kumpu Guine win the most seats in the 2025
+   Guinea-Bissau National People's Assembly election?") und brachen in drei
+   Spalten auf fuenf Zeilen um. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: .8rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .85rem;
   align-items: start;
 }
-@media (max-width: 980px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 660px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
 
 /* Karte */
 .card {
@@ -345,49 +347,78 @@ h1 {
   letter-spacing: -.005em;
 }
 
-/* Zahlenblock */
-.metric { display: flex; align-items: baseline; gap: .5rem; }
+/* Zahlenblock: Benchmark und Claude nebeneinander statt untereinander. Die
+   breiteren Karten machen den direkten Vergleich moeglich - beide Zahlen auf
+   einer Hoehe, das Auge muss nicht mehr springen. */
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .9rem;
+}
+@media (max-width: 460px) { .metrics { grid-template-columns: 1fr; gap: .6rem; } }
+.metric-col { min-width: 0; }
+.metric-col + .metric-col {
+  border-left: 1px solid var(--line-soft);
+  padding-left: .9rem;
+}
+@media (max-width: 460px) {
+  .metric-col + .metric-col {
+    border-left: none;
+    border-top: 1px solid var(--line-soft);
+    padding-left: 0;
+    padding-top: .6rem;
+  }
+}
 .metric-label {
-  font-size: .68rem;
+  display: block;
+  font-size: .665rem;
   text-transform: uppercase;
-  letter-spacing: .065em;
+  letter-spacing: .07em;
   color: var(--muted);
   font-weight: 650;
-  min-width: 4.6rem;
+  margin-bottom: .18rem;
 }
 .metric-value {
-  font-size: 1.75rem;
+  font-size: 1.95rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.02em;
+  letter-spacing: -.025em;
+  display: block;
 }
-.metric-ai .metric-value { font-size: 1.3rem; }
 .bar {
   height: 5px;
   background: var(--bar);
   border-radius: 999px;
   overflow: hidden;
-  margin: .4rem 0 .85rem;
+  margin: .5rem 0 0;
 }
 .bar-fill { height: 100%; background: var(--bar-fill); border-radius: 999px; }
-.bar-leer { margin-bottom: .85rem; }
 
-.diff { font-size: .84rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.diff {
+  display: block;
+  font-size: .84rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  margin-top: .28rem;
+}
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--flat); }
 
 /* Leere Zustaende: ruhig, aber nie eine Luecke */
 .leer {
+  display: block;
   font-size: .82rem;
   color: var(--muted);
   font-style: italic;
+  /* Gleiche Hoehe wie eine Zahl, damit die beiden Spalten nicht verspringen,
+     wenn nur eine von beiden belegt ist. */
+  padding: .5rem 0 .35rem;
 }
-.metric-ai { border-top: 1px solid var(--line-soft); padding-top: .7rem; }
 .meta { margin: .4rem 0 0; font-size: .755rem; color: var(--muted); }
 
-details { margin-top: .7rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
+details { margin-top: .85rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
 summary {
   cursor: pointer;
   font-size: .78rem;
@@ -473,8 +504,10 @@ KARTEN_VORLAGE = """<article class="card cat-<<KATEGORIE>>" data-category="<<KAT
     <span class="tag"><<FLAGGE>> <<LAND>></span>
   </div>
   <p class="question"><<FRAGE>></p>
+  <div class="metrics">
 <<BENCHMARK_BLOCK>>
 <<AI_BLOCK>>
+  </div>
   <details>
     <summary>Details</summary>
 <<REASONING_BLOCK>>
@@ -483,33 +516,32 @@ KARTEN_VORLAGE = """<article class="card cat-<<KATEGORIE>>" data-category="<<KAT
 </article>"""
 
 # Vergleichszahl vorhanden: grosse Zahl, darunter der Balken.
-BENCHMARK_VORLAGE = """  <div class="metric">
-    <span class="metric-label"><<BENCHMARK_LABEL>></span>
-    <span class="metric-value"><<MARKT_P>></span>
-  </div>
-  <div class="bar"><div class="bar-fill" style="width: <<BALKEN>>%"></div></div>"""
+BENCHMARK_VORLAGE = """    <div class="metric-col">
+      <span class="metric-label"><<BENCHMARK_LABEL>></span>
+      <span class="metric-value"><<MARKT_P>></span>
+      <div class="bar"><div class="bar-fill" style="width: <<BALKEN>>%"></div></div>
+    </div>"""
 
 # Vergleichszahl fehlt: dieselbe Beschriftung, aber ein ruhiger Hinweis statt
 # einer Zahl - und kein Balken, denn ein leerer Balken suggeriert 0 Prozent.
-BENCHMARK_FEHLT_VORLAGE = """  <div class="metric">
-    <span class="metric-label"><<BENCHMARK_LABEL>></span>
-    <span class="leer"><<HINWEIS>></span>
-  </div>
-  <div class="bar-leer"></div>"""
+BENCHMARK_FEHLT_VORLAGE = """    <div class="metric-col">
+      <span class="metric-label"><<BENCHMARK_LABEL>></span>
+      <span class="leer"><<HINWEIS>></span>
+    </div>"""
 
-AI_VORLAGE = """  <div class="metric metric-ai">
-    <span class="metric-label">Claude</span>
-    <span class="metric-value"><<MODELL_P>></span>
+AI_VORLAGE = """    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value"><<MODELL_P>></span>
 <<DIFF_BLOCK>>
-  </div>
-  <p class="meta">Confidence: <<CONFIDENCE>> &middot; <<SUCHE>></p>"""
+      <p class="meta"><<CONFIDENCE>> confidence &middot; <<SUCHE>></p>
+    </div>"""
 
-DIFF_VORLAGE = """    <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
+DIFF_VORLAGE = """      <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
 
-OHNE_AI_VORLAGE = """  <div class="metric metric-ai">
-    <span class="metric-label">Claude</span>
-    <span class="leer">No AI forecast yet</span>
-  </div>"""
+OHNE_AI_VORLAGE = """    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="leer">No AI forecast yet</span>
+    </div>"""
 
 
 # --- Daten laden -----------------------------------------------------------
