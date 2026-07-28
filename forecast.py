@@ -29,6 +29,16 @@ PLATZHALTER = "dein-key-hier"   # Platzhalter aus der .env-Vorlage
 MAX_PAUSE_RUNDEN = 5            # Sicherheitsgrenze fuer die pause_turn-Schleife
 SUCH_BUDGET = 3                 # hartes Limit: so viele Suchen INSGESAMT pro Frage
 
+# Fehler, bei denen jeder weitere Aufruf genauso scheitern wuerde: leeres
+# Guthaben (BadRequest), ungueltiger Key, gesperrter Zugang. Bei diesen brechen
+# wir die Schleife ab, statt fuer jede weitere Frage in denselben Fehler zu
+# laufen. Alle uebrigen API-Fehler gelten als voruebergehend.
+FATALE_FEHLER = (
+    anthropic.BadRequestError,
+    anthropic.AuthenticationError,
+    anthropic.PermissionDeniedError,
+)
+
 # Serverseitiges Web-Such-Tool. Claude entscheidet pro Frage selbst, ob es
 # sucht. Wettquoten-/Prediction-Market-Seiten sind gesperrt, damit das Modell
 # nicht einfach die Marktmeinung nachplappert.
@@ -101,6 +111,23 @@ def lade_markets():
     """Liest markets.json und gibt die Liste der Fragen zurueck."""
     with open(MARKETS_DATEI, "r", encoding="utf-8") as datei:
         return json.load(datei)
+
+
+def lade_alte_forecasts():
+    """Liest die bisherige forecasts.json als Dict id -> Eintrag.
+
+    Dient als Rueckfallebene: schlaegt eine Frage im aktuellen Lauf fehl,
+    uebernehmen wir ihre letzte Prognose, damit die Seite vollstaendig bleibt.
+    Existiert die Datei noch nicht oder ist sie beschaedigt, starten wir
+    einfach ohne Rueckfallebene - das ist kein Grund abzubrechen.
+    """
+    try:
+        with open(FORECASTS_DATEI, "r", encoding="utf-8") as datei:
+            alte = json.load(datei)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+    return {eintrag["id"]: eintrag for eintrag in alte if "id" in eintrag}
 
 
 # --- Prompt bauen ----------------------------------------------------------
@@ -249,13 +276,34 @@ def main():
     markets = lade_markets()
     print(f"{len(markets)} Fragen aus {MARKETS_DATEI} geladen.")
 
+    # Bisherige Prognosen als Rueckfallebene: schlaegt eine Frage jetzt fehl,
+    # behalten wir ihren letzten guten Stand, statt sie ersatzlos zu verlieren.
+    alte = lade_alte_forecasts()
+
     forecasts = []
+    abgebrochen = False
+
     for i, markt in enumerate(markets, start=1):
         frage = markt["question"]
         prompt = baue_user_prompt(markt)  # Frage + Aufloesungskriterien
         print(f"[{i}/{len(markets)}] Frage an das Modell: {frage}")
 
-        daten, num_searches = hole_forecast(client, prompt)
+        try:
+            daten, num_searches = hole_forecast(client, prompt)
+        except FATALE_FEHLER as fehler:
+            # Kein Guthaben, ungueltiger Key, gesperrter Zugang: die naechsten
+            # elf Fragen wuerden genauso scheitern. Schleife sofort beenden und
+            # das Erreichte sichern, statt sinnlos weiterzulaufen.
+            print(f"  Abbruch: {type(fehler).__name__}: {fehler}", file=sys.stderr)
+            abgebrochen = True
+            break
+        except anthropic.APIError as fehler:
+            # Voruebergehend (Rate Limit, Serverfehler, Verbindung): nur diese
+            # eine Frage ueberspringen, die uebrigen weiter versuchen.
+            print(f"  Warnung: {type(fehler).__name__}, Frage uebersprungen.",
+                  file=sys.stderr)
+            continue
+
         if daten is None:
             print("  Warnung: keine gueltige Prognose erhalten, ueberspringe.",
                   file=sys.stderr)
@@ -276,10 +324,35 @@ def main():
         print(f"  p={daten['probability']}  confidence={daten['confidence']}  "
               f"searched={num_searches > 0} ({num_searches})")
 
+    # Fuer jede Frage ohne frische Prognose die alte uebernehmen, falls es eine
+    # gibt. So bleibt die Seite vollstaendig, auch wenn ein Lauf mittendrin
+    # scheitert; veraltete Eintraege sind besser als fehlende Karten.
+    frisch = {f["id"] for f in forecasts}
+    uebernommen = 0
+    for markt in markets:
+        if markt["id"] not in frisch and markt["id"] in alte:
+            forecasts.append(alte[markt["id"]])
+            uebernommen += 1
+
+    if uebernommen:
+        print(f"{uebernommen} Prognose(n) aus dem letzten Lauf uebernommen.")
+
+    # Nie eine leere Datei schreiben: das wuerde den letzten guten Stand
+    # zerstoeren und evaluate.py sowie build_site.py ins Leere laufen lassen.
+    if not forecasts:
+        print(f"Fehler: keine einzige Prognose vorhanden. {FORECASTS_DATEI} "
+              f"wird NICHT ueberschrieben.", file=sys.stderr)
+        sys.exit(1)
+
     with open(FORECASTS_DATEI, "w", encoding="utf-8") as datei:
         json.dump(forecasts, datei, ensure_ascii=False, indent=2)
 
     print(f"{len(forecasts)} Prognosen in {FORECASTS_DATEI} gespeichert.")
+
+    # Nach einem Abbruch mit Fehlercode enden, damit der Lauf nicht faelschlich
+    # als erfolgreich gilt - die Datei ist aber gesichert.
+    if abgebrochen:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

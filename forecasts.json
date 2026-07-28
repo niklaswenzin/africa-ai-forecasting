@@ -34,14 +34,5 @@
     "confidence": "high",
     "searched": true,
     "num_searches": 3
-  },
-  {
-    "id": "polymarket-2420428",
-    "question": "Will Bola Tinubu win the 2027 Nigerian Presidential Election?",
-    "probability": 0.52,
-    "reasoning": "Tinubu benefits significantly from incumbency advantages and a split opposition (Obi and Atiku running separately), which historically favors the ruling APC candidate. However, his very low approval ratings (~30%) and worsening economic conditions pose a genuine challenge. The divided opposition vote in 2023 was the key factor in his win, and the same dynamic appears likely to repeat in 2027.",
-    "confidence": "medium",
-    "searched": true,
-    "num_searches": 3
   }
 ]
