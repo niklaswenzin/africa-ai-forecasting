@@ -143,6 +143,11 @@ SEITEN_VORLAGE = """<!DOCTYPE html>
   --bar-fill: #1f6feb;
   --schatten: 0 1px 2px rgba(16, 20, 24, .05), 0 1px 3px rgba(16, 20, 24, .04);
   --schatten-hover: 0 3px 10px rgba(16, 20, 24, .09);
+  /* Standard-Kategorienfarbe. Faengt eine Kategorie ab, fuer die es unten
+     keine Regel gibt - ohne diesen Wert waere var(--kat) ungueltig und die
+     Akzentlinie der Karte verschwaende oder erbte eine zufaellige Farbe. */
+  --kat: #64748b;
+  --kat-bg: #eef1f4;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -161,8 +166,32 @@ SEITEN_VORLAGE = """<!DOCTYPE html>
     --bar-fill: #5aa2ff;
     --schatten: 0 1px 2px rgba(0, 0, 0, .4);
     --schatten-hover: 0 3px 12px rgba(0, 0, 0, .55);
+    --kat: #94a3b8;
+    --kat-bg: #1c232c;
   }
 }
+/* Kategorienfarben. Jede Kategorie setzt --kat (kraeftig, fuer Text, Rahmen
+   und Akzentlinie) und --kat-bg (getoent, fuer Flaechen). Beides wird von
+   Karte und Tab geerbt, die Regeln weiter unten greifen dadurch auf
+   dieselben zwei Variablen zu.
+
+   Bewusst KEIN Rot fuer Security und KEIN Gruen fuer Economy: diese beiden
+   Farben bedeuten auf der Seite bereits "Modell ueber bzw. unter dem
+   Benchmark". Eine Farbe mit zwei Bedeutungen macht beide unlesbar, darum
+   Orange und Teal. */
+.cat-elections { --kat: #1f6feb; --kat-bg: #e8f0fe; }
+.cat-security  { --kat: #c2410c; --kat-bg: #fcebdf; }
+.cat-diplomacy { --kat: #6d28d9; --kat-bg: #efe8fd; }
+.cat-economy   { --kat: #0f766e; --kat-bg: #e0f2f0; }
+.cat-other     { --kat: #64748b; --kat-bg: #eef1f4; }
+@media (prefers-color-scheme: dark) {
+  .cat-elections { --kat: #6cabff; --kat-bg: #14243a; }
+  .cat-security  { --kat: #fb923c; --kat-bg: #33200f; }
+  .cat-diplomacy { --kat: #a78bfa; --kat-bg: #241a3d; }
+  .cat-economy   { --kat: #2dd4bf; --kat-bg: #0c2b28; }
+  .cat-other     { --kat: #94a3b8; --kat-bg: #1c232c; }
+}
+
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -233,11 +262,30 @@ h1 {
   cursor: pointer;
   transition: background .12s, color .12s, border-color .12s;
 }
-.tab:hover { border-color: var(--muted); color: var(--text); }
+.tab:hover { border-color: var(--kat, var(--muted)); color: var(--text); }
+/* Aktiver Kategorie-Tab: getoente Flaeche, Text und Rahmen in der Kategorien-
+   farbe. Bewusst nicht die kraeftige Farbe als Hintergrund mit weisser
+   Schrift - das haette im Dunkelmodus zu wenig Kontrast, weil --kat dort
+   selbst hell ist. */
 .tab.active {
+  background: var(--kat-bg);
+  border-color: var(--kat);
+  color: var(--kat);
+}
+/* Der All-Tab gehoert zu keiner Kategorie und bleibt darum neutral invertiert. */
+.tab[data-filter="all"].active {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
+}
+.punkt {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: var(--kat);
+  display: inline-block;
+  margin-right: .4rem;
+  vertical-align: middle;
 }
 .tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
 
@@ -255,6 +303,10 @@ h1 {
 .card {
   background: var(--card);
   border: 1px solid var(--line);
+  /* Akzentlinie oben in der Kategorienfarbe. Sie traegt dieselbe Information
+     wie die Pille im Kartenkopf, aber ueber die ganze Breite - dadurch sind
+     Bloecke gleicher Kategorie im Grid auf einen Blick als Gruppe erkennbar. */
+  border-top: 3px solid var(--kat);
   border-radius: 11px;
   padding: 1rem;
   box-shadow: var(--schatten);
@@ -262,7 +314,8 @@ h1 {
 }
 .card:hover {
   box-shadow: var(--schatten-hover);
-  border-color: var(--muted);
+  border-color: var(--line);
+  border-top-color: var(--kat);
   transform: translateY(-1px);
 }
 .card-head { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .6rem; }
@@ -278,6 +331,12 @@ h1 {
   white-space: nowrap;
 }
 .tag { text-transform: none; letter-spacing: .01em; font-size: .7rem; }
+/* Kategorienpille: die Farbe allein waere kryptisch, hier steht der Name dazu. */
+.cat-pill {
+  color: var(--kat);
+  background: var(--kat-bg);
+  border-color: transparent;
+}
 .question {
   font-weight: 600;
   font-size: .94rem;
@@ -407,8 +466,9 @@ document.querySelectorAll(".tab").forEach(function (tab) {
 </html>
 """
 
-KARTEN_VORLAGE = """<article class="card" data-category="<<KATEGORIE>>">
+KARTEN_VORLAGE = """<article class="card cat-<<KATEGORIE>>" data-category="<<KATEGORIE>>">
   <div class="card-head">
+    <span class="badge cat-pill"><<KATEGORIE_NAME>></span>
     <span class="badge"><<QUELLE>></span>
     <span class="tag"><<FLAGGE>> <<LAND>></span>
   </div>
@@ -551,6 +611,19 @@ def quellen_name(quelle):
     return QUELLEN_NAMEN.get(quelle, quelle)
 
 
+def kategorie_name(schluessel):
+    """Anzeigename einer Kategorie, z. B. "elections" -> "Elections".
+
+    Unbekannte Schluessel gehen unveraendert durch, statt zu verschwinden -
+    eine neue Kategorie faellt so auf der Seite auf und wird nicht stillschweigend
+    als "Other" ausgegeben.
+    """
+    for eintrag, anzeigename in KATEGORIE_NAMEN:
+        if eintrag == schluessel:
+            return anzeigename
+    return schluessel
+
+
 def benchmark_label(benchmark_type):
     """Beschriftung der Vergleichszahl, abhaengig von der Art des Benchmarks."""
     return BENCHMARK_LABEL.get(benchmark_type, "Benchmark")
@@ -641,6 +714,7 @@ def baue_karte(eintrag):
 
     return (
         KARTEN_VORLAGE
+        .replace("<<KATEGORIE_NAME>>", html.escape(kategorie_name(eintrag["category"])))
         .replace("<<KATEGORIE>>", html.escape(eintrag["category"]))
         .replace("<<QUELLE>>", html.escape(quellen_name(eintrag["source"])))
         .replace("<<FLAGGE>>", flagge_fuer_land(land))
@@ -666,7 +740,10 @@ def baue_tabs(eintraege):
         anzahl = sum(1 for e in eintraege if e["category"] == schluessel)
         if anzahl == 0:
             continue
-        tabs.append(f'<button class="tab" data-filter="{schluessel}">{anzeigename}'
+        # Der farbige Punkt stellt die Verbindung zur Akzentlinie der Karten
+        # her: gleiche Farbe, gleiche Kategorie.
+        tabs.append(f'<button class="tab cat-{schluessel}" data-filter="{schluessel}">'
+                    f'<span class="punkt"></span>{anzeigename}'
                     f'<span class="count">{anzahl}</span></button>')
 
     return "\n".join(tabs)

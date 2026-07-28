@@ -21,6 +21,11 @@
   --bar-fill: #1f6feb;
   --schatten: 0 1px 2px rgba(16, 20, 24, .05), 0 1px 3px rgba(16, 20, 24, .04);
   --schatten-hover: 0 3px 10px rgba(16, 20, 24, .09);
+  /* Standard-Kategorienfarbe. Faengt eine Kategorie ab, fuer die es unten
+     keine Regel gibt - ohne diesen Wert waere var(--kat) ungueltig und die
+     Akzentlinie der Karte verschwaende oder erbte eine zufaellige Farbe. */
+  --kat: #64748b;
+  --kat-bg: #eef1f4;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -39,8 +44,32 @@
     --bar-fill: #5aa2ff;
     --schatten: 0 1px 2px rgba(0, 0, 0, .4);
     --schatten-hover: 0 3px 12px rgba(0, 0, 0, .55);
+    --kat: #94a3b8;
+    --kat-bg: #1c232c;
   }
 }
+/* Kategorienfarben. Jede Kategorie setzt --kat (kraeftig, fuer Text, Rahmen
+   und Akzentlinie) und --kat-bg (getoent, fuer Flaechen). Beides wird von
+   Karte und Tab geerbt, die Regeln weiter unten greifen dadurch auf
+   dieselben zwei Variablen zu.
+
+   Bewusst KEIN Rot fuer Security und KEIN Gruen fuer Economy: diese beiden
+   Farben bedeuten auf der Seite bereits "Modell ueber bzw. unter dem
+   Benchmark". Eine Farbe mit zwei Bedeutungen macht beide unlesbar, darum
+   Orange und Teal. */
+.cat-elections { --kat: #1f6feb; --kat-bg: #e8f0fe; }
+.cat-security  { --kat: #c2410c; --kat-bg: #fcebdf; }
+.cat-diplomacy { --kat: #6d28d9; --kat-bg: #efe8fd; }
+.cat-economy   { --kat: #0f766e; --kat-bg: #e0f2f0; }
+.cat-other     { --kat: #64748b; --kat-bg: #eef1f4; }
+@media (prefers-color-scheme: dark) {
+  .cat-elections { --kat: #6cabff; --kat-bg: #14243a; }
+  .cat-security  { --kat: #fb923c; --kat-bg: #33200f; }
+  .cat-diplomacy { --kat: #a78bfa; --kat-bg: #241a3d; }
+  .cat-economy   { --kat: #2dd4bf; --kat-bg: #0c2b28; }
+  .cat-other     { --kat: #94a3b8; --kat-bg: #1c232c; }
+}
+
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -111,11 +140,30 @@ h1 {
   cursor: pointer;
   transition: background .12s, color .12s, border-color .12s;
 }
-.tab:hover { border-color: var(--muted); color: var(--text); }
+.tab:hover { border-color: var(--kat, var(--muted)); color: var(--text); }
+/* Aktiver Kategorie-Tab: getoente Flaeche, Text und Rahmen in der Kategorien-
+   farbe. Bewusst nicht die kraeftige Farbe als Hintergrund mit weisser
+   Schrift - das haette im Dunkelmodus zu wenig Kontrast, weil --kat dort
+   selbst hell ist. */
 .tab.active {
+  background: var(--kat-bg);
+  border-color: var(--kat);
+  color: var(--kat);
+}
+/* Der All-Tab gehoert zu keiner Kategorie und bleibt darum neutral invertiert. */
+.tab[data-filter="all"].active {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
+}
+.punkt {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: var(--kat);
+  display: inline-block;
+  margin-right: .4rem;
+  vertical-align: middle;
 }
 .tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
 
@@ -133,6 +181,10 @@ h1 {
 .card {
   background: var(--card);
   border: 1px solid var(--line);
+  /* Akzentlinie oben in der Kategorienfarbe. Sie traegt dieselbe Information
+     wie die Pille im Kartenkopf, aber ueber die ganze Breite - dadurch sind
+     Bloecke gleicher Kategorie im Grid auf einen Blick als Gruppe erkennbar. */
+  border-top: 3px solid var(--kat);
   border-radius: 11px;
   padding: 1rem;
   box-shadow: var(--schatten);
@@ -140,7 +192,8 @@ h1 {
 }
 .card:hover {
   box-shadow: var(--schatten-hover);
-  border-color: var(--muted);
+  border-color: var(--line);
+  border-top-color: var(--kat);
   transform: translateY(-1px);
 }
 .card-head { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .6rem; }
@@ -156,6 +209,12 @@ h1 {
   white-space: nowrap;
 }
 .tag { text-transform: none; letter-spacing: .01em; font-size: .7rem; }
+/* Kategorienpille: die Farbe allein waere kryptisch, hier steht der Name dazu. */
+.cat-pill {
+  color: var(--kat);
+  background: var(--kat-bg);
+  border-color: transparent;
+}
 .question {
   font-weight: 600;
   font-size: .94rem;
@@ -247,15 +306,16 @@ footer p { margin: 0 0 .35rem; }
 </header>
 
 <nav class="tabs"><button class="tab active" data-filter="all">All<span class="count">17</span></button>
-<button class="tab" data-filter="elections">Elections<span class="count">10</span></button>
-<button class="tab" data-filter="security">Security<span class="count">3</span></button>
-<button class="tab" data-filter="diplomacy">Diplomacy<span class="count">1</span></button>
-<button class="tab" data-filter="economy">Economy<span class="count">2</span></button>
-<button class="tab" data-filter="other">Other<span class="count">1</span></button></nav>
+<button class="tab cat-elections" data-filter="elections"><span class="punkt"></span>Elections<span class="count">10</span></button>
+<button class="tab cat-security" data-filter="security"><span class="punkt"></span>Security<span class="count">3</span></button>
+<button class="tab cat-diplomacy" data-filter="diplomacy"><span class="punkt"></span>Diplomacy<span class="count">1</span></button>
+<button class="tab cat-economy" data-filter="economy"><span class="punkt"></span>Economy<span class="count">2</span></button>
+<button class="tab cat-other" data-filter="other"><span class="punkt"></span>Other<span class="count">1</span></button></nav>
 
 <div class="grid">
-<article class="card" data-category="diplomacy">
+<article class="card cat-diplomacy" data-category="diplomacy">
   <div class="card-head">
+    <span class="badge cat-pill">Diplomacy</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🌍 Somaliland</span>
   </div>
@@ -281,8 +341,9 @@ A formal signing refers to an official agreement between Israel and another coun
 The resolution source will be official government statements, however a consensus for credible reporting may also be used.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇬🇼 Guinea-Bissau</span>
   </div>
@@ -310,8 +371,9 @@ This market includes any potential second round. If the result of this election 
 This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/).</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇲🇦 Morocco</span>
   </div>
@@ -339,8 +401,9 @@ If the specified individual is detained, effectively removed from the specified 
 The resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇪🇹 Ethiopia</span>
   </div>
@@ -370,8 +433,9 @@ If no such Prime Minister takes office by December 31, 2028, 11:59 PM ET, this m
 The primary resolution source for this market will be official information from the Government of Ethiopia; however, a consensus of credible reporting may also be used.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🌍 Somaliland</span>
   </div>
@@ -403,8 +467,9 @@ This market&#x27;s resolution will be based solely on the number of seats won by
 This market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net).</p>
   </details>
 </article>
-<article class="card" data-category="other">
+<article class="card cat-other" data-category="other">
   <div class="card-head">
+    <span class="badge cat-pill">Other</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇨🇬 Congo</span>
   </div>
@@ -428,8 +493,9 @@ Any active laboratory-confirmed, or otherwise officially confirmed, Ebola infect
 The primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇨🇬 Congo</span>
   </div>
@@ -455,8 +521,9 @@ If the specified individual is detained, effectively removed from the specified 
 The resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used.</p>
   </details>
 </article>
-<article class="card" data-category="economy">
+<article class="card cat-economy" data-category="economy">
   <div class="card-head">
+    <span class="badge cat-pill">Economy</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇿🇦 South Africa</span>
   </div>
@@ -480,8 +547,9 @@ This includes both agreements that become law through Senate ratification and Pr
 The resolution source will be a consensus of credible reporting.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇬🇼 Guinea-Bissau</span>
   </div>
@@ -511,8 +579,9 @@ This market&#x27;s resolution will be based solely on the number of seats won by
 This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/).</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇨🇫 Central African Republic</span>
   </div>
@@ -544,8 +613,9 @@ This market’s resolution will be based solely on the number of seats won by th
 This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/).</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇿🇲 Zambia</span>
   </div>
@@ -579,8 +649,9 @@ This market&#x27;s resolution will be based solely on the number of seats won by
 This market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
     <span class="tag">🇿🇲 Zambia</span>
   </div>
@@ -614,8 +685,9 @@ This market&#x27;s resolution will be based solely on the number of seats won by
 This market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government.</p>
   </details>
 </article>
-<article class="card" data-category="elections">
+<article class="card cat-elections" data-category="elections">
   <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Metaculus</span>
     <span class="tag">🇿🇲 Zambia</span>
   </div>
@@ -635,8 +707,9 @@ This market will resolve based on the results of the elections, as indicated by 
     <p class="criteria">This question resolves as **Yes** if President Hakainde Hichilema receives 65% or more of the first round votes in the [2026 Zambian presidential election](https://en.wikipedia.org/wiki/2026_Zambian_general_election). The question resolves based on [official results](https://www.elections.org.zm/) or [credible sources](https://www.metaculus.com/faq/#definitions).&amp;#x20;</p>
   </details>
 </article>
-<article class="card" data-category="security">
+<article class="card cat-security" data-category="security">
   <div class="card-head">
+    <span class="badge cat-pill">Security</span>
     <span class="badge">Metaculus</span>
     <span class="tag">🇿🇦 South Africa</span>
   </div>
@@ -656,8 +729,9 @@ This market will resolve based on the results of the elections, as indicated by 
     <p class="criteria">This question will resolve as **Yes** if, before January 1, 2027, the International Court of Justice finds that Israel has violated international law in South Africa&#x27;s genocide case. If this does not happen before January 1, 2027, this question will resolve as **No**.</p>
   </details>
 </article>
-<article class="card" data-category="security">
+<article class="card cat-security" data-category="security">
   <div class="card-head">
+    <span class="badge cat-pill">Security</span>
     <span class="badge">Metaculus</span>
     <span class="tag">🇸🇩 Sudan</span>
   </div>
@@ -681,8 +755,9 @@ A &quot;qualifying IPC Sudan acute food insecurity product&quot; is an IPC-produ
 A Famine determination counts if it is made **either** by the IPC analysis team **or** by the Famine Review Committee (FRC) within that product. A **formal projected Famine classification** (an IPC Phase 5 / Famine classification assigned to a projection period) counts. An area flagged only as **&quot;at risk of Famine&quot;** does **not** count — IPC states risk of Famine is not a classification. Household-level IPC Phase 5 (Catastrophe) population figures do **not** count; an area-level Famine classification is required. Any IPC analysis unit — a town, locality, or IDP settlement — classified in Phase 5 Famine satisfies &quot;at least one area&quot;.</p>
   </details>
 </article>
-<article class="card" data-category="security">
+<article class="card cat-security" data-category="security">
   <div class="card-head">
+    <span class="badge cat-pill">Security</span>
     <span class="badge">Metaculus</span>
     <span class="tag">🇸🇩 Sudan</span>
   </div>
@@ -711,8 +786,9 @@ A Famine determination counts if it is made **either** by the IPC analysis team 
 This question resolves **NO** if no such publication appears by 31 December 2026 (UTC).</p>
   </details>
 </article>
-<article class="card" data-category="economy">
+<article class="card cat-economy" data-category="economy">
   <div class="card-head">
+    <span class="badge cat-pill">Economy</span>
     <span class="badge">Metaculus</span>
     <span class="tag">🇸🇳 Senegal</span>
   </div>
@@ -740,7 +816,7 @@ The question may resolve according to official announcements by the Senegalese g
 <p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
 web search; the benchmark is never passed into the prompt, so the estimate is
 independent rather than a restatement of the market.</p>
-<p>Benchmarks from Metaculus and Polymarket &middot; last updated 28 July 2026, 17:18 UTC &middot;
+<p>Benchmarks from Metaculus and Polymarket &middot; last updated 28 July 2026, 18:29 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source and method</a></p>
 </footer>
 </div>
