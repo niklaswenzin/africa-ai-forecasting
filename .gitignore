@@ -4,3 +4,7 @@ __pycache__/
 
 # Umgebung / Secrets (API-Key liegt nur in der Umgebungsvariable, nie im Repo)
 .env
+
+# Interne Planungsnotizen, gehoeren nicht ins oeffentliche Repo
+PROJEKT_forecasting_mini.md
+PLAN_dashboard.md

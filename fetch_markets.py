@@ -28,7 +28,7 @@ SEITEN = 21                # Seiten a 100 pro Sortierung (API deckelt den Offset
 PRO_SEITE = 100            # Maximum, das die API pro Request zurueckgibt
 
 # Manche Requests wurden ohne User-Agent mit 403 abgewiesen, darum setzen wir einen.
-HEADERS = {"User-Agent": "forecasting-mini/1.0"}
+HEADERS = {"User-Agent": "africa-ai-forecasting/1.0"}
 TIMEOUT = 30               # Sekunden pro Anfrage, bevor sie als haengend gilt
 VERSUCHE = 3               # so oft probieren wir eine Anfrage bei Timeout erneut
 
