@@ -28,7 +28,13 @@ import source_polymarket
 # --- Konstanten ------------------------------------------------------------
 
 MARKETS_DATEI = "markets.json"
-ANZAHL = 5                 # so viele Fragen wollen wir am Ende speichern
+
+# Obergrenze, nicht Sollwert. Wie viele Fragen tatsaechlich zusammenkommen,
+# haengt daran, wie viele eigenstaendige Ereignisse die Quellen gerade
+# hergeben. Realistisch liefert Polymarket derzeit rund 13 (die ~46 Treffer
+# mit Afrika-Bezug sind groesstenteils Kandidatenvarianten derselben Wahlen).
+ANZAHL = 30
+
 MODERAT_MIN = 0.05         # bevorzugte Quote: nicht extremer als diese Grenzen
 MODERAT_MAX = 0.95
 
@@ -104,11 +110,28 @@ AFRIKA_KEYWORDS = list(AFRIKA_LAND.keys())
 
 # Sport-Begriffe: matcht einer davon, verwerfen wir die Frage als Afrika-Frage.
 # Grund: Laendernamen tauchen auch in Sport-Fragen auf (z. B. Cricket "T20
-# Namibia ... vs Uganda"). Die APIs liefern keine verlaessliche Kategorie,
-# darum diese Negativliste als einfacher, gut lesbarer Ersatz.
+# Namibia ... vs Uganda"). Die APIs liefern keine verlaessliche Kategorie:
+# geprueft wurden events[0].countryName, electionType und series - fuer
+# Sportfragen sind alle drei leer. Darum diese Negativliste als Ersatz.
+#
+# Sie ist unvollstaendig und bleibt es. "Will Renaissance Zemamra win Morocco
+# Botola Pro?" ist durchgerutscht, weil die marokkanische Fussballliga
+# "Botola Pro" heisst und keines der alten Stichworte enthielt. Neue Lecks
+# gehoeren hier ergaenzt.
+#
+# Bewusst NICHT aufgenommen, weil sie politische Fragen faelschlich treffen
+# wuerden: "final" (zweiter Wahlgang, "final round"), "premier" (Premier als
+# Regierungschef), "race" (Wahlkampf), "win"/"winner" (jede Wahlfrage).
 SPORT_KEYWORDS = [
-    "cricket", "cup", "league", "fifa", "uefa", "nba", "nfl", "mlb",
-    "t20", "odi", "tournament", "quadrangular", " vs ", "vs.", " fc ", "match",
+    # Ligen und Wettbewerbe
+    "cricket", "cup", "league", "botola", "afcon", "fifa", "uefa", "caf ",
+    "nba", "nfl", "mlb", "serie a", "la liga", "bundesliga",
+    # Sportarten
+    "football", "soccer", "basketball", "rugby", "tennis", "boxing", "golf",
+    "olympic", "athletics", "marathon",
+    # Spielbetrieb
+    "t20", "odi", "tournament", "quadrangular", " vs ", "vs.", " fc ",
+    "match", "relegation", "top scorer", "playoff",
 ]
 
 
@@ -198,21 +221,39 @@ def ist_moderat(frage):
     return p is not None and MODERAT_MIN <= p <= MODERAT_MAX
 
 
+def quote_absteigend(frage):
+    """Sortierschluessel fuer den Extremwert-Durchlauf: hoechste Quote zuerst.
+
+    Bei einer Wahl mit sieben Kandidaten sind oft alle Quoten extrem: sechs
+    Aussenseiter nahe 0 und ein Favorit nahe 1. Wir wollen den Favoriten, denn
+    nur bei ihm sagt die Karte etwas aus - bei einem Aussenseiter sind sich
+    Markt und Modell einig, dass nichts passiert.
+
+    Nach Volumen zu sortieren traf einen beliebigen Aussenseiter. Nach Abstand
+    zu 0.5 zu sortieren ebenfalls, denn |0.042 - 0.5| ist knapp kleiner als
+    |0.96 - 0.5|: ein symmetrisches Mass haelt "fast sicher nein" und "fast
+    sicher ja" faelschlich fuer gleich informativ. Darum schlicht die hoechste
+    Quote. Fehlt sie, kommt die Frage ganz nach hinten.
+    """
+    p = frage.get("market_p")
+    return p if p is not None else -1.0
+
+
 # --- Auswahl ---------------------------------------------------------------
 
-def naechste_passende(kandidaten, gesehene_laender):
-    """Gibt die erste Frage zurueck, deren Land noch nicht vertreten ist.
+def naechste_passende(kandidaten, gesehene_events):
+    """Gibt die erste Frage zurueck, deren Event noch nicht vertreten ist.
 
     Die Kandidatenlisten sind bereits nach Volumen sortiert, die erste
-    passende ist also zugleich die aktivste.
+    passende ist also zugleich die aktivste Frage ihres Events.
     """
     for frage in kandidaten:
-        if land_von_frage(frage) not in gesehene_laender:
+        if frage.get("event_id") not in gesehene_events:
             return frage
     return None
 
 
-def waehle_reihum(nach_quelle, gewaehlt, gesehene_laender):
+def waehle_reihum(nach_quelle, gewaehlt, gesehene_events):
     """Nimmt reihum aus jeder Quelle die naechste passende Frage.
 
     Reihum statt "beste zuerst", damit eine grosse Quelle wie Polymarket nicht
@@ -229,12 +270,12 @@ def waehle_reihum(nach_quelle, gewaehlt, gesehene_laender):
             if len(gewaehlt) == ANZAHL:
                 break
 
-            frage = naechste_passende(kandidaten, gesehene_laender)
+            frage = naechste_passende(kandidaten, gesehene_events)
             if frage is None:
                 continue  # diese Quelle hat gerade nichts Passendes
 
             kandidaten.remove(frage)
-            gesehene_laender.add(land_von_frage(frage))
+            gesehene_events.add(frage.get("event_id"))
             gewaehlt.append(frage)
             etwas_genommen = True
 
@@ -244,28 +285,43 @@ def waehle_reihum(nach_quelle, gewaehlt, gesehene_laender):
 
 
 def waehle_fragen(nach_quelle):
-    """Waehlt bis zu ANZAHL Fragen: max. eine pro Land, kein Sport, reihum.
+    """Waehlt bis zu ANZAHL Fragen: max. eine pro Event, kein Sport, reihum.
+
+    Frueher galt "maximal eine Frage pro Land". Das war fuer 5 Plaetze gedacht
+    und zu streng: Kenia und Nigeria haben mehrere unabhaengige Fragen, die
+    alle interessant sind. Massgeblich ist jetzt das Event. Damit sind mehrere
+    Fragen pro Land erlaubt, aber nicht zwoelf Kandidatenvarianten derselben
+    Wahl - die haengen bei Polymarket alle am selben Event.
 
     Bevorzugt Quoten zwischen MODERAT_MIN und MODERAT_MAX (erster Durchlauf).
     Nur wenn so nicht genug zusammenkommen, sind Extremwerte erlaubt (zweiter
     Durchlauf). Innerhalb jeder Quelle entscheidet das Volumen.
     """
-    # Pro Quelle: nur Afrika-Fragen, nach Volumen sortiert, dann in moderate
-    # und extreme Quoten aufgeteilt.
+    # Pro Quelle: nur Afrika-Fragen, aufgeteilt in moderate und extreme Quoten.
+    # Die beiden Listen werden unterschiedlich sortiert, weil "die beste Frage"
+    # in beiden Faellen etwas anderes heisst:
+    #   moderate -> nach Volumen, das aktivste Marktgeschehen zuerst.
+    #   extreme  -> nach hoechster Quote, damit bei einer Wahl der Favorit
+    #               gewinnt und nicht ein beliebiger Aussenseiter mit 0.4%.
     moderate = {}
     extreme = {}
     for name, fragen in nach_quelle.items():
         afrika = [f for f in fragen if hat_afrika_bezug(f)]
-        afrika.sort(key=lambda f: f.get("volume", 0.0), reverse=True)
+
         moderate[name] = [f for f in afrika if ist_moderat(f)]
+        moderate[name].sort(key=lambda f: f.get("volume", 0.0), reverse=True)
+
         extreme[name] = [f for f in afrika if not ist_moderat(f)]
+        extreme[name].sort(key=quote_absteigend, reverse=True)
+        anzahl_events = len({f.get("event_id") for f in afrika})
         print(f"  {name}: {len(afrika)} Fragen mit Afrika-Bezug "
-              f"({len(moderate[name])} mit moderater Quote).")
+              f"aus {anzahl_events} Events "
+              f"({len(moderate[name])} Fragen mit moderater Quote).")
 
     gewaehlt = []
-    gesehene_laender = set()
-    waehle_reihum(moderate, gewaehlt, gesehene_laender)  # 1. bevorzugt
-    waehle_reihum(extreme, gewaehlt, gesehene_laender)   # 2. Notnagel
+    gesehene_events = set()
+    waehle_reihum(moderate, gewaehlt, gesehene_events)  # 1. bevorzugt
+    waehle_reihum(extreme, gewaehlt, gesehene_events)   # 2. Notnagel
     return gewaehlt
 
 
@@ -286,6 +342,9 @@ def baue_eintrag(frage):
         "market_p": frage["market_p"],
         "benchmark_type": frage["benchmark_type"],
         "africa": True,
+        "country": land_von_frage(frage),
+        "event_id": frage.get("event_id"),
+        "event_title": frage.get("event_title", ""),
         "description": frage.get("description", ""),
     }
 
@@ -298,7 +357,7 @@ def main():
 
     print("Auswahl:")
     gewaehlt = waehle_fragen(nach_quelle)
-    print(f"{len(gewaehlt)} Fragen gewaehlt (max. eine pro Land, kein Sport).")
+    print(f"{len(gewaehlt)} Fragen gewaehlt (max. eine pro Event, kein Sport).")
 
     eintraege = [baue_eintrag(f) for f in gewaehlt]
 
@@ -314,14 +373,13 @@ def main():
         )
         sys.exit(1)
 
-    # Weniger als ANZAHL? Dann NICHT mit anderen Themen auffuellen, sondern die
-    # Luecke klar melden und nur die vorhandenen Fragen speichern.
+    # ANZAHL ist eine Obergrenze, kein Sollwert: wie viele Fragen es werden,
+    # haengt daran, wie viele eigenstaendige Ereignisse es gerade gibt. Weniger
+    # als ANZAHL ist darum der Normalfall und keine Warnung wert. Aufgefuellt
+    # wird nie mit fachfremden Themen.
     if len(eintraege) < ANZAHL:
-        print(
-            f"Warnung: nur {len(eintraege)} statt {ANZAHL} Afrika-Fragen gefunden. "
-            f"Es wird NICHT mit anderen Themen aufgefuellt.",
-            file=sys.stderr,
-        )
+        print(f"Hinweis: {len(eintraege)} Fragen (Obergrenze {ANZAHL}). "
+              f"Mehr eigenstaendige Ereignisse gibt es derzeit nicht.")
 
     # ensure_ascii=False, damit Umlaute/Sonderzeichen lesbar bleiben.
     with open(MARKETS_DATEI, "w", encoding="utf-8") as datei:

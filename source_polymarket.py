@@ -137,12 +137,36 @@ def hole_volumen(market):
     return float(wert) if wert else 0.0
 
 
+def hole_event(market):
+    """Gibt (event_id, event_titel) des Markets zurueck.
+
+    Polymarket buendelt zusammengehoerende Fragen in einem Event: die zwoelf
+    Kandidatenfragen zur Wahl in Guinea-Bissau haengen alle am selben Event.
+    Ueber diese id erkennt fetch_markets.py Varianten derselben Sache und nimmt
+    nur eine davon.
+
+    Das Feld heisst "events" und ist eine Liste; in der Praxis steht dort genau
+    ein Event. Wir nehmen den ersten Eintrag. Fehlt die Liste oder hat der
+    Eintrag keine id, faellt der Schluessel auf die Market-id zurueck - so eine
+    Frage bildet dann ihr eigenes Event und wird nie faelschlich mit einer
+    anderen zusammengeworfen.
+    """
+    events = market.get("events") or []
+    if events and events[0].get("id"):
+        return events[0]["id"], events[0].get("title", "")
+
+    return f"einzel-{market['id']}", market.get("question", "")
+
+
 def normalisiere(market):
     """Macht aus einem rohen Polymarket-Objekt einen Eintrag im gemeinsamen Format.
 
     Die id wird mit dem Quellennamen kombiniert, damit sie auch dann eindeutig
-    bleibt, wenn eine andere Quelle zufaellig dieselbe Nummer vergibt.
+    bleibt, wenn eine andere Quelle zufaellig dieselbe Nummer vergibt. Fuer die
+    event_id gilt dasselbe.
     """
+    event_id, event_titel = hole_event(market)
+
     return {
         "id": f"{QUELLE}-{market['id']}",
         "source": QUELLE,
@@ -151,6 +175,8 @@ def normalisiere(market):
         "benchmark_type": "market_price",  # echter Geldmarkt, kein Community-Median
         "description": market.get("description", ""),
         "volume": hole_volumen(market),
+        "event_id": f"{QUELLE}-{event_id}",
+        "event_title": event_titel,
     }
 
 
@@ -160,8 +186,9 @@ def lade_fragen():
     """Laedt alle offenen Polymarket-Fragen im gemeinsamen Format.
 
     Gemeinsames Format je Eintrag: id, source, question, market_p,
-    benchmark_type, description, volume. Jede Quelle in diesem Projekt stellt
-    genau diese Funktion bereit, damit fetch_markets.py sie gleich behandeln kann.
+    benchmark_type, description, volume, event_id, event_title. Jede Quelle in
+    diesem Projekt stellt genau diese Funktion bereit, damit fetch_markets.py
+    sie gleich behandeln kann.
 
     Eine einzelne Abfrage erreicht wegen des Offset-Deckels nur ~2000 Markets,
     und die serverseitige Volumen-Sortierung ist ueber die Seiten hinweg
