@@ -461,4 +461,11 @@ def main():
 
 
 if __name__ == "__main__":
+    # Die Windows-Konsole arbeitet standardmaessig mit cp1252. Fragetexte
+    # koennen Emojis enthalten (bei Metaculus regelmaessig), und die lassen
+    # jede Ausgabe mit UnicodeEncodeError abstuerzen - mitten im Lauf, nach
+    # dem Laden aller Fragen. errors="replace" macht daraus ein Fragezeichen.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     main()

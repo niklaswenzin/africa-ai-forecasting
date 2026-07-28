@@ -12,29 +12,43 @@ Direkt gegen die API geprueft (2026-07-28):
   fuer /api/schema/, /api/docs/ und die alte /api2/-Route.
 - Header-Format laut Doku: "Authorization: Token <token>".
 
-Was NOCH NICHT verifiziert ist
-------------------------------
-Das Antwortschema. Es liess sich ohne Token nicht einsehen, und die frei
-verfuegbare OpenAPI-Datei beschreibt die alte /api2/-API, die es so nicht mehr
-gibt. Wo genau der Community-Median steht, ist damit offen.
+Mit Token verifiziert (2026-07-28)
+---------------------------------
+- Antwort: {"next", "previous", "results"}, Paginierung ueber limit/offset.
+- Aufloesungskriterien: question.resolution_criteria.
+- Zahl der Prognostiker: nr_forecasters, auf OBERSTER Ebene, nicht in question.
+- Strukturierte Kategorie: projects.category[0].slug. Verifiziert gesehen:
+  "economy-business". Weitere Slugs sind unbekannt und fallen auf die
+  Keyword-Regeln in fetch_markets.py zurueck - ein unbekannter Slug liefert
+  also keinen falschen Hinweis, sondern gar keinen.
+- Community-Median: question.aggregations.recency_weighted.latest. Der Pfad
+  existiert im Schema.
 
-Statt einen Feldnamen zu raten, probiert lies_community_median() mehrere
-bekannte Kandidatenpfade durch. Greift keiner, meldet die Funktion die
-tatsaechlich vorhandenen Schluessel, statt still einen falschen Wert zu
-liefern. Sobald ein Token vorliegt:
+BLOCKIERT: der Median ist fuer dieses Konto durchgehend null
+------------------------------------------------------------
+Gemessen ueber 600 offene binaere Fragen: 0 mit sichtbarem Median. Kein
+Parameter schaltet ihn frei (with_cp, include_cp, aggregation_methods wurden
+geprueft), auch der Detail-Endpoint liefert latest = null.
+
+Ursache ist die Zugriffsstufe des Kontos, nicht der Code. Metaculus vergibt
+den Zugriff auf Community-Prediction-Aggregate gestuft; noetig ist der
+kostenlose "Bot Benchmarking Access Tier", zu beantragen ueber das
+Data-Needs-Formular auf https://www.metaculus.com/api/. Ein zweiter, davon
+unabhaengiger Mechanismus ist cp_reveal_time: einzelne Fragen halten den
+Median bis zu einem Stichtag zurueck.
+
+Solange der Median fehlt, liefert diese Quelle bewusst nichts: eine Frage
+ohne Vergleichszahl waere fuer dieses Projekt wertlos, weil es nichts
+auszuwerten gibt und die Karte auf der Seite leer bliebe.
+
+Sobald die Zugriffsstufe steht:
 
     python source_metaculus.py --probe
 
-Das gibt einen vollstaendigen Post als JSON aus. Danach wird MEDIAN_PFADE auf
-den tatsaechlichen Pfad reduziert und dieser Abschnitt hier aktualisiert.
-
-Kontingentierung beachten
--------------------------
-Der Community-Median ist bei Metaculus zugriffsbeschraenkt: normale Konten
-sehen ihn nur bei einer begrenzten Zahl von Fragen, ein kostenloser
-Bot-Benchmarking-Tier erweitert das Kontingent. Fragen ohne sichtbaren Median
-sind fuer dieses Projekt wertlos, weil es dann nichts zu vergleichen gibt -
-sie werden hier verworfen.
+Dann steht in latest ein echter Wert, MEDIAN_PFADE kann auf den tatsaechlich
+belegten Schluessel reduziert werden (centers oder means - welcher es ist,
+laesst sich an einem leeren Objekt nicht entscheiden), und die Slugs in
+METACULUS_KATEGORIEN lassen sich vollstaendig erfassen.
 """
 
 import json
@@ -79,20 +93,32 @@ MEDIAN_PFADE = [
 # Kandidatenpfade fuer die Zahl der Prognostiker. Sie dient als Ersatz fuer das
 # Handelsvolumen: fetch_markets.py sortiert die Auswahl danach, und je mehr
 # Leute mitprognostiziert haben, desto belastbarer ist der Median.
+# Verifiziert: nr_forecasters steht auf oberster Ebene, nicht in question.
+# Die uebrigen Pfade bleiben als Rueckfallebene stehen, falls sich das Schema
+# aendert.
 FORECASTER_PFADE = [
-    ("question", "nr_forecasters"),
     ("nr_forecasters",),
-    ("question", "forecasters_count"),
-    ("forecasters_count",),
+    ("forecasts_count",),
+    ("question", "nr_forecasters"),
 ]
 
-# Kandidatenpfade fuer die Aufloesungskriterien.
+# Verifiziert: question.resolution_criteria. description steht als letzte
+# Rueckfallebene dahinter, weil sie den Kontext enthaelt, aber nicht die Regeln.
 KRITERIEN_PFADE = [
     ("question", "resolution_criteria"),
     ("resolution_criteria",),
-    ("question", "fine_print"),
     ("question", "description"),
 ]
+
+# Zuordnung der Metaculus-Kategorie (projects.category[0].slug) auf unsere
+# Kategorien. Nur "economy-business" ist an echten Daten verifiziert; die
+# uebrigen Slugs sind unbekannt, solange die Zugriffsstufe fehlt und wir keine
+# breite Stichprobe sehen. Ein unbekannter Slug liefert bewusst KEINEN
+# Hinweis - dann greifen die Keyword-Regeln in fetch_markets.py, statt dass
+# eine geratene Zuordnung eine falsche Kategorie setzt.
+METACULUS_KATEGORIEN = {
+    "economy-business": "economy",
+}
 
 
 # --- Token laden -----------------------------------------------------------
@@ -190,16 +216,38 @@ def lies_community_median(post):
     return zahl
 
 
-def melde_unbekanntes_schema(post):
-    """Gibt die vorhandenen Schluessel aus, wenn kein Median-Pfad gepasst hat.
+def melde_fehlenden_median(post):
+    """Erklaert, WARUM kein Median gelesen werden konnte.
 
-    Absichtlich laut: ein stilles Ueberspringen saehe aus wie "Metaculus hat
-    gerade nichts", waere aber in Wahrheit eine veraltete Feldzuordnung.
+    Zwei sehr verschiedene Ursachen sehen im Ergebnis gleich aus, brauchen
+    aber gegensaetzliche Reaktionen:
+
+    1. Der Pfad existiert, steht aber auf null. Dann fehlt die Zugriffsstufe
+       (oder cp_reveal_time liegt in der Zukunft) - am Code ist nichts zu tun.
+    2. Der Pfad existiert gar nicht. Dann hat sich das Schema geaendert und
+       MEDIAN_PFADE muss angepasst werden.
+
+    Ein stilles Ueberspringen saehe in beiden Faellen aus wie "Metaculus hat
+    gerade nichts", darum melden wir es ausdruecklich.
     """
-    print(f"  {QUELLE}: kein bekannter Pfad zum Community-Median.",
-          file=sys.stderr)
-    print(f"    Schluessel im Post:     {sorted(post.keys())}", file=sys.stderr)
     frage = post.get("question")
+    aggregationen = frage.get("aggregations") if isinstance(frage, dict) else None
+
+    if isinstance(aggregationen, dict) and "recency_weighted" in aggregationen:
+        # Fall 1: Struktur stimmt, Werte fehlen.
+        reveal = frage.get("cp_reveal_time")
+        print(f"  {QUELLE}: Struktur stimmt, aber der Community-Median ist leer "
+              f"(latest = null).", file=sys.stderr)
+        print(f"    Das ist eine Frage der Zugriffsstufe, nicht des Codes. "
+              f"Bot-Benchmarking-Tier beantragen ueber das Data-Needs-Formular "
+              f"auf {BASE_URL}/api/.", file=sys.stderr)
+        print(f"    cp_reveal_time dieser Frage: {reveal}", file=sys.stderr)
+        return
+
+    # Fall 2: Struktur unbekannt.
+    print(f"  {QUELLE}: kein bekannter Pfad zum Community-Median - das Schema "
+          f"hat sich vermutlich geaendert.", file=sys.stderr)
+    print(f"    Schluessel im Post:     {sorted(post.keys())}", file=sys.stderr)
     if isinstance(frage, dict):
         print(f"    Schluessel in question: {sorted(frage.keys())}", file=sys.stderr)
     print("    Vollstaendige Struktur: python source_metaculus.py --probe",
@@ -207,6 +255,24 @@ def melde_unbekanntes_schema(post):
 
 
 # --- Normalisieren ---------------------------------------------------------
+
+def hole_kategorie_hinweis(post):
+    """Uebersetzt die Metaculus-Kategorie in unsere, sonst None.
+
+    Metaculus fuehrt eigene Kategorien unter projects.category. Wo sich eine
+    davon sicher zuordnen laesst, ist das verlaesslicher als ein Keyword im
+    Fragetext - dasselbe Prinzip wie electionType bei Polymarket.
+
+    Unbekannte Slugs geben None zurueck, nicht "other": None heisst "kein
+    Hinweis, bitte Keywords anwenden", other waere eine Behauptung.
+    """
+    kategorien = (post.get("projects") or {}).get("category") or []
+    for kategorie in kategorien:
+        treffer = METACULUS_KATEGORIEN.get(kategorie.get("slug"))
+        if treffer:
+            return treffer
+    return None
+
 
 def normalisiere(post):
     """Macht aus einem Metaculus-Post einen Eintrag im gemeinsamen Format.
@@ -237,9 +303,7 @@ def normalisiere(post):
         "volume": float(forecaster) if forecaster else 0.0,
         "event_id": f"{QUELLE}-{post['id']}",
         "event_title": post.get("title", ""),
-        # Metaculus kennt kein Gegenstueck zu Polymarkets electionType, die
-        # Kategorie kommt darum ueber die Keyword-Regeln in fetch_markets.py.
-        "category_hint": None,
+        "category_hint": hole_kategorie_hinweis(post),
     }
 
 
@@ -292,6 +356,14 @@ def lade_fragen():
                     continue
                 fragen.append(eintrag)
 
+            # Abbruch nach der ersten Seite, wenn dort KEINE einzige Frage
+            # einen Median hatte. Fehlt der Zugriff, liefern die restlichen
+            # neun Seiten garantiert dasselbe - das waeren neun nutzlose
+            # Anfragen pro Lauf, und Metaculus antwortet auf zu viele
+            # Anfragen mit HTTP 429.
+            if seite == 0 and not fragen and posts:
+                break
+
             if not weitere:
                 break
 
@@ -300,11 +372,11 @@ def lade_fragen():
               f"Quelle wird uebersprungen.", file=sys.stderr)
         return []
 
-    # Erst am Ende urteilen: einzelne Fragen ohne Median sind normal (das
-    # Kontingent), aber KEINE einzige verwertbare Frage bei vorhandenen Posts
-    # deutet auf eine veraltete Feldzuordnung hin.
+    # Erst am Ende urteilen: einzelne Fragen ohne Median sind normal (Stichtag
+    # oder Kontingent), aber KEINE einzige verwertbare Frage deutet auf ein
+    # groesseres Problem hin - fehlender Zugriff oder geaendertes Schema.
     if not fragen and erster_post is not None:
-        melde_unbekanntes_schema(erster_post)
+        melde_fehlenden_median(erster_post)
 
     print(f"  {QUELLE}: {len(fragen)} Fragen mit sichtbarem Community-Median "
           f"({ohne_median} ohne, verworfen).")
@@ -347,6 +419,13 @@ def probe():
 
 
 if __name__ == "__main__":
+    # Die Windows-Konsole arbeitet standardmaessig mit cp1252. Metaculus-
+    # Fragetexte enthalten gelegentlich Emojis, und die lassen jede Ausgabe
+    # mit UnicodeEncodeError abstuerzen. errors="replace" ist bewusst
+    # gewaehlt: ein Fragezeichen statt Emoji ist harmlos, ein Absturz nicht.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     if "--probe" in sys.argv:
         probe()
     else:
