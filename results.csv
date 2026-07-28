@@ -1,6 +1,6 @@
-question,model_p,market_p,diff
-"Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",0.82,0.8685,-0.0485
-Will Abiy Ahmed be the next Prime Minister of Ethiopia?,0.95,0.9455,0.0045
-Will Somaliland join the Abraham Accords before 2027?,0.72,0.26,0.46
-Will Fernando Dias da Costa win the 2025 Guinea-Bissau presidential election?,0.12,0.111,0.009
-Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?,0.95,0.9305,0.0195
+question,source,benchmark_type,model_p,market_p,diff
+"Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.82,0.899,-0.079
+Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.97,0.948,0.022
+Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.62,0.245,0.375
+Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.05,0.1655,-0.1155
+Will Bola Tinubu win the 2027 Nigerian Presidential Election?,polymarket,market_price,0.52,0.625,-0.105

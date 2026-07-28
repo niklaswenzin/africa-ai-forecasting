@@ -1,50 +1,43 @@
 """fetch_markets.py
 
-Laedt offene Fragen von der Polymarket Gamma API und speichert 5 davon
-als markets.json. Design: 5 Fragen mit Afrika-Bezug, maximal eine pro Land,
-keine Sport-Fragen. Bevorzugt werden Fragen mit einer Marktquote zwischen
-0.05 und 0.95 (nach Volumen sortiert); Extremwerte nur, falls sonst keine 5
-zusammenkommen. Bleiben nach allen Filtern weniger als 5 uebrig, speichern
-wir alle vorhandenen und melden die Luecke, statt mit anderen Themen aufzufuellen.
+Laedt offene Fragen aus allen angebundenen Quellen (Polymarket, Metaculus,
+Kalshi) und speichert eine Auswahl als markets.json.
 
-Die API ist oeffentlich, es wird kein Key benoetigt.
+Design: Fragen mit Afrika-Bezug, maximal eine pro Land, keine Sport-Fragen.
+Bevorzugt werden Fragen mit einer Quote zwischen 0.05 und 0.95; Extremwerte
+nur, falls sonst nicht genug zusammenkommen. Die Auswahl laeuft reihum ueber
+die Quellen, damit eine grosse Quelle nicht alle Plaetze belegt. Bleiben nach
+allen Filtern weniger als ANZAHL uebrig, speichern wir alle vorhandenen und
+melden die Luecke, statt mit anderen Themen aufzufuellen.
+
+Jede Quelle liegt in einer eigenen Datei und stellt eine Funktion
+lade_fragen() bereit, die Eintraege in diesem gemeinsamen Format liefert:
+id, source, question, market_p, benchmark_type, description, volume.
+Eine neue Quelle anzubinden heisst darum: eine Datei schreiben und sie unten
+in QUELLEN eintragen. Filter und Auswahl gelten dann automatisch auch fuer sie.
 """
 
 import json
 import re
 import sys
-import time
 
-import requests
+import source_kalshi
+import source_metaculus
+import source_polymarket
 
 # --- Konstanten ------------------------------------------------------------
 
-BASE_URL = "https://gamma-api.polymarket.com"
-ENDPOINT = "/markets"
-ANZAHL = 5                 # so viele Afrika-Fragen wollen wir am Ende speichern
+MARKETS_DATEI = "markets.json"
+ANZAHL = 5                 # so viele Fragen wollen wir am Ende speichern
 MODERAT_MIN = 0.05         # bevorzugte Quote: nicht extremer als diese Grenzen
 MODERAT_MAX = 0.95
-SEITEN = 21                # Seiten a 100 pro Sortierung (API deckelt den Offset bei 2000)
-PRO_SEITE = 100            # Maximum, das die API pro Request zurueckgibt
 
-# Manche Requests wurden ohne User-Agent mit 403 abgewiesen, darum setzen wir einen.
-HEADERS = {"User-Agent": "africa-ai-forecasting/1.0"}
-TIMEOUT = 30               # Sekunden pro Anfrage, bevor sie als haengend gilt
-VERSUCHE = 3               # so oft probieren wir eine Anfrage bei Timeout erneut
-
-# Die API deckelt den Offset bei 2000, eine einzelne Abfrage erreicht also nur
-# ~2000 Markets. Weil es aber weit mehr offene Markets gibt und die serverseitige
-# Volumen-Sortierung ueber die Seiten hinweg unzuverlaessig ist, laden wir das
-# gleiche Fenster mit mehreren Sortierungen und vereinigen die Ergebnisse ueber
-# die id. So erwischen wir auch liquide Afrika-Markets, die eine einzelne
-# Sortierung verpasst.
-SORTIERUNGEN = [
-    {},                                             # unsortiert (Standard)
-    {"order": "volume", "ascending": "false"},      # groesstes Volumen zuerst
-    {"order": "volume", "ascending": "true"},       # kleinstes Volumen zuerst
-    {"order": "liquidity", "ascending": "false"},   # nach Liquiditaet
-    {"order": "startDate", "ascending": "false"},   # neueste zuerst
-    {"order": "endDate", "ascending": "true"},      # bald endende zuerst
+# Alle angebundenen Quellen. Metaculus und Kalshi geben derzeit leere Listen
+# zurueck (siehe die jeweiligen Dateien), die Pipeline laeuft trotzdem durch.
+QUELLEN = [
+    source_polymarket,
+    source_metaculus,
+    source_kalshi,
 ]
 
 # Zuordnung Keyword -> Land, um Afrika-Bezug im Fragetext zu erkennen (alles
@@ -56,7 +49,7 @@ SORTIERUNGEN = [
 # Bianco"/"Chad Patrick", nicht den Staat).
 #
 # Reihenfolge wichtig: spezifischere Keywords zuerst, damit "south sudan" vor
-# "sudan" greift; land_von_market nimmt das erste passende Keyword.
+# "sudan" greift; land_von_frage nimmt das erste passende Keyword.
 AFRIKA_LAND = {
     "south sudan": "South Sudan",
     "guinea-bissau": "Guinea-Bissau",
@@ -109,237 +102,217 @@ AFRIKA_LAND = {
 # Aus dem Dict abgeleitete Liste aller Afrika-Keywords (einzige Quelle: AFRIKA_LAND).
 AFRIKA_KEYWORDS = list(AFRIKA_LAND.keys())
 
-# Sport-Begriffe: matcht einer davon, verwerfen wir den Markt als Afrika-Frage.
+# Sport-Begriffe: matcht einer davon, verwerfen wir die Frage als Afrika-Frage.
 # Grund: Laendernamen tauchen auch in Sport-Fragen auf (z. B. Cricket "T20
-# Namibia ... vs Uganda"). Die API liefert leider keine Kategorie/Tags, darum
-# diese Negativliste als einfacher, gut lesbarer Ersatz.
+# Namibia ... vs Uganda"). Die APIs liefern keine verlaessliche Kategorie,
+# darum diese Negativliste als einfacher, gut lesbarer Ersatz.
 SPORT_KEYWORDS = [
     "cricket", "cup", "league", "fifa", "uefa", "nba", "nfl", "mlb",
     "t20", "odi", "tournament", "quadrangular", " vs ", "vs.", " fc ", "match",
 ]
 
 
-# --- Daten laden -----------------------------------------------------------
+# --- Quellen abfragen ------------------------------------------------------
 
-def hole_seite(params):
-    """Holt eine einzelne Seite und wiederholt bei Timeout bis zu VERSUCHE Mal.
+def lade_alle_quellen():
+    """Ruft jede Quelle auf und gibt ein Dict quellenname -> Fragen zurueck.
 
-    Ein einzelner haengender Request soll bei ~126 Anfragen nicht den ganzen
-    Lauf abbrechen. Andere Fehler (kein Timeout) reichen wir sofort weiter.
+    Faellt eine Quelle mit einem Fehler aus, soll das die uebrigen nicht
+    mitreissen: wir melden den Ausfall und machen mit den anderen weiter.
+    Ein leeres Ergebnis ist ausdruecklich erlaubt (noch nicht angebundene
+    Quellen geben genau das zurueck).
     """
-    for versuch in range(1, VERSUCHE + 1):
+    nach_quelle = {}
+    for quelle in QUELLEN:
+        name = quelle.QUELLE
         try:
-            return requests.get(
-                BASE_URL + ENDPOINT, params=params, headers=HEADERS, timeout=TIMEOUT
-            )
-        except requests.exceptions.Timeout:
-            if versuch == VERSUCHE:
-                raise  # nach dem letzten Versuch klar scheitern lassen
-            print(
-                f"  Timeout, neuer Versuch {versuch + 1}/{VERSUCHE} ...",
-                file=sys.stderr,
-            )
-            time.sleep(2)  # kurz warten, dann erneut probieren
-
-
-def lade_seiten(sortierung):
-    """Blaettert eine einzelne Sortierung durch und gibt ihre Markets zurueck."""
-    markets = []
-    for seite in range(SEITEN):
-        offset = seite * PRO_SEITE
-        params = {
-            "closed": "false",   # nur noch offene Fragen
-            "limit": PRO_SEITE,
-            "offset": offset,
-        }
-        params.update(sortierung)  # z. B. order=volume, ascending=false
-
-        antwort = hole_seite(params)
-        # Die API begrenzt den Offset: zu hohe Werte liefern 422. Das ist kein
-        # echter Fehler, sondern heisst "keine weiteren Seiten" -> aufhoeren.
-        if antwort.status_code == 422:
-            break
-        # Bei allen anderen HTTP-Fehlern brechen wir klar ab statt still weiterzulaufen.
-        antwort.raise_for_status()
-
-        seiten_daten = antwort.json()
-        if not seiten_daten:
-            break  # keine weiteren Markets mehr, wir hoeren auf zu blaettern
-
-        markets.extend(seiten_daten)
-
-    return markets
-
-
-def lade_alle_offenen_markets():
-    """Laedt offene Markets ueber mehrere Sortierungen und vereinigt sie ueber die id.
-
-    Eine einzelne Abfrage erreicht wegen des Offset-Deckels nur ~2000 Markets,
-    und die serverseitige Volumen-Sortierung ist ueber die Seiten hinweg
-    unzuverlaessig. Darum kombinieren wir mehrere Sortierungen. Am Ende
-    sortieren wir clientseitig selbst nach Volumen, statt der API zu vertrauen.
-    """
-    nach_id = {}  # id -> market, dadurch werden Duplikate automatisch entfernt
-    for sortierung in SORTIERUNGEN:
-        for market in lade_seiten(sortierung):
-            nach_id[market["id"]] = market
-
-    alle = list(nach_id.values())
-    alle.sort(key=volumen, reverse=True)  # clientseitig: groesstes Volumen zuerst
-
-    print(f"{len(alle)} eindeutige offene Markets geladen (aus {len(SORTIERUNGEN)} Sortierungen).")
-    return alle
+            nach_quelle[name] = quelle.lade_fragen()
+        except Exception as fehler:
+            # Fehlertyp mit ausgeben: "IndexError: list index out of range"
+            # verraet einen Bug im eigenen Code, "ConnectionError" einen
+            # echten Ausfall der Gegenstelle. Ohne den Typ sieht beides gleich aus.
+            print(f"  Warnung: Quelle {name} ausgefallen "
+                  f"({type(fehler).__name__}: {fehler}), wird uebersprungen.",
+                  file=sys.stderr)
+            nach_quelle[name] = []
+    return nach_quelle
 
 
 # --- Hilfsfunktionen fuer die Auswahl -------------------------------------
 
-def enthaelt_wort(market, keywords):
+def enthaelt_wort(frage, keywords):
     """Prueft, ob eines der Keywords als ganzes Wort im Fragetext steht.
 
     Wortgrenzen (nicht bloss Teilstring), damit "niger" nicht in "Nigeria" und
     "mali" nicht in "Somalia" faelschlich anschlaegt. Mehrwort-Phrasen wie
     "south africa" funktionieren damit ebenfalls.
     """
-    frage = market.get("question", "").lower()
+    text = frage.get("question", "").lower()
     for wort in keywords:
         # (?<![a-z]) und (?![a-z]): links und rechts kein weiterer Buchstabe.
-        if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", frage):
+        if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", text):
             return True
     return False
 
 
-def enthaelt_teilstring(market, keywords):
+def enthaelt_teilstring(frage, keywords):
     """Prueft, ob eines der Keywords als Teilstring im Fragetext steht.
 
     Fuer Sport-Begriffe wie " vs " oder "t20", die keine Wortgrenzen brauchen.
     """
-    frage = market.get("question", "").lower()
-    return any(wort in frage for wort in keywords)
+    text = frage.get("question", "").lower()
+    return any(wort in text for wort in keywords)
 
 
-def ist_sport(market):
+def ist_sport(frage):
     """True, wenn die Frage nach Sport aussieht (Cricket, Cup, "vs" usw.)."""
-    return enthaelt_teilstring(market, SPORT_KEYWORDS)
+    return enthaelt_teilstring(frage, SPORT_KEYWORDS)
 
 
-def hat_afrika_bezug(market):
+def hat_afrika_bezug(frage):
     """True, wenn ein Afrika-Keyword vorkommt UND es keine Sport-Frage ist."""
-    return enthaelt_wort(market, AFRIKA_KEYWORDS) and not ist_sport(market)
+    return enthaelt_wort(frage, AFRIKA_KEYWORDS) and not ist_sport(frage)
 
 
-def land_von_market(market):
+def land_von_frage(frage):
     """Gibt das Land der Frage zurueck (erstes passendes Keyword aus AFRIKA_LAND).
 
     Reihenfolge im Dict sorgt dafuer, dass spezifische Keywords zuerst greifen
     (z. B. "south sudan" vor "sudan"). Fehlt ein Treffer, nehmen wir die id als
-    eigenes Land, damit so ein Markt nie faelschlich mit einem anderen zusammenfaellt.
+    eigenes Land, damit so eine Frage nie faelschlich mit einer anderen
+    zusammenfaellt.
+
+    Das Land gilt quellenuebergreifend: fragen dieselbe Frage auf Polymarket
+    und Kalshi nach Kenia, nehmen wir nur eine davon.
     """
-    frage = market.get("question", "").lower()
+    text = frage.get("question", "").lower()
     for wort, land in AFRIKA_LAND.items():
-        if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", frage):
+        if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", text):
             return land
-    return market.get("id")
+    return frage.get("id")
 
 
-def volumen(market):
-    """Liest das Handelsvolumen als Zahl, fehlt es, zaehlt es als 0."""
-    wert = market.get("volume")
-    return float(wert) if wert else 0.0
-
-
-def hole_market_p(market):
-    """Gibt die "Yes"-Quote eines Markets als Zahl zurueck, sonst None.
-
-    outcomes und outcomePrices kommen von der API als JSON-String (z. B.
-    '["Yes", "No"]' bzw. '["0.0045", "0.9955"]'), darum parsen wir sie mit
-    json.loads. Fehlt ein "Yes"-Outcome oder ist der Text ungueltig, gibt es
-    keine Quote (None).
-    """
-    try:
-        outcomes = json.loads(market.get("outcomes", "[]"))
-        preise = json.loads(market.get("outcomePrices", "[]"))
-    except (json.JSONDecodeError, TypeError):
-        return None
-
-    if "Yes" in outcomes:
-        index_yes = outcomes.index("Yes")
-        return float(preise[index_yes])
-    return None
-
-
-def ist_moderat(market):
+def ist_moderat(frage):
     """True, wenn die Quote existiert und nicht extrem ist (zwischen den Grenzen)."""
-    p = hole_market_p(market)
+    p = frage.get("market_p")
     return p is not None and MODERAT_MIN <= p <= MODERAT_MAX
 
 
 # --- Auswahl ---------------------------------------------------------------
 
-def _hoechstes_volumen_pro_land(markets, gewaehlt, gesehene_laender):
-    """Geht Markets (schon nach Volumen sortiert) durch und nimmt je Land den ersten.
+def naechste_passende(kandidaten, gesehene_laender):
+    """Gibt die erste Frage zurueck, deren Land noch nicht vertreten ist.
 
-    Arbeitet auf den uebergebenen Listen/Mengen weiter, damit ein erster Durchlauf
-    (moderate Quoten) und ein zweiter Durchlauf (Extremwerte) sich nicht in die
-    Quere kommen: ein Land, das schon vertreten ist, wird nie doppelt genommen.
+    Die Kandidatenlisten sind bereits nach Volumen sortiert, die erste
+    passende ist also zugleich die aktivste.
     """
-    for m in markets:
-        if len(gewaehlt) == ANZAHL:
+    for frage in kandidaten:
+        if land_von_frage(frage) not in gesehene_laender:
+            return frage
+    return None
+
+
+def waehle_reihum(nach_quelle, gewaehlt, gesehene_laender):
+    """Nimmt reihum aus jeder Quelle die naechste passende Frage.
+
+    Reihum statt "beste zuerst", damit eine grosse Quelle wie Polymarket nicht
+    alle Plaetze belegt und kleinere Quellen sichtbar bleiben. Kann eine Quelle
+    nichts mehr beitragen, wird sie einfach uebersprungen - ihr Anteil geht
+    dann an die uebrigen. Die Funktion arbeitet auf den uebergebenen Listen
+    weiter, damit ein erster Durchlauf (moderate Quoten) und ein zweiter
+    (Extremwerte) sich nicht in die Quere kommen.
+    """
+    while len(gewaehlt) < ANZAHL:
+        etwas_genommen = False
+
+        for kandidaten in nach_quelle.values():
+            if len(gewaehlt) == ANZAHL:
+                break
+
+            frage = naechste_passende(kandidaten, gesehene_laender)
+            if frage is None:
+                continue  # diese Quelle hat gerade nichts Passendes
+
+            kandidaten.remove(frage)
+            gesehene_laender.add(land_von_frage(frage))
+            gewaehlt.append(frage)
+            etwas_genommen = True
+
+        # Eine komplette Runde ohne Treffer heisst: keine Quelle kann mehr.
+        if not etwas_genommen:
             break
-        land = land_von_market(m)
-        if land in gesehene_laender:
-            continue
-        gesehene_laender.add(land)
-        gewaehlt.append(m)
 
 
-def waehle_afrika(markets):
-    """Waehlt bis zu ANZAHL Afrika-Fragen: max. eine pro Land, kein Sport.
+def waehle_fragen(nach_quelle):
+    """Waehlt bis zu ANZAHL Fragen: max. eine pro Land, kein Sport, reihum.
 
     Bevorzugt Quoten zwischen MODERAT_MIN und MODERAT_MAX (erster Durchlauf).
-    Nur wenn so keine ANZAHL zusammenkommen, sind Extremwerte erlaubt (zweiter
-    Durchlauf). Innerhalb jedes Durchlaufs entscheidet das Volumen.
+    Nur wenn so nicht genug zusammenkommen, sind Extremwerte erlaubt (zweiter
+    Durchlauf). Innerhalb jeder Quelle entscheidet das Volumen.
     """
-    afrika = [m for m in markets if hat_afrika_bezug(m)]
-    afrika.sort(key=volumen, reverse=True)  # groesstes Volumen zuerst
-
-    moderate = [m for m in afrika if ist_moderat(m)]
-    extreme = [m for m in afrika if not ist_moderat(m)]
+    # Pro Quelle: nur Afrika-Fragen, nach Volumen sortiert, dann in moderate
+    # und extreme Quoten aufgeteilt.
+    moderate = {}
+    extreme = {}
+    for name, fragen in nach_quelle.items():
+        afrika = [f for f in fragen if hat_afrika_bezug(f)]
+        afrika.sort(key=lambda f: f.get("volume", 0.0), reverse=True)
+        moderate[name] = [f for f in afrika if ist_moderat(f)]
+        extreme[name] = [f for f in afrika if not ist_moderat(f)]
+        print(f"  {name}: {len(afrika)} Fragen mit Afrika-Bezug "
+              f"({len(moderate[name])} mit moderater Quote).")
 
     gewaehlt = []
     gesehene_laender = set()
-    _hoechstes_volumen_pro_land(moderate, gewaehlt, gesehene_laender)  # 1. bevorzugt
-    _hoechstes_volumen_pro_land(extreme, gewaehlt, gesehene_laender)   # 2. Notnagel
+    waehle_reihum(moderate, gewaehlt, gesehene_laender)  # 1. bevorzugt
+    waehle_reihum(extreme, gewaehlt, gesehene_laender)   # 2. Notnagel
     return gewaehlt
 
 
 # --- Eintrag bauen ---------------------------------------------------------
 
-def baue_eintrag(market):
-    """Macht aus einem rohen Market-Objekt einen schlanken Eintrag fuer markets.json.
+def baue_eintrag(frage):
+    """Macht aus einer ausgewaehlten Frage den Eintrag fuer markets.json.
 
-    Die Marktquote (market_p) holen wir ueber hole_market_p. Da wir nur noch
-    Afrika-Fragen speichern, ist "africa" immer True. "description" enthaelt die
-    Aufloesungskriterien der Frage (keine Quote) und wird spaeter in forecast.py
-    in den Prompt gegeben, damit das Modell die formalen Bedingungen kennt.
+    "volume" brauchen wir nur fuer die Auswahl und lassen es hier weg.
+    "description" enthaelt die Aufloesungskriterien (keine Quote) und wird
+    spaeter in forecast.py in den Prompt gegeben, damit das Modell die
+    formalen Bedingungen kennt.
     """
     return {
-        "id": market["id"],
-        "question": market["question"],
-        "market_p": hole_market_p(market),
+        "id": frage["id"],
+        "source": frage["source"],
+        "question": frage["question"],
+        "market_p": frage["market_p"],
+        "benchmark_type": frage["benchmark_type"],
         "africa": True,
-        "description": market.get("description", ""),
+        "description": frage.get("description", ""),
     }
 
 
 # --- Hauptablauf -----------------------------------------------------------
 
 def main():
-    markets = lade_alle_offenen_markets()
+    print(f"Quellen abfragen ({len(QUELLEN)}):")
+    nach_quelle = lade_alle_quellen()
 
-    afrika = waehle_afrika(markets)
-    print(f"{len(afrika)} Afrika-Fragen gewaehlt (max. eine pro Land, kein Sport).")
+    print("Auswahl:")
+    gewaehlt = waehle_fragen(nach_quelle)
+    print(f"{len(gewaehlt)} Fragen gewaehlt (max. eine pro Land, kein Sport).")
 
-    eintraege = [baue_eintrag(m) for m in afrika]
+    eintraege = [baue_eintrag(f) for f in gewaehlt]
+
+    # Gar keine Frage? Dann die bestehende markets.json NICHT ueberschreiben.
+    # Sonst zerstoert ein einzelner Ausfall aller Quellen den letzten guten
+    # Stand, und die Folgeskripte laufen ins Leere. Lieber klar abbrechen und
+    # die alte Datei behalten.
+    if not eintraege:
+        print(
+            f"Fehler: keine einzige Frage gefunden. {MARKETS_DATEI} wird NICHT "
+            f"ueberschrieben, der letzte Stand bleibt erhalten.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     # Weniger als ANZAHL? Dann NICHT mit anderen Themen auffuellen, sondern die
     # Luecke klar melden und nur die vorhandenen Fragen speichern.
@@ -351,12 +324,12 @@ def main():
         )
 
     # ensure_ascii=False, damit Umlaute/Sonderzeichen lesbar bleiben.
-    with open("markets.json", "w", encoding="utf-8") as datei:
+    with open(MARKETS_DATEI, "w", encoding="utf-8") as datei:
         json.dump(eintraege, datei, ensure_ascii=False, indent=2)
 
-    print(f"{len(eintraege)} Afrika-Fragen in markets.json gespeichert.")
-    for m in afrika:
-        print(f"  [{land_von_market(m)}] p={hole_market_p(m)}  {m['question']}")
+    print(f"{len(eintraege)} Fragen in {MARKETS_DATEI} gespeichert.")
+    for e in eintraege:
+        print(f"  [{e['source']}] p={e['market_p']}  {e['question']}")
 
 
 if __name__ == "__main__":

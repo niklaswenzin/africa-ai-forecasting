@@ -49,6 +49,18 @@ h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .4rem; letter-spacing: -.
   padding: 1.1rem 1.2rem;
   margin-bottom: .9rem;
 }
+.badge {
+  display: inline-block;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 600;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .15rem .55rem;
+  margin-bottom: .6rem;
+}
 .question { font-weight: 600; margin: 0 0 1rem; }
 .nums { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: baseline; }
 .num { min-width: 5.5rem; }
@@ -92,30 +104,32 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header>
   <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Claude&rsquo;s probability estimates next to live Polymarket prices.</p>
-  <p class="stamp">Last updated 28 July 2026, 13:24 UTC &middot; 5 open questions</p>
+  <p class="sub">Claude&rsquo;s probability estimates next to prediction-market prices
+  and community forecasts.</p>
+  <p class="stamp">Last updated 28 July 2026, 13:55 UTC &middot; 5 open questions</p>
 </header>
 
 <article class="card">
+  <span class="badge">Polymarket</span>
   <p class="question">Will Somaliland join the Abraham Accords before 2027?</p>
   <div class="nums">
     <div class="num">
       <span class="label">Market</span>
-      <span class="value">26%</span>
+      <span class="value">24%</span>
     </div>
     <div class="num">
       <span class="label">Claude</span>
-      <span class="value">72%</span>
+      <span class="value">62%</span>
     </div>
     <div class="num">
       <span class="label">Difference</span>
-      <span class="value up">+46 pts</span>
+      <span class="value up">+38 pts</span>
     </div>
   </div>
-  <p class="meta">Confidence: medium &middot; 2 web searches</p>
+  <p class="meta">Confidence: medium &middot; 3 web searches</p>
   <details>
     <summary>Reasoning and resolution criteria</summary>
-    <p>On December 26, 2025, Israel and Somaliland signed a joint declaration of full diplomatic relations, with Netanyahu explicitly describing it &#x27;in the spirit of the Abraham Accords&#x27; and Somaliland&#x27;s president stating they would join the Accords. This meets the resolution criteria reasonably well — it is a publicly acknowledged formal signing attributed to the Abraham Accords framework by both governments. The main uncertainty is whether a joint declaration &#x27;in the spirit of&#x27; the Accords qualifies as a formal normalization agreement &#x27;clearly attributed&#x27; to them, and whether Somaliland&#x27;s unrecognized statehood status could complicate resolution.</p>
+    <p>On December 26, 2025, Israel and Somaliland signed a joint declaration of mutual recognition explicitly framed &#x27;in the spirit of the Abraham Accords,&#x27; and Somaliland&#x27;s president pledged to formally join the Accords. However, the resolution requires a formal normalization agreement clearly attributed to the Abraham Accords, not merely a pledge. Given the strong momentum, existing diplomatic ties, and stated intent from both sides, a formal Abraham Accords signing before end of 2026 is likely but not yet confirmed, and Somaliland&#x27;s ambiguous international legal status may complicate formal accession.</p>
     <p class="criteria">This market will resolve to &quot;Yes&quot; if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
 
 A formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.
@@ -124,89 +138,26 @@ The resolution source will be official government statements, however a consensu
   </details>
 </article>
 <article class="card">
-  <p class="question">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</p>
+  <span class="badge">Polymarket</span>
+  <p class="question">Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?</p>
   <div class="nums">
     <div class="num">
       <span class="label">Market</span>
-      <span class="value">87%</span>
+      <span class="value">17%</span>
     </div>
     <div class="num">
       <span class="label">Claude</span>
-      <span class="value">82%</span>
+      <span class="value">5%</span>
     </div>
     <div class="num">
       <span class="label">Difference</span>
-      <span class="value flat">-5 pts</span>
-    </div>
-  </div>
-  <p class="meta">Confidence: medium &middot; 3 web searches</p>
-  <details>
-    <summary>Reasoning and resolution criteria</summary>
-    <p>Akhannouch has announced he will not seek re-election as RNI party leader (February 2026) and will not return as PM after the elections. Morocco&#x27;s parliamentary elections are scheduled for September 23, 2026 — before the December 31, 2026 deadline. Once elections are held and a new government is formed, Akhannouch will cease to be PM. The main uncertainty is whether the new government formation could be delayed past December 31, 2026, or whether Akhannouch steps down even earlier due to protest pressure.</p>
-    <p class="criteria">This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
-
-An announcement of Aziz Akhannouch&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
-
-If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
-
-The resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used.</p>
-  </details>
-</article>
-<article class="card">
-  <p class="question">Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?</p>
-  <div class="nums">
-    <div class="num">
-      <span class="label">Market</span>
-      <span class="value">93%</span>
-    </div>
-    <div class="num">
-      <span class="label">Claude</span>
-      <span class="value">95%</span>
-    </div>
-    <div class="num">
-      <span class="label">Difference</span>
-      <span class="value flat">+2 pts</span>
+      <span class="value down">-12 pts</span>
     </div>
   </div>
   <p class="meta">Confidence: high &middot; 3 web searches</p>
   <details>
     <summary>Reasoning and resolution criteria</summary>
-    <p>The MCU already won 50 seats in the first round (out of 140 total) with 67 seats still contested in a second round, making them by far the leading party. Historical precedent (61 seats in 2020-21) and the ruling party&#x27;s structural advantages strongly support MCU winning the most seats overall. No opposition party is close to matching their first-round tally.</p>
-    <p class="criteria">The 2025 Central African Republic general election is scheduled to be held on December 28, 2025, to elect the 140 members of the National Assembly (CAR’s unicameral parliament).
-
-This market will resolve according to the party that controls the most seats in the Central African Republic National Assembly as a result of the next Central African parliamentary election.
-
-If initial voting in the next Central African parliamentary election does not occur by June 30, 2026, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
-
-This market may remain open to consider any second-round votes held to determine winners in individual single-member constituencies, as long as the remaining undecided seats can still change which party wins the most seats overall, or maximally until December 31, 2026, 11:59 PM ET, after which the market will resolve based on the results available at that time.
-
-In the case of a tie between this party and any other for the most seats held, this market will resolve in favor of the party whose listed abbreviation comes first in alphabetical order.
-
-This market’s resolution will be based solely on the number of seats won by this party, not any coalition of which it may be a part.
-
-This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/).</p>
-  </details>
-</article>
-<article class="card">
-  <p class="question">Will Fernando Dias da Costa win the 2025 Guinea-Bissau presidential election?</p>
-  <div class="nums">
-    <div class="num">
-      <span class="label">Market</span>
-      <span class="value">11%</span>
-    </div>
-    <div class="num">
-      <span class="label">Claude</span>
-      <span class="value">12%</span>
-    </div>
-    <div class="num">
-      <span class="label">Difference</span>
-      <span class="value flat">+1 pt</span>
-    </div>
-  </div>
-  <p class="meta">Confidence: medium &middot; 3 web searches</p>
-  <details>
-    <summary>Reasoning and resolution criteria</summary>
-    <p>Fernando Dias da Costa appeared likely to have won based on civil-society tallies and independent observers, but a military coup on November 26, 2025 prevented the CNE from ever officially announcing results. The junta installed its own transitional leader, and Dias da Costa fled to the Nigerian embassy. The resolution criteria require an official CNE result; without one — and given the ongoing military takeover — a formal recognition of Dias as winner is very unlikely, making an &#x27;Other&#x27; resolution more probable.</p>
+    <p>Embaló was ousted in a military coup on November 26, 2025, one day before official results were due. Guinea-Bissau&#x27;s electoral commission announced it could no longer complete the election after soldiers seized and destroyed all voting data and servers. A military transitional government was installed, making it extremely unlikely the market resolves in Embaló&#x27;s favor unless the election is somehow reconstituted — which seems very unlikely given the destroyed records and changed political landscape.</p>
     <p class="criteria">Presidential elections are scheduled to be held in Guinea-Bissau on November 23, 2025. If no candidate secures more than 50% of the valid votes in the first round, a second round will be held on November 30, 2025.
 
 This market will resolve according to the listed candidate that wins this election. 
@@ -217,6 +168,69 @@ This market will resolve based on the result of the election as indicated by a c
   </details>
 </article>
 <article class="card">
+  <span class="badge">Polymarket</span>
+  <p class="question">Will Bola Tinubu win the 2027 Nigerian Presidential Election?</p>
+  <div class="nums">
+    <div class="num">
+      <span class="label">Market</span>
+      <span class="value">62%</span>
+    </div>
+    <div class="num">
+      <span class="label">Claude</span>
+      <span class="value">52%</span>
+    </div>
+    <div class="num">
+      <span class="label">Difference</span>
+      <span class="value down">-10 pts</span>
+    </div>
+  </div>
+  <p class="meta">Confidence: medium &middot; 3 web searches</p>
+  <details>
+    <summary>Reasoning and resolution criteria</summary>
+    <p>Tinubu benefits significantly from incumbency advantages and a split opposition (Obi and Atiku running separately), which historically favors the ruling APC candidate. However, his very low approval ratings (~30%) and worsening economic conditions pose a genuine challenge. The divided opposition vote in 2023 was the key factor in his win, and the same dynamic appears likely to repeat in 2027.</p>
+    <p class="criteria">Presidential elections are scheduled to be held in Nigeria on January 16, 2027.
+
+This market will resolve according to the listed candidate who wins the 2027 Nigerian presidential election. 
+
+This market includes any potential second round. 
+
+If the results are not known definitively by October 31, 2027, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
+
+This market will resolve based on the results of this election, as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve solely based on official results as reported by Nigerian government sources, including the Independent National Electoral Commission (https://www.inecnigeria.org/).</p>
+  </details>
+</article>
+<article class="card">
+  <span class="badge">Polymarket</span>
+  <p class="question">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</p>
+  <div class="nums">
+    <div class="num">
+      <span class="label">Market</span>
+      <span class="value">90%</span>
+    </div>
+    <div class="num">
+      <span class="label">Claude</span>
+      <span class="value">82%</span>
+    </div>
+    <div class="num">
+      <span class="label">Difference</span>
+      <span class="value down">-8 pts</span>
+    </div>
+  </div>
+  <p class="meta">Confidence: medium &middot; 3 web searches</p>
+  <details>
+    <summary>Reasoning and resolution criteria</summary>
+    <p>Morocco&#x27;s parliamentary elections are scheduled for September 23, 2026. Akhannouch has already announced he will not seek re-election as RNI party leader, effectively ending his path to remain PM. Post-election government formation in Morocco typically takes several weeks, making it highly likely a new PM is appointed before December 31, 2026. The main downside risk is a prolonged coalition negotiation pushing the formal transfer past year-end.</p>
+    <p class="criteria">This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
+
+An announcement of Aziz Akhannouch&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
+
+If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
+
+The resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used.</p>
+  </details>
+</article>
+<article class="card">
+  <span class="badge">Polymarket</span>
   <p class="question">Will Abiy Ahmed be the next Prime Minister of Ethiopia?</p>
   <div class="nums">
     <div class="num">
@@ -225,17 +239,17 @@ This market will resolve based on the result of the election as indicated by a c
     </div>
     <div class="num">
       <span class="label">Claude</span>
-      <span class="value">95%</span>
+      <span class="value">97%</span>
     </div>
     <div class="num">
       <span class="label">Difference</span>
-      <span class="value flat">&lt;1 pt</span>
+      <span class="value flat">+2 pts</span>
     </div>
   </div>
   <p class="meta">Confidence: high &middot; 3 web searches</p>
   <details>
     <summary>Reasoning and resolution criteria</summary>
-    <p>Abiy Ahmed&#x27;s Prosperity Party won the June 1, 2026 elections with 438 seats (a large parliamentary majority), and multiple credible sources confirm he is set to remain Prime Minister. The formal appointment and swearing-in follows automatically from the parliamentary majority in Ethiopia&#x27;s system, as occurred after the 2021 elections. A small residual uncertainty remains because explicit confirmation of the swearing-in ceremony has not yet appeared in search results.</p>
+    <p>Abiy Ahmed&#x27;s Prosperity Party won 438 of 501 contested seats in the June 1, 2026 general elections, securing a dominant parliamentary majority. Multiple credible sources confirm Abiy is set to be sworn in for another term in early October 2026. The only residual uncertainty is a small risk of an unexpected constitutional change (e.g., switch to presidential system) or unforeseen event before the swearing-in.</p>
     <p class="criteria">General elections are scheduled to be held in Ethiopia on June 1, 2026.
 
 This market will resolve to the next individual who officially assumes the office of Prime Minister of Ethiopia following the 2026 General elections.
@@ -253,7 +267,9 @@ The primary resolution source for this market will be official information from 
 question and its resolution criteria, so the estimate is independent rather than
 a restatement of the market. Forecasts are produced with the Claude API
 (<code>claude-sonnet-4-6</code>) and may use web search for recent events.</p>
-<p>Questions and prices from the Polymarket Gamma API. Source and method:
+<p>Questions and benchmarks on this page come from Polymarket. Market prices
+reflect real money at stake; community forecasts are the median of volunteer
+predictions and are labelled separately. Source and method:
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">https://github.com/niklaswenzin/africa-ai-forecasting</a></p>
 </footer>
 </div>

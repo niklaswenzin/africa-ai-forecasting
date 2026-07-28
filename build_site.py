@@ -27,6 +27,23 @@ REPO_URL = "https://github.com/niklaswenzin/africa-ai-forecasting"
 # wir die Differenz neutral grau an, damit Rauschen nicht wie ein Signal wirkt.
 NAH_SCHWELLE = 0.05
 
+# Anzeigenamen der Quellen. Unbekannte Quellen zeigen wir unveraendert an,
+# statt sie zu verstecken.
+QUELLEN_NAMEN = {
+    "polymarket": "Polymarket",
+    "metaculus": "Metaculus",
+    "kalshi": "Kalshi",
+}
+
+# Beschriftung der Vergleichszahl. Ein Polymarket- oder Kalshi-Preis entsteht
+# durch echten Geldeinsatz, der Metaculus-Wert ist der Median freiwilliger
+# Community-Prognosen. Beides in eine Spalte "Market" zu schreiben, waere
+# irrefuehrend, darum haengt die Beschriftung am benchmark_type.
+BENCHMARK_LABEL = {
+    "market_price": "Market",
+    "community_forecast": "Community",
+}
+
 
 # --- Vorlagen --------------------------------------------------------------
 #
@@ -86,6 +103,18 @@ h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .4rem; letter-spacing: -.
   padding: 1.1rem 1.2rem;
   margin-bottom: .9rem;
 }
+.badge {
+  display: inline-block;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 600;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .15rem .55rem;
+  margin-bottom: .6rem;
+}
 .question { font-weight: 600; margin: 0 0 1rem; }
 .nums { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: baseline; }
 .num { min-width: 5.5rem; }
@@ -129,7 +158,8 @@ footer a { color: var(--accent); }
 <div class="wrap">
 <header>
   <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Claude&rsquo;s probability estimates next to live Polymarket prices.</p>
+  <p class="sub">Claude&rsquo;s probability estimates next to prediction-market prices
+  and community forecasts.</p>
   <p class="stamp">Last updated <<ZEITSTEMPEL>> &middot; <<ANZAHL>> open questions</p>
 </header>
 
@@ -140,7 +170,9 @@ footer a { color: var(--accent); }
 question and its resolution criteria, so the estimate is independent rather than
 a restatement of the market. Forecasts are produced with the Claude API
 (<code>claude-sonnet-4-6</code>) and may use web search for recent events.</p>
-<p>Questions and prices from the Polymarket Gamma API. Source and method:
+<p>Questions and benchmarks on this page come from <<QUELLEN_LISTE>>. Market prices
+reflect real money at stake; community forecasts are the median of volunteer
+predictions and are labelled separately. Source and method:
 <a href="<<REPO_URL>>"><<REPO_URL>></a></p>
 </footer>
 </div>
@@ -149,10 +181,11 @@ a restatement of the market. Forecasts are produced with the Claude API
 """
 
 KARTEN_VORLAGE = """<article class="card">
+  <span class="badge"><<QUELLE>></span>
   <p class="question"><<FRAGE>></p>
   <div class="nums">
     <div class="num">
-      <span class="label">Market</span>
+      <span class="label"><<BENCHMARK_LABEL>></span>
       <span class="value"><<MARKT_P>></span>
     </div>
     <div class="num">
@@ -219,6 +252,8 @@ def baue_karten_daten(markets, forecasts):
 
         eintraege.append({
             "question": prognose["question"],
+            "source": markt.get("source", "unknown"),
+            "benchmark_type": markt.get("benchmark_type", "market_price"),
             "model_p": model_p,
             "market_p": market_p,
             "diff": diff,
@@ -270,6 +305,16 @@ def klasse_fuer_diff(diff):
     return "up" if diff > 0 else "down"
 
 
+def quellen_name(quelle):
+    """Anzeigename einer Quelle, z. B. "polymarket" -> "Polymarket"."""
+    return QUELLEN_NAMEN.get(quelle, quelle)
+
+
+def benchmark_label(benchmark_type):
+    """Beschriftung der Vergleichszahl, abhaengig von der Art des Benchmarks."""
+    return BENCHMARK_LABEL.get(benchmark_type, "Benchmark")
+
+
 def beschreibe_suche(eintrag):
     """Formuliert den Hinweis, ob und wie oft das Modell gesucht hat."""
     if not eintrag["searched"]:
@@ -291,6 +336,8 @@ def baue_karte(eintrag):
 
     return (
         KARTEN_VORLAGE
+        .replace("<<QUELLE>>", html.escape(quellen_name(eintrag["source"])))
+        .replace("<<BENCHMARK_LABEL>>", benchmark_label(eintrag["benchmark_type"]))
         .replace("<<FRAGE>>", html.escape(eintrag["question"]))
         .replace("<<MARKT_P>>", formatiere_prozent(eintrag["market_p"]))
         .replace("<<MODELL_P>>", formatiere_prozent(eintrag["model_p"]))
@@ -301,6 +348,22 @@ def baue_karte(eintrag):
         .replace("<<REASONING>>", html.escape(eintrag["reasoning"]))
         .replace("<<KRITERIEN>>", html.escape(kriterien))
     )
+
+
+def nenne_quellen(eintraege):
+    """Zaehlt die tatsaechlich vertretenen Quellen auf, z. B. "Polymarket and Kalshi".
+
+    Bewusst aus den Daten abgeleitet und nicht fest hingeschrieben: solange
+    Metaculus und Kalshi keine Fragen liefern, sollen sie in der Fusszeile auch
+    nicht als Quelle behauptet werden.
+    """
+    # sorted() gibt eine stabile Reihenfolge, damit die Fusszeile nicht bei
+    # jedem Lauf anders aussieht und unnoetige Commits erzeugt.
+    namen = sorted({quellen_name(e["source"]) for e in eintraege})
+
+    if len(namen) == 1:
+        return html.escape(namen[0])
+    return html.escape(", ".join(namen[:-1]) + " and " + namen[-1])
 
 
 def baue_seite(eintraege, zeitstempel):
@@ -323,6 +386,7 @@ def baue_seite(eintraege, zeitstempel):
         .replace("<<ZEITSTEMPEL>>", zeitstempel)
         .replace("<<ANZAHL>>", str(len(sortiert)))
         .replace("<<KARTEN>>", karten)
+        .replace("<<QUELLEN_LISTE>>", nenne_quellen(eintraege))
         .replace("<<REPO_URL>>", REPO_URL)
     )
 

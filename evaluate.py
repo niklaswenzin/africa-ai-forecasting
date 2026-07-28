@@ -32,20 +32,32 @@ def lade_json(pfad):
 
 # --- Zuordnung -------------------------------------------------------------
 
-def baue_quoten_map(markets):
-    """Macht aus der Markets-Liste ein Dict id -> market_p fuer schnelle Suche."""
-    quoten = {}
+def baue_markt_map(markets):
+    """Macht aus der Markets-Liste ein Dict id -> Markt fuer schnelle Suche.
+
+    Frueher haben wir hier nur die Quote abgelegt. Seit es mehrere Quellen
+    gibt, brauchen wir auch source und benchmark_type, darum merken wir uns
+    den ganzen Eintrag.
+    """
+    nach_id = {}
     for markt in markets:
-        quoten[markt["id"]] = markt.get("market_p")
-    return quoten
+        nach_id[markt["id"]] = markt
+    return nach_id
 
 
-def baue_zeilen(forecasts, quoten):
-    """Baut pro Prognose eine Ergebniszeile (question, model_p, market_p, diff)."""
+def baue_zeilen(forecasts, nach_id):
+    """Baut pro Prognose eine Ergebniszeile.
+
+    Spalten: question, source, benchmark_type, model_p, market_p, diff.
+    source und benchmark_type stehen mit dabei, weil ein Polymarket-Preis und
+    ein Metaculus-Community-Median nicht dasselbe sind und eine spaetere
+    Auswertung sie trennen koennen muss.
+    """
     zeilen = []
     for prognose in forecasts:
         model_p = prognose["probability"]
-        market_p = quoten.get(prognose["id"])  # ueber die id zuordnen
+        markt = nach_id.get(prognose["id"])  # ueber die id zuordnen
+        market_p = markt.get("market_p") if markt else None
 
         if market_p is None:
             # Keine Marktquote vorhanden -> diff bleibt leer, wir melden es.
@@ -61,6 +73,8 @@ def baue_zeilen(forecasts, quoten):
 
         zeilen.append({
             "question": prognose["question"],
+            "source": markt.get("source", "unknown") if markt else "unknown",
+            "benchmark_type": markt.get("benchmark_type", "") if markt else "",
             "model_p": model_p,
             "market_p": market_p,
             "diff": diff,
@@ -76,7 +90,7 @@ def schreibe_csv(zeilen):
     newline="" ist unter Windows wichtig, sonst schreibt der csv-Writer
     zusaetzliche Leerzeilen zwischen die Datensaetze.
     """
-    spalten = ["question", "model_p", "market_p", "diff"]
+    spalten = ["question", "source", "benchmark_type", "model_p", "market_p", "diff"]
     try:
         with open(RESULTS_DATEI, "w", newline="", encoding="utf-8") as datei:
             writer = csv.DictWriter(datei, fieldnames=spalten)
@@ -100,15 +114,15 @@ def main():
     markets = lade_json(MARKETS_DATEI)
     forecasts = lade_json(FORECASTS_DATEI)
 
-    quoten = baue_quoten_map(markets)
-    zeilen = baue_zeilen(forecasts, quoten)
+    nach_id = baue_markt_map(markets)
+    zeilen = baue_zeilen(forecasts, nach_id)
 
     schreibe_csv(zeilen)
     print(f"{len(zeilen)} Zeilen in {RESULTS_DATEI} geschrieben.")
 
     # Kurze Uebersicht auf der Konsole.
     for z in zeilen:
-        print(f"  model={z['model_p']}  markt={z['market_p']}  "
+        print(f"  [{z['source']}] model={z['model_p']}  markt={z['market_p']}  "
               f"diff={z['diff']}  {z['question']}")
 
 
