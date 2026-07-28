@@ -2,8 +2,8 @@
   {
     "id": "620335",
     "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
-    "probability": 0.72,
-    "reasoning": "Die marokkanischen Parlamentswahlen sind für September 2026 geplant; Akhannouch hat angekündigt, nicht mehr als RNI-Parteivorsitzender zu kandidieren, was nach marokkanischem Verfassungsbrauch seine Ablösung als Premier nach der Wahl bedeutet. Da die Wahl noch vor dem 31. Dezember 2026 stattfinden soll, ist ein Amtswechsel innerhalb des Auflösungszeitraums wahrscheinlich – jedoch besteht ein Restrisiko durch mögliche Wahlverzögerungen oder eine sehr lange Regierungsbildungsphase.",
+    "probability": 0.82,
+    "reasoning": "Akhannouch has announced he will not seek re-election as RNI party leader (February 2026) and will not return as PM after the elections. Morocco's parliamentary elections are scheduled for September 23, 2026 — before the December 31, 2026 deadline. Once elections are held and a new government is formed, Akhannouch will cease to be PM. The main uncertainty is whether the new government formation could be delayed past December 31, 2026, or whether Akhannouch steps down even earlier due to protest pressure.",
     "confidence": "medium",
     "searched": true,
     "num_searches": 3
@@ -11,26 +11,26 @@
   {
     "id": "2063128",
     "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
-    "probability": 0.97,
-    "reasoning": "Die Wahlen vom 1. Juni 2026 haben bereits stattgefunden. Abiy Ahmeds Prosperity Party hat laut Wikipedia und mehreren Medienberichten eine parlamentarische Mehrheit von 438 Sitzen gewonnen. Al Jazeera berichtet explizit, dass Abiy Ahmed 'set to keep the top job' ist. Die formale Vereidigung steht noch aus, aber der Ausgang ist praktisch gesichert.",
+    "probability": 0.95,
+    "reasoning": "Abiy Ahmed's Prosperity Party won the June 1, 2026 elections with 438 seats (a large parliamentary majority), and multiple credible sources confirm he is set to remain Prime Minister. The formal appointment and swearing-in follows automatically from the parliamentary majority in Ethiopia's system, as occurred after the 2021 elections. A small residual uncertainty remains because explicit confirmation of the swearing-in ceremony has not yet appeared in search results.",
     "confidence": "high",
-    "searched": true,
-    "num_searches": 2
-  },
-  {
-    "id": "1076686",
-    "question": "Will Somaliland join the Abraham Accords before 2027?",
-    "probability": 0.28,
-    "reasoning": "Somaliland hat am 26.12.2025 eine Absichtserklärung abgegeben, den Abraham Accords beizutreten, und Israel hat Somaliland als Staat anerkannt. Ein formales Normalisierungsabkommen unter dem Abraham-Accords-Rahmen wurde jedoch noch nicht unterzeichnet. Erschwerend kommt hinzu, dass Somaliland kein UN-Mitglied ist, was die Formalisierung kompliziert. Die verbleibende Zeit bis Ende 2026 ist realistisch, aber es besteht erhebliche Unsicherheit über den tatsächlichen Abschluss.",
-    "confidence": "medium",
     "searched": true,
     "num_searches": 3
   },
   {
+    "id": "1076686",
+    "question": "Will Somaliland join the Abraham Accords before 2027?",
+    "probability": 0.72,
+    "reasoning": "On December 26, 2025, Israel and Somaliland signed a joint declaration of full diplomatic relations, with Netanyahu explicitly describing it 'in the spirit of the Abraham Accords' and Somaliland's president stating they would join the Accords. This meets the resolution criteria reasonably well — it is a publicly acknowledged formal signing attributed to the Abraham Accords framework by both governments. The main uncertainty is whether a joint declaration 'in the spirit of' the Accords qualifies as a formal normalization agreement 'clearly attributed' to them, and whether Somaliland's unrecognized statehood status could complicate resolution.",
+    "confidence": "medium",
+    "searched": true,
+    "num_searches": 2
+  },
+  {
     "id": "668333",
     "question": "Will Fernando Dias da Costa win the 2025 Guinea-Bissau presidential election?",
-    "probability": 0.1,
-    "reasoning": "Der Militärputsch vom 26. November 2025 hat den Wahlprozess unterbrochen, bevor offizielle Ergebnisse verkündet wurden. Die CNE erklärte, sie sei nicht mehr in der Lage, die Wahl abzuschließen, da Wahlunterlagen und Server zerstört wurden. Eine formale Bestätigung von Dias da Costa als Sieger durch die CNE – wie von den Auflösungskriterien gefordert – ist derzeit nicht absehbar; eine Neuauflage der Wahl und deren Ergebnis sind höchst ungewiss.",
+    "probability": 0.12,
+    "reasoning": "Fernando Dias da Costa appeared likely to have won based on civil-society tallies and independent observers, but a military coup on November 26, 2025 prevented the CNE from ever officially announcing results. The junta installed its own transitional leader, and Dias da Costa fled to the Nigerian embassy. The resolution criteria require an official CNE result; without one — and given the ongoing military takeover — a formal recognition of Dias as winner is very unlikely, making an 'Other' resolution more probable.",
     "confidence": "medium",
     "searched": true,
     "num_searches": 3
@@ -38,8 +38,8 @@
   {
     "id": "799982",
     "question": "Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?",
-    "probability": 0.97,
-    "reasoning": "Die MCU von Präsident Touadéra gewann nach dem ersten Wahlgang vom 28. Dezember 2025 bereits 50 von 74 vergebenen Sitzen (67,6%) und dominiert die Parlamentswahl laut Constitutional Court vom 19. Januar 2026 eindeutig. Der zweite Wahlgang fand am 5. April 2026 statt, wobei erwartet wird, dass die MCU ihre Mehrheit weiter ausbaut. Kein anderes Ergebnis als die MCU als stärkste Fraktion erscheint realistisch.",
+    "probability": 0.95,
+    "reasoning": "The MCU already won 50 seats in the first round (out of 140 total) with 67 seats still contested in a second round, making them by far the leading party. Historical precedent (61 seats in 2020-21) and the ruling party's structural advantages strongly support MCU winning the most seats overall. No opposition party is close to matching their first-round tally.",
     "confidence": "high",
     "searched": true,
     "num_searches": 3

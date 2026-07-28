@@ -61,8 +61,11 @@ SYSTEM_PROMPT = (
     "davor oder danach und ohne Markdown-Codeblock. Das JSON hat genau diese "
     "Schluessel:\n"
     '  "probability": Zahl zwischen 0 und 1,\n'
-    '  "reasoning": kurze Begruendung, maximal 3 Saetze,\n'
-    '  "confidence": genau einer der Werte "low", "medium" oder "high".'
+    '  "reasoning": kurze Begruendung, maximal 3 Saetze, auf ENGLISCH,\n'
+    '  "confidence": genau einer der Werte "low", "medium" oder "high".\n'
+    "Das Feld reasoning muss auf Englisch sein, weil es unveraendert auf der "
+    "oeffentlichen Dashboard-Seite erscheint. Die uebrigen Felder sind Zahlen "
+    "bzw. feste Schluesselwoerter und bleiben unveraendert."
 )
 
 
