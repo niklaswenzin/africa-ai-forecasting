@@ -163,6 +163,16 @@ KATEGORIE_KEYWORDS = [
         "debt", "default", "tariff", "export", "import", "oil price",
         "central bank", "interest rate", "recession", "bailout", "budget",
     ]),
+    # Diplomatie steht hinter economy, weil "trade deal" beide Wortfelder
+    # trifft und ein Handelsabkommen naeher an Wirtschaft liegt als an
+    # Aussenpolitik. Bewusst getrennt von security: ein Normalisierungs-
+    # abkommen ist keine Konfliktfrage, und die Kategorie security soll
+    # aussagekraeftig bleiben, wenn spaeter echte Konfliktfragen dazukommen.
+    ("diplomacy", [
+        "abraham accords", "recognize", "recognise", "diplomatic",
+        "normalizat", "normalisat", "embassy", "treaty", "accord",
+        "summit", "sanction", "join the", "membership", "alliance",
+    ]),
 ]
 
 KATEGORIE_STANDARD = "other"   # wenn keine Regel greift

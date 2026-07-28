@@ -1,5 +1,5 @@
 question,source,benchmark_type,model_p,market_p,diff
 "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.82,0.899,-0.079
-Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.97,0.9465,0.0235
+Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.97,0.9435,0.0265
 Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.62,0.24,0.38
 Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.05,0.166,-0.116
