@@ -5,8 +5,9 @@ Seite docs/index.html. Kein Framework, keine zusaetzlichen Bibliotheken:
 nur die Standardbibliothek, das Filtern uebernimmt etwas Vanilla-JS.
 
 Ausgangspunkt sind die Fragen aus markets.json, nicht die Prognosen. Jede
-ausgewaehlte Frage bekommt eine Karte; die Prognose ist optional. Fragen ohne
-Prognose zeigen nur die Marktquote, statt ganz zu fehlen.
+ausgewaehlte Frage bekommt eine Karte. Sowohl die Vergleichszahl als auch der
+Claude-Forecast koennen fehlen, und beide Faelle haben eine eigene, ruhige
+Darstellung - nie ein Pfeil ohne Zahl, nie eine leere Stelle.
 
 Die Seite selbst ist auf Englisch, weil sie oeffentlich ist. Kommentare und
 Funktionsnamen bleiben deutsch wie im Rest des Projekts.
@@ -31,8 +32,6 @@ REPO_URL = "https://github.com/niklaswenzin/africa-ai-forecasting"
 # wir die Differenz neutral grau an, damit Rauschen nicht wie ein Signal wirkt.
 NAH_SCHWELLE = 0.05
 
-# Anzeigenamen der Quellen. Unbekannte Quellen zeigen wir unveraendert an,
-# statt sie zu verstecken.
 QUELLEN_NAMEN = {
     "polymarket": "Polymarket",
     "metaculus": "Metaculus",
@@ -41,15 +40,20 @@ QUELLEN_NAMEN = {
 
 # Beschriftung der Vergleichszahl. Ein Polymarket- oder Kalshi-Preis entsteht
 # durch echten Geldeinsatz, der Metaculus-Wert ist der Median freiwilliger
-# Community-Prognosen. Beides in eine Spalte "Market" zu schreiben, waere
-# irrefuehrend, darum haengt die Beschriftung am benchmark_type.
+# Community-Prognosen. Beides "Market" zu nennen waere irrefuehrend.
 BENCHMARK_LABEL = {
     "market_price": "Market",
     "community_forecast": "Community",
 }
 
-# Anzeigenamen und Reihenfolge der Kategorien in der Tab-Leiste. Kategorien
-# ohne Fragen werden spaeter uebersprungen, damit kein leerer Tab entsteht.
+# Text, wenn die Vergleichszahl fehlt. Haengt am benchmark_type, weil die
+# Ursache unterschiedlich ist: bei Metaculus ist der Median gesperrt oder noch
+# nicht freigegeben, bei einem Geldmarkt fehlt schlicht ein handelbarer Preis.
+BENCHMARK_FEHLT = {
+    "market_price": "No market price",
+    "community_forecast": "Community forecast pending",
+}
+
 KATEGORIE_NAMEN = [
     ("elections", "Elections"),
     ("security", "Security"),
@@ -58,13 +62,63 @@ KATEGORIE_NAMEN = [
     ("other", "Other"),
 ]
 
+# Flaggen-Emoji zum Laender-Tag. Die Schluessel sind exakt die Werte aus
+# AFRIKA_LAND in fetch_markets.py. Somaliland und Sahel fehlen bewusst: fuer
+# Somaliland gibt es kein Emoji (kein ISO-Laendercode), Sahel ist eine Region.
+# Beide bekommen ueber den Standardwert die Weltkugel.
+LAND_FLAGGE = {
+    "South Sudan": "\U0001F1F8\U0001F1F8",
+    "Guinea-Bissau": "\U0001F1EC\U0001F1FC",
+    "Central African Republic": "\U0001F1E8\U0001F1EB",
+    "South Africa": "\U0001F1FF\U0001F1E6",
+    "Burkina Faso": "\U0001F1E7\U0001F1EB",
+    "Sierra Leone": "\U0001F1F8\U0001F1F1",
+    "Ivory Coast": "\U0001F1E8\U0001F1EE",
+    "Nigeria": "\U0001F1F3\U0001F1EC",
+    "Kenya": "\U0001F1F0\U0001F1EA",
+    "Ethiopia": "\U0001F1EA\U0001F1F9",
+    "Egypt": "\U0001F1EA\U0001F1EC",
+    "Ghana": "\U0001F1EC\U0001F1ED",
+    "Sudan": "\U0001F1F8\U0001F1E9",
+    "Somalia": "\U0001F1F8\U0001F1F4",
+    "Zimbabwe": "\U0001F1FF\U0001F1FC",
+    "Uganda": "\U0001F1FA\U0001F1EC",
+    "Tanzania": "\U0001F1F9\U0001F1FF",
+    "Morocco": "\U0001F1F2\U0001F1E6",
+    "Algeria": "\U0001F1E9\U0001F1FF",
+    "Angola": "\U0001F1E6\U0001F1F4",
+    "Senegal": "\U0001F1F8\U0001F1F3",
+    "Rwanda": "\U0001F1F7\U0001F1FC",
+    "Zambia": "\U0001F1FF\U0001F1F2",
+    "Tunisia": "\U0001F1F9\U0001F1F3",
+    "Libya": "\U0001F1F1\U0001F1FE",
+    "Cameroon": "\U0001F1E8\U0001F1F2",
+    "Gabon": "\U0001F1EC\U0001F1E6",
+    "Mozambique": "\U0001F1F2\U0001F1FF",
+    "Malawi": "\U0001F1F2\U0001F1FC",
+    "Botswana": "\U0001F1E7\U0001F1FC",
+    "Namibia": "\U0001F1F3\U0001F1E6",
+    "Mauritania": "\U0001F1F2\U0001F1F7",
+    "Liberia": "\U0001F1F1\U0001F1F7",
+    "Congo": "\U0001F1E8\U0001F1EC",
+    "Mali": "\U0001F1F2\U0001F1F1",
+    "Niger": "\U0001F1F3\U0001F1EA",
+    "Togo": "\U0001F1F9\U0001F1EC",
+    "Benin": "\U0001F1E7\U0001F1EF",
+    "Eritrea": "\U0001F1EA\U0001F1F7",
+    "Djibouti": "\U0001F1E9\U0001F1EF",
+    "Madagascar": "\U0001F1F2\U0001F1EC",
+    "Lesotho": "\U0001F1F1\U0001F1F8",
+    "Eswatini": "\U0001F1F8\U0001F1FF",
+}
+FLAGGE_STANDARD = "\U0001F30D"   # Weltkugel Afrika/Europa
+
 
 # --- Vorlagen --------------------------------------------------------------
 #
-# Die Vorlagen sind normale Strings mit Platzhaltern in doppelten spitzen
-# Klammern. Wir setzen sie spaeter mit str.replace ein. Bewusst nicht
-# .format() oder f-Strings: CSS und JavaScript enthalten geschweifte Klammern,
-# die beide Verfahren als Platzhalter missverstehen wuerden.
+# Platzhalter in doppelten spitzen Klammern, eingesetzt mit str.replace.
+# Bewusst nicht .format() oder f-Strings: CSS und JavaScript enthalten
+# geschweifte Klammern, die beide Verfahren als Platzhalter missverstehen.
 
 SEITEN_VORLAGE = """<!DOCTYPE html>
 <html lang="en">
@@ -74,173 +128,244 @@ SEITEN_VORLAGE = """<!DOCTYPE html>
 <title>AI Forecasting: African Economic and Political Development</title>
 <style>
 :root {
-  --bg: #f6f7f9;
+  --bg: #f7f8fa;
   --card: #ffffff;
-  --text: #14171a;
-  --muted: #656d76;
-  --line: #e1e4e8;
-  --line-strong: #c9cfd6;
+  --text: #101418;
+  --text-soft: #4a545e;
+  --muted: #79838d;
+  --line: #e4e7eb;
+  --line-soft: #eef0f3;
   --accent: #1f6feb;
-  --up: #1a7f5a;
-  --down: #b3341f;
-  --flat: #656d76;
-  --bar: #d7dce1;
+  --up: #12805c;
+  --down: #c0392b;
+  --flat: #79838d;
+  --bar: #e4e7eb;
   --bar-fill: #1f6feb;
+  --schatten: 0 1px 2px rgba(16, 20, 24, .05), 0 1px 3px rgba(16, 20, 24, .04);
+  --schatten-hover: 0 3px 10px rgba(16, 20, 24, .09);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0d1117;
-    --card: #161b22;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --line: #30363d;
-    --line-strong: #444c56;
-    --accent: #58a6ff;
-    --up: #3fb950;
-    --down: #f85149;
-    --flat: #8b949e;
-    --bar: #30363d;
-    --bar-fill: #58a6ff;
+    --bg: #0c0f13;
+    --card: #151a20;
+    --text: #e9eef4;
+    --text-soft: #b3bdc7;
+    --muted: #8592a0;
+    --line: #262d36;
+    --line-soft: #1d232b;
+    --accent: #5aa2ff;
+    --up: #3ecf8e;
+    --down: #ff6b5e;
+    --flat: #8592a0;
+    --bar: #262d36;
+    --bar-fill: #5aa2ff;
+    --schatten: 0 1px 2px rgba(0, 0, 0, .4);
+    --schatten-hover: 0 3px 12px rgba(0, 0, 0, .55);
   }
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  padding: 2rem 1rem 3rem;
+  padding: 2.25rem 1.15rem 3rem;
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Inter zuerst, aber ohne Web-Font-Download: wer sie installiert hat,
+     bekommt sie, alle anderen den System-Stack. Kein externer Request. */
+  font-family: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1140px; margin: 0 auto; }
-header { margin-bottom: 1.4rem; }
-h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 .4rem; letter-spacing: -.01em; }
-.sub { color: var(--muted); margin: 0 0 .5rem; max-width: 60ch; }
-.stamp { color: var(--muted); font-size: .85rem; margin: 0; }
+.wrap { max-width: 1160px; margin: 0 auto; }
 
-/* Tab-Leiste */
+/* Kopf */
+header { margin-bottom: 1.5rem; }
+h1 {
+  font-size: 1.55rem;
+  line-height: 1.2;
+  letter-spacing: -.021em;
+  font-weight: 700;
+  margin: 0 0 .35rem;
+}
+.sub {
+  color: var(--text-soft);
+  margin: 0 0 1rem;
+  max-width: 62ch;
+  font-size: .93rem;
+}
+.stats { display: flex; flex-wrap: wrap; gap: .5rem; }
+.stat {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: .45rem .75rem;
+  box-shadow: var(--schatten);
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+}
+.stat-value { font-size: 1.02rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-label {
+  font-size: .69rem;
+  text-transform: uppercase;
+  letter-spacing: .065em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Tabs als Pills */
 .tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: .4rem;
-  margin: 0 0 1.4rem;
-  padding-bottom: .9rem;
-  border-bottom: 1px solid var(--line);
+  gap: .38rem;
+  margin: 1.35rem 0 1.15rem;
 }
 .tab {
   font: inherit;
-  font-size: .87rem;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--line-strong);
+  font-size: .845rem;
+  font-weight: 550;
+  color: var(--text-soft);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  padding: .34rem .85rem;
+  padding: .34rem .8rem;
   cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
 }
-.tab:hover { color: var(--text); }
+.tab:hover { border-color: var(--muted); color: var(--text); }
 .tab.active {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
 }
-.tab .count { opacity: .65; margin-left: .3rem; font-variant-numeric: tabular-nums; }
+.tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
 
-/* Karten-Grid */
+/* Grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: .9rem;
+  gap: .8rem;
   align-items: start;
 }
-@media (max-width: 950px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 980px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 660px) { .grid { grid-template-columns: 1fr; } }
 
+/* Karte */
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 1rem 1.05rem 1.1rem;
-  display: flex;
-  flex-direction: column;
+  border-radius: 11px;
+  padding: 1rem;
+  box-shadow: var(--schatten);
+  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
 }
-.card-head { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .7rem; }
+.card:hover {
+  box-shadow: var(--schatten-hover);
+  border-color: var(--muted);
+  transform: translateY(-1px);
+}
+.card-head { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .6rem; }
 .badge, .tag {
-  font-size: .66rem;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  font-weight: 600;
-  color: var(--muted);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: .13rem .5rem;
-}
-.tag { border-style: dashed; }
-.question { font-weight: 600; margin: 0 0 .95rem; font-size: .97rem; }
-
-/* Benchmark mit Balken */
-.bench-row { display: flex; align-items: baseline; justify-content: space-between; }
-.bench-label, .ai-label {
-  font-size: .7rem;
+  font-size: .655rem;
   text-transform: uppercase;
   letter-spacing: .06em;
+  font-weight: 650;
   color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .12rem .48rem;
+  white-space: nowrap;
 }
-.bench-value { font-size: 1.65rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tag { text-transform: none; letter-spacing: .01em; font-size: .7rem; }
+.question {
+  font-weight: 600;
+  font-size: .94rem;
+  line-height: 1.38;
+  margin: 0 0 .85rem;
+  letter-spacing: -.005em;
+}
+
+/* Zahlenblock */
+.metric { display: flex; align-items: baseline; gap: .5rem; }
+.metric-label {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .065em;
+  color: var(--muted);
+  font-weight: 650;
+  min-width: 4.6rem;
+}
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+.metric-ai .metric-value { font-size: 1.3rem; }
 .bar {
   height: 5px;
   background: var(--bar);
   border-radius: 999px;
   overflow: hidden;
-  margin: .35rem 0 .9rem;
+  margin: .4rem 0 .85rem;
 }
 .bar-fill { height: 100%; background: var(--bar-fill); border-radius: 999px; }
+.bar-leer { margin-bottom: .85rem; }
 
-/* AI-Block */
-.ai { border-top: 1px solid var(--line); padding-top: .75rem; }
-.ai-row { display: flex; align-items: baseline; gap: .55rem; }
-.ai-value { font-size: 1.2rem; font-weight: 650; font-variant-numeric: tabular-nums; }
-.diff { font-size: .87rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.diff { font-size: .84rem; font-weight: 650; font-variant-numeric: tabular-nums; }
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--flat); }
-.meta { margin: .45rem 0 0; font-size: .78rem; color: var(--muted); }
-.pending {
-  border-top: 1px solid var(--line);
-  padding-top: .75rem;
-  margin: 0;
-  font-size: .8rem;
+
+/* Leere Zustaende: ruhig, aber nie eine Luecke */
+.leer {
+  font-size: .82rem;
   color: var(--muted);
   font-style: italic;
 }
+.metric-ai { border-top: 1px solid var(--line-soft); padding-top: .7rem; }
+.meta { margin: .4rem 0 0; font-size: .755rem; color: var(--muted); }
 
-details { margin-top: .8rem; border-top: 1px solid var(--line); padding-top: .7rem; }
-summary { cursor: pointer; font-size: .82rem; color: var(--accent); }
-details p { margin: .6rem 0 0; font-size: .88rem; }
+details { margin-top: .7rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
+summary {
+  cursor: pointer;
+  font-size: .78rem;
+  color: var(--accent);
+  font-weight: 550;
+}
+details p { margin: .55rem 0 0; font-size: .85rem; color: var(--text-soft); }
 details .criteria {
-  margin: .6rem 0 0;
-  font-size: .8rem;
+  margin: .55rem 0 0;
+  font-size: .78rem;
   color: var(--muted);
   white-space: pre-wrap;
 }
 
 footer {
-  margin-top: 2.5rem;
-  padding-top: 1.2rem;
+  margin-top: 2.25rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--line);
-  font-size: .85rem;
+  font-size: .8rem;
   color: var(--muted);
-  max-width: 75ch;
+  max-width: 80ch;
 }
 footer a { color: var(--accent); }
+footer p { margin: 0 0 .35rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Claude&rsquo;s probability estimates next to prediction-market prices
-  and community forecasts. The model never sees the benchmark.</p>
-  <p class="stamp">Last updated <<ZEITSTEMPEL>> &middot; <<ANZAHL>> open questions
-  &middot; <<ANZAHL_AI>> with an AI forecast</p>
+  <p class="sub">Claude estimates the probability of open questions on African
+  politics and economics, without ever seeing the benchmark it is compared against.</p>
+  <div class="stats">
+    <div class="stat"><span class="stat-value"><<ANZAHL>></span><span class="stat-label">Questions</span></div>
+    <div class="stat"><span class="stat-value"><<ANZAHL_QUELLEN>></span><span class="stat-label">Sources</span></div>
+    <div class="stat"><span class="stat-value"><<DURCHSCHNITT>></span><span class="stat-label">Avg. gap</span></div>
+  </div>
 </header>
 
 <nav class="tabs"><<TABS>></nav>
@@ -250,14 +375,11 @@ footer a { color: var(--accent); }
 </div>
 
 <footer>
-<p>The model never sees the benchmark: <code>forecast.py</code> passes only the
-question and its resolution criteria, so the estimate is independent rather than
-a restatement of the market. Forecasts are produced with the Claude API
-(<code>claude-sonnet-4-6</code>) and may use web search for recent events.</p>
-<p>Questions and benchmarks on this page come from <<QUELLEN_LISTE>>. Market prices
-reflect real money at stake; community forecasts are the median of volunteer
-predictions and are labelled separately. Source and method:
-<a href="<<REPO_URL>>"><<REPO_URL>></a></p>
+<p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
+web search; the benchmark is never passed into the prompt, so the estimate is
+independent rather than a restatement of the market.</p>
+<p>Benchmarks from <<QUELLEN_LISTE>> &middot; last updated <<ZEITSTEMPEL>> &middot;
+<a href="<<REPO_URL>>">source and method</a></p>
 </footer>
 </div>
 
@@ -288,14 +410,10 @@ document.querySelectorAll(".tab").forEach(function (tab) {
 KARTEN_VORLAGE = """<article class="card" data-category="<<KATEGORIE>>">
   <div class="card-head">
     <span class="badge"><<QUELLE>></span>
-    <span class="tag"><<LAND>></span>
+    <span class="tag"><<FLAGGE>> <<LAND>></span>
   </div>
   <p class="question"><<FRAGE>></p>
-  <div class="bench-row">
-    <span class="bench-label"><<BENCHMARK_LABEL>></span>
-    <span class="bench-value"><<MARKT_P>></span>
-  </div>
-  <div class="bar"><div class="bar-fill" style="width: <<BALKEN>>%"></div></div>
+<<BENCHMARK_BLOCK>>
 <<AI_BLOCK>>
   <details>
     <summary>Details</summary>
@@ -304,26 +422,40 @@ KARTEN_VORLAGE = """<article class="card" data-category="<<KATEGORIE>>">
   </details>
 </article>"""
 
-AI_VORLAGE = """  <div class="ai">
-    <div class="ai-row">
-      <span class="ai-label">Claude</span>
-      <span class="ai-value"><<MODELL_P>></span>
-      <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>
-    </div>
-    <p class="meta">Confidence: <<CONFIDENCE>> &middot; <<SUCHE>></p>
-  </div>"""
+# Vergleichszahl vorhanden: grosse Zahl, darunter der Balken.
+BENCHMARK_VORLAGE = """  <div class="metric">
+    <span class="metric-label"><<BENCHMARK_LABEL>></span>
+    <span class="metric-value"><<MARKT_P>></span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: <<BALKEN>>%"></div></div>"""
 
-OHNE_AI_VORLAGE = """  <p class="pending">No AI forecast yet</p>"""
+# Vergleichszahl fehlt: dieselbe Beschriftung, aber ein ruhiger Hinweis statt
+# einer Zahl - und kein Balken, denn ein leerer Balken suggeriert 0 Prozent.
+BENCHMARK_FEHLT_VORLAGE = """  <div class="metric">
+    <span class="metric-label"><<BENCHMARK_LABEL>></span>
+    <span class="leer"><<HINWEIS>></span>
+  </div>
+  <div class="bar-leer"></div>"""
+
+AI_VORLAGE = """  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="metric-value"><<MODELL_P>></span>
+<<DIFF_BLOCK>>
+  </div>
+  <p class="meta">Confidence: <<CONFIDENCE>> &middot; <<SUCHE>></p>"""
+
+DIFF_VORLAGE = """    <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
+
+OHNE_AI_VORLAGE = """  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>"""
 
 
 # --- Daten laden -----------------------------------------------------------
 
 def lade_json(pfad):
-    """Liest eine JSON-Datei (UTF-8). Fehlt sie, brechen wir klar ab.
-
-    Gleiche Fehlerbehandlung wie in evaluate.py: lieber eine verstaendliche
-    Meldung als ein Traceback.
-    """
+    """Liest eine JSON-Datei (UTF-8). Fehlt sie, brechen wir klar ab."""
     try:
         with open(pfad, "r", encoding="utf-8") as datei:
             return json.load(datei)
@@ -339,10 +471,10 @@ def lade_json(pfad):
 def baue_karten_daten(markets, forecasts):
     """Baut pro ausgewaehlter Frage einen Karten-Eintrag.
 
-    Ausgangspunkt sind die Fragen, nicht die Prognosen: eine Frage ohne
-    Prognose soll ihre Marktquote zeigen und nicht verschwinden. Das tritt
-    auf, wenn ein Forecast-Lauf abgebrochen ist oder spaeter, wenn bewusst nur
-    ein Teil der Fragen prognostiziert wird.
+    Ausgangspunkt sind die Fragen, nicht die Prognosen. Beide Zahlen koennen
+    unabhaengig voneinander fehlen: die Vergleichszahl, wenn der
+    Community-Median gesperrt ist, und der Forecast, wenn ein Lauf abgebrochen
+    wurde. Die Differenz gibt es nur, wenn BEIDE vorliegen.
     """
     nach_id = {prognose["id"]: prognose for prognose in forecasts}
 
@@ -350,13 +482,12 @@ def baue_karten_daten(markets, forecasts):
     for markt in markets:
         prognose = nach_id.get(markt["id"])
         market_p = markt.get("market_p")
+        model_p = prognose["probability"] if prognose else None
 
-        if prognose is None:
-            model_p = None
+        if market_p is None or model_p is None:
             diff = None
         else:
-            model_p = prognose["probability"]
-            diff = None if market_p is None else round(model_p - market_p, 4)
+            diff = round(model_p - market_p, 4)
 
         eintraege.append({
             "question": markt["question"],
@@ -380,32 +511,21 @@ def baue_karten_daten(markets, forecasts):
 # --- Formatierung ----------------------------------------------------------
 
 def formatiere_prozent(p):
-    """Macht aus 0.72 die Anzeige "72%". Fehlt der Wert, kommt ein Strich."""
-    if p is None:
-        return "&ndash;"
+    """Macht aus 0.72 die Anzeige "72%"."""
     return f"{round(p * 100)}%"
 
 
 def balken_breite(p):
-    """Breite des Wahrscheinlichkeitsbalkens in Prozent, als Text fuer CSS.
-
-    Fehlt die Quote, bleibt der Balken leer (0), statt die Karte kaputtzumachen.
-    """
-    if p is None:
-        return "0"
+    """Breite des Wahrscheinlichkeitsbalkens in Prozent, als Text fuer CSS."""
     return str(round(p * 100))
 
 
 def formatiere_diff(diff):
-    """Formatiert die Differenz mit Pfeil und Vorzeichen, z. B. "&#9650; 46 pts".
+    """Formatiert die Differenz mit Pfeil, z. B. "&#9650; 46 pts".
 
-    Zwei Sonderfaelle: rundet die Differenz auf 0 Punkte, waere "+0 pts"
-    irrefuehrend (der Wert ist nicht exakt null), darum "<1 pt". Und bei
-    genau einem Punkt heisst es "pt", nicht "pts".
+    Rundet die Differenz auf 0 Punkte, waere "0 pts" irrefuehrend (der Wert
+    ist nicht exakt null), darum "<1 pt". Bei genau einem Punkt "pt".
     """
-    if diff is None:
-        return "&ndash;"
-
     punkte = round(diff * 100)
     if punkte == 0:
         return "&#9679; &lt;1 pt"
@@ -416,12 +536,12 @@ def formatiere_diff(diff):
 
 
 def klasse_fuer_diff(diff):
-    """Waehlt die CSS-Klasse (Farbe) fuer die Differenz.
+    """CSS-Klasse (Farbe) fuer die Differenz.
 
     Abweichungen unterhalb von NAH_SCHWELLE zeigen wir neutral grau, damit
     kleine Unterschiede optisch nicht wie eine echte Gegenposition wirken.
     """
-    if diff is None or abs(diff) < NAH_SCHWELLE:
+    if abs(diff) < NAH_SCHWELLE:
         return "flat"
     return "up" if diff > 0 else "down"
 
@@ -436,6 +556,16 @@ def benchmark_label(benchmark_type):
     return BENCHMARK_LABEL.get(benchmark_type, "Benchmark")
 
 
+def flagge_fuer_land(land):
+    """Flaggen-Emoji zum Land, sonst die Weltkugel.
+
+    Unbekannte oder regionale Angaben (Somaliland, Sahel) bekommen bewusst
+    einen neutralen Standardwert, statt gar kein Zeichen - so bleibt der Tag
+    optisch gleich breit aufgebaut.
+    """
+    return LAND_FLAGGE.get(land, FLAGGE_STANDARD)
+
+
 def beschreibe_suche(eintrag):
     """Formuliert den Hinweis, ob und wie oft das Modell gesucht hat."""
     if not eintrag["searched"]:
@@ -446,16 +576,48 @@ def beschreibe_suche(eintrag):
 
 # --- HTML bauen ------------------------------------------------------------
 
+def baue_benchmark_block(eintrag):
+    """Baut den Benchmark-Teil: grosse Zahl mit Balken, oder ruhiger Hinweis."""
+    label = benchmark_label(eintrag["benchmark_type"])
+
+    if eintrag["market_p"] is None:
+        hinweis = BENCHMARK_FEHLT.get(eintrag["benchmark_type"], "Not available")
+        return (
+            BENCHMARK_FEHLT_VORLAGE
+            .replace("<<BENCHMARK_LABEL>>", label)
+            .replace("<<HINWEIS>>", hinweis)
+        )
+
+    return (
+        BENCHMARK_VORLAGE
+        .replace("<<BENCHMARK_LABEL>>", label)
+        .replace("<<MARKT_P>>", formatiere_prozent(eintrag["market_p"]))
+        .replace("<<BALKEN>>", balken_breite(eintrag["market_p"]))
+    )
+
+
 def baue_ai_block(eintrag):
-    """Baut den Claude-Teil der Karte, oder den Hinweis, dass er noch fehlt."""
+    """Baut den Claude-Teil der Karte, oder den Hinweis, dass er noch fehlt.
+
+    Der Differenz-Pfeil erscheint NUR, wenn beide Zahlen vorliegen. Ein Pfeil
+    ohne Gegenwert waere eine Behauptung ohne Grundlage.
+    """
     if eintrag["model_p"] is None:
         return OHNE_AI_VORLAGE
+
+    if eintrag["diff"] is None:
+        diff_block = ""
+    else:
+        diff_block = (
+            DIFF_VORLAGE
+            .replace("<<DIFF_KLASSE>>", klasse_fuer_diff(eintrag["diff"]))
+            .replace("<<DIFF>>", formatiere_diff(eintrag["diff"]))
+        )
 
     return (
         AI_VORLAGE
         .replace("<<MODELL_P>>", formatiere_prozent(eintrag["model_p"]))
-        .replace("<<DIFF_KLASSE>>", klasse_fuer_diff(eintrag["diff"]))
-        .replace("<<DIFF>>", formatiere_diff(eintrag["diff"]))
+        .replace("<<DIFF_BLOCK>>", diff_block)
         .replace("<<CONFIDENCE>>", html.escape(eintrag["confidence"]))
         .replace("<<SUCHE>>", beschreibe_suche(eintrag))
     )
@@ -465,7 +627,7 @@ def baue_karte(eintrag):
     """Baut das HTML fuer eine einzelne Frage-Karte.
 
     Alle Texte laufen durch html.escape. Frage, Begruendung und Kriterien
-    stammen aus der Markt-API bzw. vom Modell; ein "&" oder "<" darin wuerde
+    stammen aus fremden APIs bzw. vom Modell; ein "&" oder "<" darin wuerde
     die Seite sonst zerlegen.
     """
     kriterien = eintrag["criteria"].strip() or "No resolution criteria provided."
@@ -475,15 +637,16 @@ def baue_karte(eintrag):
     else:
         reasoning_block = ""
 
+    land = eintrag["country"] or "Africa"
+
     return (
         KARTEN_VORLAGE
         .replace("<<KATEGORIE>>", html.escape(eintrag["category"]))
         .replace("<<QUELLE>>", html.escape(quellen_name(eintrag["source"])))
-        .replace("<<LAND>>", html.escape(eintrag["country"] or "Africa"))
+        .replace("<<FLAGGE>>", flagge_fuer_land(land))
+        .replace("<<LAND>>", html.escape(land))
         .replace("<<FRAGE>>", html.escape(eintrag["question"]))
-        .replace("<<BENCHMARK_LABEL>>", benchmark_label(eintrag["benchmark_type"]))
-        .replace("<<MARKT_P>>", formatiere_prozent(eintrag["market_p"]))
-        .replace("<<BALKEN>>", balken_breite(eintrag["market_p"]))
+        .replace("<<BENCHMARK_BLOCK>>", baue_benchmark_block(eintrag))
         .replace("<<AI_BLOCK>>", baue_ai_block(eintrag))
         .replace("<<REASONING_BLOCK>>", reasoning_block)
         .replace("<<KRITERIEN>>", html.escape(kriterien))
@@ -493,9 +656,8 @@ def baue_karte(eintrag):
 def baue_tabs(eintraege):
     """Baut die Tab-Leiste aus den tatsaechlich vorhandenen Kategorien.
 
-    Kategorien ohne Fragen bekommen keinen Tab. Ein Tab, der auf eine leere
-    Liste filtert, sieht nach einem Fehler aus - und welche Kategorien belegt
-    sind, aendert sich mit den Quellen und der Nachrichtenlage.
+    Kategorien ohne Fragen bekommen keinen Tab: ein Tab, der auf eine leere
+    Liste filtert, sieht nach einem Fehler aus.
     """
     tabs = [f'<button class="tab active" data-filter="all">All'
             f'<span class="count">{len(eintraege)}</span></button>']
@@ -511,12 +673,7 @@ def baue_tabs(eintraege):
 
 
 def nenne_quellen(eintraege):
-    """Zaehlt die tatsaechlich vertretenen Quellen auf, z. B. "Polymarket and Kalshi".
-
-    Bewusst aus den Daten abgeleitet und nicht fest hingeschrieben: solange
-    Metaculus und Kalshi keine Fragen liefern, sollen sie in der Fusszeile auch
-    nicht als Quelle behauptet werden.
-    """
+    """Zaehlt die tatsaechlich vertretenen Quellen auf, z. B. "Metaculus and Polymarket"."""
     # sorted() gibt eine stabile Reihenfolge, damit die Fusszeile nicht bei
     # jedem Lauf anders aussieht und unnoetige Commits erzeugt.
     namen = sorted({quellen_name(e["source"]) for e in eintraege})
@@ -526,31 +683,49 @@ def nenne_quellen(eintraege):
     return html.escape(", ".join(namen[:-1]) + " and " + namen[-1])
 
 
-def sortierschluessel(eintrag):
-    """Sortierung der Karten: erst mit Prognose nach groesster Abweichung.
+def mittlere_abweichung(eintraege):
+    """Durchschnittliche absolute Abweichung in Prozentpunkten, als Text.
 
-    Karten mit Prognose stehen vorn, weil nur dort ein Vergleich sichtbar ist -
-    und innerhalb davon zuerst die groesste Abweichung, denn das ist der
-    interessante Teil. Karten ohne Prognose folgen danach, nach Marktquote
-    absteigend. Sonst stuenden unfertige Karten oben.
+    Nur ueber Karten, bei denen beide Zahlen vorliegen. Gibt es keine solche
+    Karte, steht ein Strich - eine 0 waere hier eine Falschaussage, sie hiesse
+    "Modell und Benchmark sind sich einig".
     """
-    hat_prognose = eintrag["diff"] is not None
-    if hat_prognose:
+    diffs = [abs(e["diff"]) for e in eintraege if e["diff"] is not None]
+    if not diffs:
+        return "&ndash;"
+    return f"{round(sum(diffs) / len(diffs) * 100)} pts"
+
+
+def sortierschluessel(eintrag):
+    """Sortierung der Karten.
+
+    Drei Gruppen, in dieser Reihenfolge: erst Karten mit beiden Zahlen, nach
+    groesster Abweichung - dort ist der Vergleich sichtbar und das ist der
+    interessante Teil. Dann Karten mit Forecast, aber ohne Vergleichszahl.
+    Zuletzt Karten, die noch auf ihren Forecast warten.
+    """
+    hat_diff = eintrag["diff"] is not None
+    hat_modell = eintrag["model_p"] is not None
+
+    if hat_diff:
         return (0, -abs(eintrag["diff"]))
-    return (1, -(eintrag["market_p"] or 0))
+    if hat_modell:
+        return (1, -eintrag["model_p"])
+    return (2, -(eintrag["market_p"] or 0))
 
 
 def baue_seite(eintraege, zeitstempel):
     """Setzt Kopf, Tab-Leiste, alle Karten und Fusszeile zur fertigen Seite zusammen."""
     sortiert = sorted(eintraege, key=sortierschluessel)
     karten = "\n".join(baue_karte(e) for e in sortiert)
-    mit_prognose = sum(1 for e in sortiert if e["model_p"] is not None)
+    anzahl_quellen = len({e["source"] for e in sortiert})
 
     return (
         SEITEN_VORLAGE
         .replace("<<ZEITSTEMPEL>>", zeitstempel)
-        .replace("<<ANZAHL_AI>>", str(mit_prognose))
+        .replace("<<ANZAHL_QUELLEN>>", str(anzahl_quellen))
         .replace("<<ANZAHL>>", str(len(sortiert)))
+        .replace("<<DURCHSCHNITT>>", mittlere_abweichung(sortiert))
         .replace("<<TABS>>", baue_tabs(sortiert))
         .replace("<<KARTEN>>", karten)
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
@@ -573,8 +748,7 @@ def main():
         sys.exit(1)
 
     # Bauzeit in UTC. Die Action baut direkt nach dem Abruf, der Stempel steht
-    # also fuer den Datenstand. Weder markets.json noch forecasts.json bringen
-    # einen eigenen Zeitstempel mit.
+    # also fuer den Datenstand.
     zeitstempel = datetime.now(timezone.utc).strftime("%d %B %Y, %H:%M UTC")
 
     seite = baue_seite(eintraege, zeitstempel)
@@ -584,9 +758,11 @@ def main():
         datei.write(seite)
 
     mit_prognose = sum(1 for e in eintraege if e["model_p"] is not None)
+    mit_benchmark = sum(1 for e in eintraege if e["market_p"] is not None)
     print(f"{len(eintraege)} Karten nach {AUSGABE_DATEI} geschrieben "
-          f"({mit_prognose} davon mit Prognose).")
+          f"({mit_prognose} mit Prognose, {mit_benchmark} mit Vergleichszahl).")
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     main()

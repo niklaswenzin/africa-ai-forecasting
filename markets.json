@@ -10,19 +10,21 @@
     "category": "elections",
     "event_id": "polymarket-53298",
     "event_title": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+    "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Aziz Akhannouch's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes into effect.\n\nIf the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.\n\nThe resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used."
   },
   {
     "id": "polymarket-2063128",
     "source": "polymarket",
     "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
-    "market_p": 0.9375,
+    "market_p": 0.938,
     "benchmark_type": "market_price",
     "africa": true,
     "country": "Ethiopia",
     "category": "elections",
     "event_id": "polymarket-411239",
     "event_title": "Next Prime Minister of Ethiopia?",
+    "resolve_time": "2026-06-01T00:00:00Z",
     "description": "General elections are scheduled to be held in Ethiopia on June 1, 2026.\n\nThis market will resolve to the next individual who officially assumes the office of Prime Minister of Ethiopia following the 2026 General elections.\n\nTo count for resolution, the individual must be officially appointed and sworn in as Prime Minister of Ethiopia. Any interim or caretaker Prime Minister will not count toward the resolution of this market.\n\nIf no such Prime Minister takes office by December 31, 2028, 11:59 PM ET, this market will resolve to “Other”.\n\nThe primary resolution source for this market will be official information from the Government of Ethiopia; however, a consensus of credible reporting may also be used."
   },
   {
@@ -36,6 +38,7 @@
     "category": "diplomacy",
     "event_id": "polymarket-73191",
     "event_title": "Which country will join Abraham Accords before 2027?",
+    "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nA formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.\n\nThe resolution source will be official government statements, however a consensus for credible reporting may also be used."
   },
   {
@@ -49,6 +52,7 @@
     "category": "elections",
     "event_id": "polymarket-74788",
     "event_title": "Guinea-Bissau Presidential Election",
+    "resolve_time": "2025-11-23T00:00:00Z",
     "description": "Presidential elections are scheduled to be held in Guinea-Bissau on November 23, 2025. If no candidate secures more than 50% of the valid votes in the first round, a second round will be held on November 30, 2025.\n\nThis market will resolve according to the listed candidate that wins this election. \n\nThis market includes any potential second round. If the result of this election isn't known by December 31, 2026, 11:59 PM ET, the market will resolve to \"Other\".\n\nThis market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/)."
   },
   {
@@ -62,6 +66,7 @@
     "category": "elections",
     "event_id": "polymarket-106758",
     "event_title": "Somaliland Parliamentary Election Winner",
+    "resolve_time": "2026-12-31T00:00:00Z",
     "description": "Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.\n\nThis market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. \n\nIf no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to \"No election before 2027\".\n\nIf an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to \"Other\".\n\nIn the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.\n\nThis market's resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. \n\nThis market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net)."
   },
   {
@@ -75,6 +80,7 @@
     "category": "elections",
     "event_id": "polymarket-74940",
     "event_title": "Guinea-Bissau National People's Assembly Election Winner",
+    "resolve_time": "2025-11-23T00:00:00Z",
     "description": "Parliamentary elections are scheduled to be held in Guinea-Bissau on November 23, 2025.\n\nThis market will resolve to the political party or coalition that wins the greatest number of seats in the National People's Assembly of Guinea-Bissau.\n\nIf voting in the National People's Assembly of Guinea-Bissau election does not occur by December 31, 2026, this market will resolve to \"Other\".\n\nIn the event of a tie between this party or coalition and any other for the most seats won, this market will be resolved in favor of the party or coalition whose listed abbreviation or name appears first in alphabetical order.\n\nThis market's resolution will be based solely on the number of seats won by the named party or coalition in the National People's Assembly.\n\nThis market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/)."
   },
   {
@@ -88,7 +94,36 @@
     "category": "elections",
     "event_id": "polymarket-103613",
     "event_title": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
+    "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Denis Sassou Nguesso's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes into effect.\n\nIf the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.\n\nThe resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used."
+  },
+  {
+    "id": "polymarket-799988",
+    "source": "polymarket",
+    "question": "Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?",
+    "market_p": 0.0575,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Central African Republic",
+    "category": "elections",
+    "event_id": "polymarket-95933",
+    "event_title": "Central African Republic National Assembly Election Winner",
+    "resolve_time": "2025-12-28T00:00:00Z",
+    "description": "The 2025 Central African Republic general election is scheduled to be held on December 28, 2025, to elect the 140 members of the National Assembly (CAR’s unicameral parliament).\n\nThis market will resolve according to the party that controls the most seats in the Central African Republic National Assembly as a result of the next Central African parliamentary election.\n\nIf initial voting in the next Central African parliamentary election does not occur by June 30, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThis market may remain open to consider any second-round votes held to determine winners in individual single-member constituencies, as long as the remaining undecided seats can still change which party wins the most seats overall, or maximally until December 31, 2026, 11:59 PM ET, after which the market will resolve based on the results available at that time.\n\nIn the case of a tie between this party and any other for the most seats held, this market will resolve in favor of the party whose listed abbreviation comes first in alphabetical order.\n\nThis market’s resolution will be based solely on the number of seats won by this party, not any coalition of which it may be a part.\n\nThis market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/)."
+  },
+  {
+    "id": "polymarket-2326375",
+    "source": "polymarket",
+    "question": "Will the Republic of the Congo have an Ebola case in 2026?",
+    "market_p": 0.155,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Congo",
+    "category": "other",
+    "event_id": "polymarket-511422",
+    "event_title": "Which countries will have an Ebola case in 2026?",
+    "resolve_time": "2026-12-31T00:00:00Z",
+    "description": "This market will resolve to \"Yes\" if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nAny active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.\n\nThe primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice."
   },
   {
     "id": "polymarket-666832",
@@ -101,20 +136,8 @@
     "category": "economy",
     "event_id": "polymarket-73951",
     "event_title": "Which countries will Trump make new trade deals with before 2027?",
+    "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if a free trade agreement with the specified country or entity becomes law in the United States by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nThis includes both agreements that become law through Senate ratification and Presidential approval, or through the enactment of a Congressional-Executive Agreement signed into law by the President.\n\nThe resolution source will be a consensus of credible reporting."
-  },
-  {
-    "id": "polymarket-799982",
-    "source": "polymarket",
-    "question": "Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?",
-    "market_p": 0.9915,
-    "benchmark_type": "market_price",
-    "africa": true,
-    "country": "Central African Republic",
-    "category": "elections",
-    "event_id": "polymarket-95933",
-    "event_title": "Central African Republic National Assembly Election Winner",
-    "description": "The 2025 Central African Republic general election is scheduled to be held on December 28, 2025, to elect the 140 members of the National Assembly (CAR’s unicameral parliament).\n\nThis market will resolve according to the party that controls the most seats in the Central African Republic National Assembly as a result of the next Central African parliamentary election.\n\nIf initial voting in the next Central African parliamentary election does not occur by June 30, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThis market may remain open to consider any second-round votes held to determine winners in individual single-member constituencies, as long as the remaining undecided seats can still change which party wins the most seats overall, or maximally until December 31, 2026, 11:59 PM ET, after which the market will resolve based on the results available at that time.\n\nIn the case of a tie between this party and any other for the most seats held, this market will resolve in favor of the party whose listed abbreviation comes first in alphabetical order.\n\nThis market’s resolution will be based solely on the number of seats won by this party, not any coalition of which it may be a part.\n\nThis market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/)."
   },
   {
     "id": "polymarket-3081841",
@@ -127,6 +150,91 @@
     "category": "elections",
     "event_id": "polymarket-743521",
     "event_title": "Zambia National Assembly Election: 2nd Place",
+    "resolve_time": "2026-08-13T23:59:00Z",
     "description": "Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.\n\nThis market will resolve to the political party that wins the second-highest number of seats in the National Assembly of Zambia as a result of this election.\n\nThe number of seats will include all members of the National Assembly of Zambia serving as a result of this election, including appointed members and those elected by proportional representation.\n\nIf the results of the specified election are not definitively known by July 31, 2027, this market will resolve to \"Other\".\n\nThe named parties will be primarily ranked by the number of seats won in the specified election. If two or more parties are tied on seats, ties will be broken by the total number of valid votes received by each party’s candidates, with higher vote totals ranking higher. If parties remain tied, ties will be broken by alphabetical order of the listed party abbreviations. This market will resolve to the party that occupies the second finishing position after applying this ranking.\n\nA constituency-elected member will count towards the party they registered to contest the election with. A member elected by proportional representation will count towards the party whose list they were elected from. A member appointed by the President will count towards the party of their personal affiliation if such affiliation is clear. If their affiliation is ambiguous or unclear, they will count towards the party of the President.\n\nThis market's resolution will be based solely on the number of seats won by the named party. Independents will not count towards any party.\n\nThis market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government."
+  },
+  {
+    "id": "polymarket-3081798",
+    "source": "polymarket",
+    "question": "Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?",
+    "market_p": 0.005,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Zambia",
+    "category": "elections",
+    "event_id": "polymarket-743520",
+    "event_title": "Zambia National Assembly Election: Party Winner",
+    "resolve_time": "2026-08-13T03:59:00Z",
+    "description": "Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.\n\nThis market will resolve to the political party that wins the greatest number of seats in the National Assembly of Zambia as a result of this election.\n\nThe number of seats will include all members of the National Assembly of Zambia serving as a result of this election, including appointed members and those elected by proportional representation.\n\nIf the results of the specified election are not definitively known by July 31, 2027, this market will resolve to \"Other\".\n\nIn the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party whose name as listed in this market appears first in alphabetical order.\n\nA constituency-elected member will count towards the party they registered to contest the election with. A member elected by proportional representation will count towards the party whose list they were elected from. A member appointed by the President will count towards the party of their personal affiliation if such affiliation is clear. If their affiliation is ambiguous or unclear, they will count towards the party of the President.\n\nThis market's resolution will be based solely on the number of seats won by the named party. Independents will not count towards any party.\n\nThis market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government."
+  },
+  {
+    "id": "metaculus-43844",
+    "source": "metaculus",
+    "question": "Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?",
+    "market_p": null,
+    "benchmark_type": "community_forecast",
+    "africa": true,
+    "country": "Zambia",
+    "category": "elections",
+    "event_id": "metaculus-43844",
+    "event_title": "Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?",
+    "resolve_time": "2026-08-14T12:00:00Z",
+    "description": "This question resolves as **Yes** if President Hakainde Hichilema receives 65% or more of the first round votes in the [2026 Zambian presidential election](https://en.wikipedia.org/wiki/2026_Zambian_general_election). The question resolves based on [official results](https://www.elections.org.zm/) or [credible sources](https://www.metaculus.com/faq/#definitions).&#x20;"
+  },
+  {
+    "id": "metaculus-31071",
+    "source": "metaculus",
+    "question": "Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?",
+    "market_p": null,
+    "benchmark_type": "community_forecast",
+    "africa": true,
+    "country": "South Africa",
+    "category": "security",
+    "event_id": "metaculus-31071",
+    "event_title": "Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?",
+    "resolve_time": "2027-01-01T14:46:00Z",
+    "description": "This question will resolve as **Yes** if, before January 1, 2027, the International Court of Justice finds that Israel has violated international law in South Africa's genocide case. If this does not happen before January 1, 2027, this question will resolve as **No**."
+  },
+  {
+    "id": "metaculus-43590",
+    "source": "metaculus",
+    "question": "Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?",
+    "market_p": null,
+    "benchmark_type": "community_forecast",
+    "africa": true,
+    "country": "Sudan",
+    "category": "security",
+    "event_id": "metaculus-43590",
+    "event_title": "Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?",
+    "resolve_time": "2027-01-02T21:00:00Z",
+    "description": "This question resolves **YES** if **either of the first two qualifying IPC Sudan acute food insecurity products** classifies **at least one area in Famine (IPC Phase 5)** at the area level, for any analysis or projection period falling on or after 1 June 2026. It resolves **NO** if the first two qualifying products both make the relevant area-level classifications but neither classifies any area in Famine (IPC Phase 5) — or if only one qualifying product has been published by 31 December 2026 and it classifies no area in Famine.\n\nA \"qualifying IPC Sudan acute food insecurity product\" is an IPC-produced Sudan product (a full IPC analysis, an IPC Global Initiative Special Snapshot, or an IPC Alert), published on the IPC website (ipcinfo.org) **after 14 May 2026**, that (a) makes area-level IPC phase classifications for Sudan and (b) whose current period or a formally classified projection period covers any time on or after 1 June 2026 (the June–September 2026 lean season or later). The \"first two qualifying products\" are the first two such products in publication order. A YES resolves as soon as either of them classifies an area in Famine.\n\nA Famine determination counts if it is made **either** by the IPC analysis team **or** by the Famine Review Committee (FRC) within that product. A **formal projected Famine classification** (an IPC Phase 5 / Famine classification assigned to a projection period) counts. An area flagged only as **\"at risk of Famine\"** does **not** count — IPC states risk of Famine is not a classification. Household-level IPC Phase 5 (Catastrophe) population figures do **not** count; an area-level Famine classification is required. Any IPC analysis unit — a town, locality, or IDP settlement — classified in Phase 5 Famine satisfies \"at least one area\"."
+  },
+  {
+    "id": "metaculus-43315",
+    "source": "metaculus",
+    "question": "Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",
+    "market_p": null,
+    "benchmark_type": "community_forecast",
+    "africa": true,
+    "country": "Sudan",
+    "category": "security",
+    "event_id": "metaculus-43315",
+    "event_title": "Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",
+    "resolve_time": "2027-01-31T21:59:00Z",
+    "description": "This question resolves **YES** if, between 1 January 2026 and 31 December 2026 (UTC), any of the following entities publishes a Sudan-war total **excess-mortality estimate (direct + indirect)** with a **central / point estimate exceeding 200,000 deaths**, applied at **nationwide** scope (i.e., covering \"Sudan\", \"the Sudan war\", or \"the conflict\" - not a single state, single city, or single event):\n\n1. A peer-reviewed article in a PubMed-indexed medical or epidemiological journal (the *Lancet* family, *BMJ* family, *NEJM*, *JAMA*, *PLOS*, *Nature*, *Science*, *Conflict and Health*, or similar);\n2. A working paper or preprint by a named academic research group with a university affiliation, hosted on SSRN, medRxiv, ResearchGate, or an institutional site (e.g., LSHTM Sudan Research Group, Yale Humanitarian Research Lab, UCLouvain CRED);\n3. A formal publication of a UN body (UN Independent International Fact-Finding Mission for Sudan, OHCHR, OCHA, WHO, UNICEF) presenting the figure as the body's own estimate, not a citation of others;\n4. A formal report or press release with stated methodology from a major international NGO with epidemiological capacity (MSF, ICRC, IRC, Save the Children, or similar);\n5. A national government report (US State Department, UK FCDO, EU EUAA, or similar) presenting its own modelled figure (not a citation);\n6. A documented release or revision of the [CRED EM-DAT](https://www.emdat.be/) or [Uppsala UCDP](https://ucdp.uu.se/) database that lists a Sudan-war cumulative total exceeding the threshold, accompanied by a public report or release note.\n\nThis question resolves **NO** if no such publication appears by 31 December 2026 (UTC)."
+  },
+  {
+    "id": "metaculus-43793",
+    "source": "metaculus",
+    "question": "Will Senegal formally restructure its external debt before 2028?",
+    "market_p": null,
+    "benchmark_type": "community_forecast",
+    "africa": true,
+    "country": "Senegal",
+    "category": "economy",
+    "event_id": "metaculus-43793",
+    "event_title": "Will Senegal formally restructure its external debt before 2028?",
+    "resolve_time": "2028-01-01T01:00:00Z",
+    "description": "This question will resolve as Yes if, before January 1, 2028, Senegal announces a formal debt restructuring agreement.\n\nThe question may resolve according to official announcements by the Senegalese government or consensus reporting in reputable financial journals like the Wall Street Journal or Financial Times."
   }
 ]

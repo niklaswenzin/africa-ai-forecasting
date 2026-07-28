@@ -20,6 +20,7 @@ in QUELLEN eintragen. Filter und Auswahl gelten dann automatisch auch fuer sie.
 import json
 import re
 import sys
+from datetime import datetime, timezone
 
 import source_kalshi
 import source_metaculus
@@ -37,6 +38,27 @@ ANZAHL = 30
 
 MODERAT_MIN = 0.05         # bevorzugte Quote: nicht extremer als diese Grenzen
 MODERAT_MAX = 0.95
+
+# Obergrenze fuer Fragen OHNE Vergleichszahl. Betrifft derzeit nur Metaculus:
+# der Community-Median ist fuer unser Konto gesperrt, die Fragen sind aber
+# trotzdem wertvoll, weil Claude sie prognostizieren kann. Eine Karte ohne
+# Vergleichszahl zeigt eben nur den Forecast - besser als keine Frage.
+# Begrenzt, damit diese Fragen die Seite nicht dominieren und der
+# Forecast-Lauf bezahlbar bleibt.
+MAX_OHNE_BENCHMARK = 15
+
+# Fragen ohne Vergleichszahl nehmen wir nur aus diesen Kategorien auf:
+# Wirtschaft und Politik. Ohne Benchmark ist der Forecast die einzige Aussage
+# der Karte, und die soll zum Thema des Projekts passen - ein Ebola-Fall oder
+# eine Sportfrage gehoert dann nicht dazu.
+KATEGORIEN_OHNE_BENCHMARK = ("elections", "security", "diplomacy", "economy")
+
+# Zeithorizont fuer Fragen ohne Vergleichszahl, in Tagen. Metaculus fuehrt
+# Fragen mit sehr fernem Aufloesungsdatum ("Will X be elected President of
+# South Africa before 2065?"). Eine Prognose, deren Ausgang in 39 Jahren
+# feststeht, ist auf einem Dashboard wertlos: sie laesst sich nie ueberpruefen
+# und verdraengt eine Frage, die naechsten Monat faellig ist.
+MAX_HORIZONT_TAGE = 1095   # rund drei Jahre
 
 # Alle angebundenen Quellen. Metaculus und Kalshi geben derzeit leere Listen
 # zurueck (siehe die jeweiligen Dateien), die Pipeline laeuft trotzdem durch.
@@ -153,6 +175,11 @@ KATEGORIE_KEYWORDS = [
         "war", "coup", "ceasefire", "conflict", "militant", "insurgen",
         "rebel", "junta", "terror", "attack", "invasion", "troops",
         "military", "violence", "unrest", "hostage", "genocide",
+        # Humanitaere Folgen bewaffneter Konflikte. Metaculus fragt haeufiger
+        # danach als Polymarket, und eine IPC-Hungersnotklassifikation im
+        # Sudan gehoert naeher an Sicherheit als an "other".
+        "famine", "food insecurity", "ipc ", "displac", "refugee",
+        "humanitarian", "excess mortality",
     ]),
     ("elections", [
         "elect", "president", "parliament", "vote", "ballot", "candidate",
@@ -172,6 +199,10 @@ KATEGORIE_KEYWORDS = [
         "abraham accords", "recognize", "recognise", "diplomatic",
         "normalizat", "normalisat", "embassy", "treaty", "accord",
         "summit", "sanction", "join the", "membership", "alliance",
+        # Restitution ist eine zwischenstaatliche Frage, keine kulturelle
+        # Randnotiz: die Benin-Bronzen sind seit Jahren Gegenstand
+        # bilateraler Verhandlungen zwischen Nigeria und Grossbritannien.
+        "restitution", "repatriat",
     ]),
 ]
 
@@ -322,6 +353,71 @@ def naechste_passende(kandidaten, gesehene_events):
     return None
 
 
+def aufloesung_zuerst(frage):
+    """Sortierschluessel: fruehe Aufloesung zuerst, Fragen ohne Datum zuletzt.
+
+    Fuer Fragen ohne Vergleichszahl ist das die sinnvollste Reihenfolge. Was
+    bald aufgeloest wird, laesst sich bald ueberpruefen - und eine Prognose,
+    deren Ausgang man in Wochen kennt, ist mehr wert als eine, die 2031
+    faellig wird. Die Zeitangaben sind ISO-Text ("2026-09-10T09:00:00Z"), der
+    sich lexikografisch korrekt sortieren laesst.
+    """
+    zeit = frage.get("resolve_time") or ""
+    # Leerer Text sortiert vor allen Datumsangaben, darum explizit ans Ende.
+    return (1, "") if not zeit else (0, zeit)
+
+
+def loest_bald_auf(frage):
+    """True, wenn die Frage innerhalb von MAX_HORIZONT_TAGE aufgeloest wird.
+
+    Fragen ohne Datum lassen wir durch: fehlende Angabe ist kein Grund, eine
+    sonst passende Frage zu verwerfen. Unlesbare Datumsangaben ebenso - lieber
+    eine Frage zu viel als ein Absturz an einem Formatfehler.
+    """
+    zeit = frage.get("resolve_time") or ""
+    if not zeit:
+        return True
+
+    try:
+        ziel = datetime.fromisoformat(zeit.replace("Z", "+00:00"))
+    except ValueError:
+        return True
+
+    return (ziel - datetime.now(timezone.utc)).days <= MAX_HORIZONT_TAGE
+
+
+def waehle_ohne_benchmark(nach_quelle, gewaehlt, gesehene_events):
+    """Nimmt bis zu MAX_OHNE_BENCHMARK Fragen ohne Vergleichszahl auf.
+
+    Eigener Durchlauf, weil diese Fragen in den beiden anderen durchs Raster
+    fielen: ist_moderat() ist ohne Quote falsch, und die Sortierung nach
+    hoechster Quote schiebt sie ans Ende. Massgeblich ist hier stattdessen die
+    Naehe der Aufloesung.
+    """
+    kandidaten = []
+    for fragen in nach_quelle.values():
+        kandidaten.extend(
+            f for f in fragen
+            if f.get("market_p") is None
+            and bestimme_kategorie(f) in KATEGORIEN_OHNE_BENCHMARK
+            and loest_bald_auf(f)
+        )
+
+    kandidaten.sort(key=aufloesung_zuerst)
+
+    genommen = 0
+    for frage in kandidaten:
+        if genommen == MAX_OHNE_BENCHMARK or len(gewaehlt) == ANZAHL:
+            break
+        if frage.get("event_id") in gesehene_events:
+            continue
+        gesehene_events.add(frage.get("event_id"))
+        gewaehlt.append(frage)
+        genommen += 1
+
+    return genommen
+
+
 def waehle_reihum(nach_quelle, gewaehlt, gesehene_events):
     """Nimmt reihum aus jeder Quelle die naechste passende Frage.
 
@@ -372,25 +468,42 @@ def waehle_fragen(nach_quelle):
     #   moderate -> nach Volumen, das aktivste Marktgeschehen zuerst.
     #   extreme  -> nach hoechster Quote, damit bei einer Wahl der Favorit
     #               gewinnt und nicht ein beliebiger Aussenseiter mit 0.4%.
+    afrika_je_quelle = {}
     moderate = {}
     extreme = {}
     for name, fragen in nach_quelle.items():
         afrika = [f for f in fragen if hat_afrika_bezug(f)]
+        afrika_je_quelle[name] = afrika
 
-        moderate[name] = [f for f in afrika if ist_moderat(f)]
+        mit_quote = [f for f in afrika if f.get("market_p") is not None]
+
+        moderate[name] = [f for f in mit_quote if ist_moderat(f)]
         moderate[name].sort(key=lambda f: f.get("volume", 0.0), reverse=True)
 
-        extreme[name] = [f for f in afrika if not ist_moderat(f)]
+        extreme[name] = [f for f in mit_quote if not ist_moderat(f)]
         extreme[name].sort(key=quote_absteigend, reverse=True)
+
         anzahl_events = len({f.get("event_id") for f in afrika})
+        ohne_quote = len(afrika) - len(mit_quote)
         print(f"  {name}: {len(afrika)} Fragen mit Afrika-Bezug "
               f"aus {anzahl_events} Events "
-              f"({len(moderate[name])} Fragen mit moderater Quote).")
+              f"({len(moderate[name])} mit moderater Quote, "
+              f"{ohne_quote} ohne Vergleichszahl).")
 
     gewaehlt = []
     gesehene_events = set()
-    waehle_reihum(moderate, gewaehlt, gesehene_events)  # 1. bevorzugt
-    waehle_reihum(extreme, gewaehlt, gesehene_events)   # 2. Notnagel
+
+    # Reihenfolge nach Wert: Fragen MIT Vergleichszahl zuerst, denn nur dort
+    # entsteht der eigentliche Vergleich Modell gegen Markt. Fragen ohne
+    # Vergleichszahl fuellen danach auf.
+    waehle_reihum(moderate, gewaehlt, gesehene_events)   # 1. bevorzugt
+    waehle_reihum(extreme, gewaehlt, gesehene_events)    # 2. Notnagel
+    ohne = waehle_ohne_benchmark(afrika_je_quelle, gewaehlt, gesehene_events)
+
+    if ohne:
+        print(f"  dazu {ohne} Fragen ohne Vergleichszahl "
+              f"(Obergrenze {MAX_OHNE_BENCHMARK}, naechste Aufloesung zuerst).")
+
     return gewaehlt
 
 
@@ -415,6 +528,7 @@ def baue_eintrag(frage):
         "category": bestimme_kategorie(frage),
         "event_id": frage.get("event_id"),
         "event_title": frage.get("event_title", ""),
+        "resolve_time": frage.get("resolve_time", ""),
         "description": frage.get("description", ""),
     }
 

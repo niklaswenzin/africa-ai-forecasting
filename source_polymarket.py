@@ -195,6 +195,11 @@ def normalisiere(market):
         "event_id": f"{QUELLE}-{event_id}",
         "event_title": event_titel,
         "category_hint": hole_kategorie_hinweis(market),
+        # Geplante Aufloesung als ISO-Text. Fuer Polymarket-Fragen entscheidet
+        # das Volumen ueber die Auswahl; das Feld ist fuer Fragen ohne
+        # Vergleichszahl gedacht und wird hier nur mitgefuehrt, damit alle
+        # Quellen dasselbe Format liefern.
+        "resolve_time": market.get("endDate") or "",
     }
 
 

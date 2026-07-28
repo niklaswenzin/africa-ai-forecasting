@@ -69,7 +69,12 @@ TOKEN_NAME = "METACULUS_API_TOKEN"
 HEADERS_BASIS = {"User-Agent": "africa-ai-forecasting/1.0"}
 TIMEOUT = 30
 PRO_SEITE = 100            # Seitengroesse fuer die Paginierung
-MAX_SEITEN = 10            # Sicherheitsgrenze, damit die Schleife endet
+# Sicherheitsgrenze, damit die Schleife endet. Bewusst hoch: Fragen mit
+# Afrika-Bezug sind selten (rund 9 auf die ersten 1000), und die API bietet
+# keinen Themenfilter, den wir serverseitig setzen koennten. Wir muessen also
+# breit laden und clientseitig filtern. 30 Seiten sind 30 Anfragen pro Lauf -
+# vertretbar bei einem Lauf alle sechs Stunden.
+MAX_SEITEN = 30
 
 # Filter fuer die Abfrage. Wir wollen nur offene, binaere Fragen: alles andere
 # (numerische Fragen, Datumsfragen, geschlossene Fragen) passt nicht zu einer
@@ -277,17 +282,21 @@ def hole_kategorie_hinweis(post):
 def normalisiere(post):
     """Macht aus einem Metaculus-Post einen Eintrag im gemeinsamen Format.
 
-    Gibt None zurueck, wenn kein Community-Median sichtbar ist. Solche Fragen
-    sind fuer dieses Projekt nutzlos: ohne Vergleichszahl gibt es nichts
-    auszuwerten und die Karte auf der Seite waere leer.
+    market_p darf None sein. Frueher haben wir solche Fragen verworfen, weil
+    ohne Vergleichszahl nichts auszuwerten ist. Da der Community-Median fuer
+    dieses Konto durchgehend gesperrt ist, waere die Quelle damit aber komplett
+    stumm. Stattdessen nehmen wir die Frage auf: die Karte zeigt dann den
+    Claude-Forecast und "Community forecast pending" statt einer Quote.
+
+    Der Vergleich Modell gegen Benchmark faellt fuer diese Fragen weg - das
+    ist eine bewusste Einschraenkung, keine Luecke, die spaeter jemand fuer
+    einen Fehler haelt. Sobald die Zugriffsstufe steht, fuellt sich die Zahl
+    von selbst.
 
     Jede Frage bildet ihr eigenes Event. Metaculus buendelt Fragen nicht wie
     Polymarket in Kandidatenvarianten, darum gibt es hier nichts zu entdoppeln.
     """
     median = lies_community_median(post)
-    if median is None:
-        return None
-
     forecaster = ersten_treffer(post, FORECASTER_PFADE)
     kriterien = ersten_treffer(post, KRITERIEN_PFADE) or ""
 
@@ -304,6 +313,10 @@ def normalisiere(post):
         "event_id": f"{QUELLE}-{post['id']}",
         "event_title": post.get("title", ""),
         "category_hint": hole_kategorie_hinweis(post),
+        # Zeitpunkt der geplanten Aufloesung. Fuer Fragen ohne Vergleichszahl
+        # ist das die Sortiergroesse: was zuerst aufgeloest wird, ist zuerst
+        # ueberpruefbar und damit am interessantesten.
+        "resolve_time": post.get("scheduled_resolve_time") or "",
     }
 
 
@@ -352,17 +365,10 @@ def lade_fragen():
 
                 eintrag = normalisiere(post)
                 if eintrag is None:
-                    ohne_median += 1
                     continue
+                if eintrag["market_p"] is None:
+                    ohne_median += 1
                 fragen.append(eintrag)
-
-            # Abbruch nach der ersten Seite, wenn dort KEINE einzige Frage
-            # einen Median hatte. Fehlt der Zugriff, liefern die restlichen
-            # neun Seiten garantiert dasselbe - das waeren neun nutzlose
-            # Anfragen pro Lauf, und Metaculus antwortet auf zu viele
-            # Anfragen mit HTTP 429.
-            if seite == 0 and not fragen and posts:
-                break
 
             if not weitere:
                 break
@@ -372,14 +378,16 @@ def lade_fragen():
               f"Quelle wird uebersprungen.", file=sys.stderr)
         return []
 
-    # Erst am Ende urteilen: einzelne Fragen ohne Median sind normal (Stichtag
-    # oder Kontingent), aber KEINE einzige verwertbare Frage deutet auf ein
-    # groesseres Problem hin - fehlender Zugriff oder geaendertes Schema.
-    if not fragen and erster_post is not None:
+    # Fragen ohne Median werden jetzt mitgenommen, nicht mehr verworfen. Fehlt
+    # der Median AUSNAHMSLOS, ist das trotzdem meldenswert: entweder fehlt die
+    # Zugriffsstufe oder das Schema hat sich geaendert. Der Unterschied steht
+    # in melde_fehlenden_median.
+    mit_median = len(fragen) - ohne_median
+    if mit_median == 0 and erster_post is not None:
         melde_fehlenden_median(erster_post)
 
-    print(f"  {QUELLE}: {len(fragen)} Fragen mit sichtbarem Community-Median "
-          f"({ohne_median} ohne, verworfen).")
+    print(f"  {QUELLE}: {len(fragen)} Fragen geladen "
+          f"({mit_median} mit Community-Median, {ohne_median} ohne).")
     return fragen
 
 

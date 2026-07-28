@@ -6,200 +6,271 @@
 <title>AI Forecasting: African Economic and Political Development</title>
 <style>
 :root {
-  --bg: #f6f7f9;
+  --bg: #f7f8fa;
   --card: #ffffff;
-  --text: #14171a;
-  --muted: #656d76;
-  --line: #e1e4e8;
-  --line-strong: #c9cfd6;
+  --text: #101418;
+  --text-soft: #4a545e;
+  --muted: #79838d;
+  --line: #e4e7eb;
+  --line-soft: #eef0f3;
   --accent: #1f6feb;
-  --up: #1a7f5a;
-  --down: #b3341f;
-  --flat: #656d76;
-  --bar: #d7dce1;
+  --up: #12805c;
+  --down: #c0392b;
+  --flat: #79838d;
+  --bar: #e4e7eb;
   --bar-fill: #1f6feb;
+  --schatten: 0 1px 2px rgba(16, 20, 24, .05), 0 1px 3px rgba(16, 20, 24, .04);
+  --schatten-hover: 0 3px 10px rgba(16, 20, 24, .09);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0d1117;
-    --card: #161b22;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --line: #30363d;
-    --line-strong: #444c56;
-    --accent: #58a6ff;
-    --up: #3fb950;
-    --down: #f85149;
-    --flat: #8b949e;
-    --bar: #30363d;
-    --bar-fill: #58a6ff;
+    --bg: #0c0f13;
+    --card: #151a20;
+    --text: #e9eef4;
+    --text-soft: #b3bdc7;
+    --muted: #8592a0;
+    --line: #262d36;
+    --line-soft: #1d232b;
+    --accent: #5aa2ff;
+    --up: #3ecf8e;
+    --down: #ff6b5e;
+    --flat: #8592a0;
+    --bar: #262d36;
+    --bar-fill: #5aa2ff;
+    --schatten: 0 1px 2px rgba(0, 0, 0, .4);
+    --schatten-hover: 0 3px 12px rgba(0, 0, 0, .55);
   }
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  padding: 2rem 1rem 3rem;
+  padding: 2.25rem 1.15rem 3rem;
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Inter zuerst, aber ohne Web-Font-Download: wer sie installiert hat,
+     bekommt sie, alle anderen den System-Stack. Kein externer Request. */
+  font-family: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1140px; margin: 0 auto; }
-header { margin-bottom: 1.4rem; }
-h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 .4rem; letter-spacing: -.01em; }
-.sub { color: var(--muted); margin: 0 0 .5rem; max-width: 60ch; }
-.stamp { color: var(--muted); font-size: .85rem; margin: 0; }
+.wrap { max-width: 1160px; margin: 0 auto; }
 
-/* Tab-Leiste */
+/* Kopf */
+header { margin-bottom: 1.5rem; }
+h1 {
+  font-size: 1.55rem;
+  line-height: 1.2;
+  letter-spacing: -.021em;
+  font-weight: 700;
+  margin: 0 0 .35rem;
+}
+.sub {
+  color: var(--text-soft);
+  margin: 0 0 1rem;
+  max-width: 62ch;
+  font-size: .93rem;
+}
+.stats { display: flex; flex-wrap: wrap; gap: .5rem; }
+.stat {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: .45rem .75rem;
+  box-shadow: var(--schatten);
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+}
+.stat-value { font-size: 1.02rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-label {
+  font-size: .69rem;
+  text-transform: uppercase;
+  letter-spacing: .065em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Tabs als Pills */
 .tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: .4rem;
-  margin: 0 0 1.4rem;
-  padding-bottom: .9rem;
-  border-bottom: 1px solid var(--line);
+  gap: .38rem;
+  margin: 1.35rem 0 1.15rem;
 }
 .tab {
   font: inherit;
-  font-size: .87rem;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--line-strong);
+  font-size: .845rem;
+  font-weight: 550;
+  color: var(--text-soft);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  padding: .34rem .85rem;
+  padding: .34rem .8rem;
   cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
 }
-.tab:hover { color: var(--text); }
+.tab:hover { border-color: var(--muted); color: var(--text); }
 .tab.active {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
 }
-.tab .count { opacity: .65; margin-left: .3rem; font-variant-numeric: tabular-nums; }
+.tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
 
-/* Karten-Grid */
+/* Grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: .9rem;
+  gap: .8rem;
   align-items: start;
 }
-@media (max-width: 950px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 980px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 660px) { .grid { grid-template-columns: 1fr; } }
 
+/* Karte */
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 1rem 1.05rem 1.1rem;
-  display: flex;
-  flex-direction: column;
+  border-radius: 11px;
+  padding: 1rem;
+  box-shadow: var(--schatten);
+  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
 }
-.card-head { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .7rem; }
+.card:hover {
+  box-shadow: var(--schatten-hover);
+  border-color: var(--muted);
+  transform: translateY(-1px);
+}
+.card-head { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .6rem; }
 .badge, .tag {
-  font-size: .66rem;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  font-weight: 600;
-  color: var(--muted);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: .13rem .5rem;
-}
-.tag { border-style: dashed; }
-.question { font-weight: 600; margin: 0 0 .95rem; font-size: .97rem; }
-
-/* Benchmark mit Balken */
-.bench-row { display: flex; align-items: baseline; justify-content: space-between; }
-.bench-label, .ai-label {
-  font-size: .7rem;
+  font-size: .655rem;
   text-transform: uppercase;
   letter-spacing: .06em;
+  font-weight: 650;
   color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .12rem .48rem;
+  white-space: nowrap;
 }
-.bench-value { font-size: 1.65rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tag { text-transform: none; letter-spacing: .01em; font-size: .7rem; }
+.question {
+  font-weight: 600;
+  font-size: .94rem;
+  line-height: 1.38;
+  margin: 0 0 .85rem;
+  letter-spacing: -.005em;
+}
+
+/* Zahlenblock */
+.metric { display: flex; align-items: baseline; gap: .5rem; }
+.metric-label {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .065em;
+  color: var(--muted);
+  font-weight: 650;
+  min-width: 4.6rem;
+}
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+.metric-ai .metric-value { font-size: 1.3rem; }
 .bar {
   height: 5px;
   background: var(--bar);
   border-radius: 999px;
   overflow: hidden;
-  margin: .35rem 0 .9rem;
+  margin: .4rem 0 .85rem;
 }
 .bar-fill { height: 100%; background: var(--bar-fill); border-radius: 999px; }
+.bar-leer { margin-bottom: .85rem; }
 
-/* AI-Block */
-.ai { border-top: 1px solid var(--line); padding-top: .75rem; }
-.ai-row { display: flex; align-items: baseline; gap: .55rem; }
-.ai-value { font-size: 1.2rem; font-weight: 650; font-variant-numeric: tabular-nums; }
-.diff { font-size: .87rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.diff { font-size: .84rem; font-weight: 650; font-variant-numeric: tabular-nums; }
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--flat); }
-.meta { margin: .45rem 0 0; font-size: .78rem; color: var(--muted); }
-.pending {
-  border-top: 1px solid var(--line);
-  padding-top: .75rem;
-  margin: 0;
-  font-size: .8rem;
+
+/* Leere Zustaende: ruhig, aber nie eine Luecke */
+.leer {
+  font-size: .82rem;
   color: var(--muted);
   font-style: italic;
 }
+.metric-ai { border-top: 1px solid var(--line-soft); padding-top: .7rem; }
+.meta { margin: .4rem 0 0; font-size: .755rem; color: var(--muted); }
 
-details { margin-top: .8rem; border-top: 1px solid var(--line); padding-top: .7rem; }
-summary { cursor: pointer; font-size: .82rem; color: var(--accent); }
-details p { margin: .6rem 0 0; font-size: .88rem; }
+details { margin-top: .7rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
+summary {
+  cursor: pointer;
+  font-size: .78rem;
+  color: var(--accent);
+  font-weight: 550;
+}
+details p { margin: .55rem 0 0; font-size: .85rem; color: var(--text-soft); }
 details .criteria {
-  margin: .6rem 0 0;
-  font-size: .8rem;
+  margin: .55rem 0 0;
+  font-size: .78rem;
   color: var(--muted);
   white-space: pre-wrap;
 }
 
 footer {
-  margin-top: 2.5rem;
-  padding-top: 1.2rem;
+  margin-top: 2.25rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--line);
-  font-size: .85rem;
+  font-size: .8rem;
   color: var(--muted);
-  max-width: 75ch;
+  max-width: 80ch;
 }
 footer a { color: var(--accent); }
+footer p { margin: 0 0 .35rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Claude&rsquo;s probability estimates next to prediction-market prices
-  and community forecasts. The model never sees the benchmark.</p>
-  <p class="stamp">Last updated 28 July 2026, 16:33 UTC &middot; 10 open questions
-  &middot; 4 with an AI forecast</p>
+  <p class="sub">Claude estimates the probability of open questions on African
+  politics and economics, without ever seeing the benchmark it is compared against.</p>
+  <div class="stats">
+    <div class="stat"><span class="stat-value">17</span><span class="stat-label">Questions</span></div>
+    <div class="stat"><span class="stat-value">2</span><span class="stat-label">Sources</span></div>
+    <div class="stat"><span class="stat-value">15 pts</span><span class="stat-label">Avg. gap</span></div>
+  </div>
 </header>
 
-<nav class="tabs"><button class="tab active" data-filter="all">All<span class="count">10</span></button>
-<button class="tab" data-filter="elections">Elections<span class="count">8</span></button>
+<nav class="tabs"><button class="tab active" data-filter="all">All<span class="count">17</span></button>
+<button class="tab" data-filter="elections">Elections<span class="count">10</span></button>
+<button class="tab" data-filter="security">Security<span class="count">3</span></button>
 <button class="tab" data-filter="diplomacy">Diplomacy<span class="count">1</span></button>
-<button class="tab" data-filter="economy">Economy<span class="count">1</span></button></nav>
+<button class="tab" data-filter="economy">Economy<span class="count">2</span></button>
+<button class="tab" data-filter="other">Other<span class="count">1</span></button></nav>
 
 <div class="grid">
 <article class="card" data-category="diplomacy">
   <div class="card-head">
     <span class="badge">Polymarket</span>
-    <span class="tag">Somaliland</span>
+    <span class="tag">🌍 Somaliland</span>
   </div>
   <p class="question">Will Somaliland join the Abraham Accords before 2027?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">24%</span>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">24%</span>
   </div>
   <div class="bar"><div class="bar-fill" style="width: 24%"></div></div>
-  <div class="ai">
-    <div class="ai-row">
-      <span class="ai-label">Claude</span>
-      <span class="ai-value">62%</span>
-      <span class="diff up">&#9650; 38 pts</span>
-    </div>
-    <p class="meta">Confidence: medium &middot; 3 web searches</p>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="metric-value">62%</span>
+    <span class="diff up">&#9650; 38 pts</span>
   </div>
+  <p class="meta">Confidence: medium &middot; 3 web searches</p>
   <details>
     <summary>Details</summary>
     <p>On December 26, 2025, Israel and Somaliland signed a joint declaration of mutual recognition explicitly framed &#x27;in the spirit of the Abraham Accords,&#x27; and Somaliland&#x27;s president pledged to formally join the Accords. However, the resolution requires a formal normalization agreement clearly attributed to the Abraham Accords, not merely a pledge. Given the strong momentum, existing diplomatic ties, and stated intent from both sides, a formal Abraham Accords signing before end of 2026 is likely but not yet confirmed, and Somaliland&#x27;s ambiguous international legal status may complicate formal accession.</p>
@@ -213,22 +284,20 @@ The resolution source will be official government statements, however a consensu
 <article class="card" data-category="elections">
   <div class="card-head">
     <span class="badge">Polymarket</span>
-    <span class="tag">Guinea-Bissau</span>
+    <span class="tag">🇬🇼 Guinea-Bissau</span>
   </div>
   <p class="question">Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">17%</span>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">17%</span>
   </div>
   <div class="bar"><div class="bar-fill" style="width: 17%"></div></div>
-  <div class="ai">
-    <div class="ai-row">
-      <span class="ai-label">Claude</span>
-      <span class="ai-value">5%</span>
-      <span class="diff down">&#9660; 12 pts</span>
-    </div>
-    <p class="meta">Confidence: high &middot; 3 web searches</p>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="metric-value">5%</span>
+    <span class="diff down">&#9660; 12 pts</span>
   </div>
+  <p class="meta">Confidence: high &middot; 3 web searches</p>
   <details>
     <summary>Details</summary>
     <p>Embaló was ousted in a military coup on November 26, 2025, one day before official results were due. Guinea-Bissau&#x27;s electoral commission announced it could no longer complete the election after soldiers seized and destroyed all voting data and servers. A military transitional government was installed, making it extremely unlikely the market resolves in Embaló&#x27;s favor unless the election is somehow reconstituted — which seems very unlikely given the destroyed records and changed political landscape.</p>
@@ -244,22 +313,20 @@ This market will resolve based on the result of the election as indicated by a c
 <article class="card" data-category="elections">
   <div class="card-head">
     <span class="badge">Polymarket</span>
-    <span class="tag">Morocco</span>
+    <span class="tag">🇲🇦 Morocco</span>
   </div>
   <p class="question">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">90%</span>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">90%</span>
   </div>
   <div class="bar"><div class="bar-fill" style="width: 90%"></div></div>
-  <div class="ai">
-    <div class="ai-row">
-      <span class="ai-label">Claude</span>
-      <span class="ai-value">82%</span>
-      <span class="diff down">&#9660; 8 pts</span>
-    </div>
-    <p class="meta">Confidence: medium &middot; 3 web searches</p>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="metric-value">82%</span>
+    <span class="diff down">&#9660; 8 pts</span>
   </div>
+  <p class="meta">Confidence: medium &middot; 3 web searches</p>
   <details>
     <summary>Details</summary>
     <p>Morocco&#x27;s parliamentary elections are scheduled for September 23, 2026. Akhannouch has already announced he will not seek re-election as RNI party leader, effectively ending his path to remain PM. Post-election government formation in Morocco typically takes several weeks, making it highly likely a new PM is appointed before December 31, 2026. The main downside risk is a prolonged coalition negotiation pushing the formal transfer past year-end.</p>
@@ -275,22 +342,20 @@ The resolution source for this market will be official information from Aziz Akh
 <article class="card" data-category="elections">
   <div class="card-head">
     <span class="badge">Polymarket</span>
-    <span class="tag">Ethiopia</span>
+    <span class="tag">🇪🇹 Ethiopia</span>
   </div>
   <p class="question">Will Abiy Ahmed be the next Prime Minister of Ethiopia?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">94%</span>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">94%</span>
   </div>
   <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
-  <div class="ai">
-    <div class="ai-row">
-      <span class="ai-label">Claude</span>
-      <span class="ai-value">97%</span>
-      <span class="diff flat">&#9650; 3 pts</span>
-    </div>
-    <p class="meta">Confidence: high &middot; 3 web searches</p>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="metric-value">97%</span>
+    <span class="diff flat">&#9650; 3 pts</span>
   </div>
+  <p class="meta">Confidence: high &middot; 3 web searches</p>
   <details>
     <summary>Details</summary>
     <p>Abiy Ahmed&#x27;s Prosperity Party won 438 of 501 contested seats in the June 1, 2026 general elections, securing a dominant parliamentary majority. Multiple credible sources confirm Abiy is set to be sworn in for another term in early October 2026. The only residual uncertainty is a small risk of an unexpected constitutional change (e.g., switch to presidential system) or unforeseen event before the swearing-in.</p>
@@ -308,15 +373,159 @@ The primary resolution source for this market will be official information from 
 <article class="card" data-category="elections">
   <div class="card-head">
     <span class="badge">Polymarket</span>
-    <span class="tag">Central African Republic</span>
+    <span class="tag">🌍 Somaliland</span>
   </div>
-  <p class="question">Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">99%</span>
+  <p class="question">Will there be no Somaliland parliamentary election before 2027?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">94%</span>
   </div>
-  <div class="bar"><div class="bar-fill" style="width: 99%"></div></div>
-  <p class="pending">No AI forecast yet</p>
+  <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.
+
+This market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. 
+
+If no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to &quot;No election before 2027&quot;.
+
+If an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
+
+In the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.
+
+This market&#x27;s resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. 
+
+This market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net).</p>
+  </details>
+</article>
+<article class="card" data-category="other">
+  <div class="card-head">
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇨🇬 Congo</span>
+  </div>
+  <p class="question">Will the Republic of the Congo have an Ebola case in 2026?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">16%</span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: 16%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This market will resolve to &quot;Yes&quot; if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+
+Any active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.
+
+The primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice.</p>
+  </details>
+</article>
+<article class="card" data-category="elections">
+  <div class="card-head">
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇨🇬 Congo</span>
+  </div>
+  <p class="question">Nguesso out as President of the Republic of the Congo by December 31, 2026?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">13%</span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: 13%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
+
+An announcement of Denis Sassou Nguesso&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
+
+If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
+
+The resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used.</p>
+  </details>
+</article>
+<article class="card" data-category="economy">
+  <div class="card-head">
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇿🇦 South Africa</span>
+  </div>
+  <p class="question">U.S. agrees to a new trade deal with &quot;South Africa&quot; before 2027?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">12%</span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: 12%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This market will resolve to &quot;Yes&quot; if a free trade agreement with the specified country or entity becomes law in the United States by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+
+This includes both agreements that become law through Senate ratification and Presidential approval, or through the enactment of a Congressional-Executive Agreement signed into law by the President.
+
+The resolution source will be a consensus of credible reporting.</p>
+  </details>
+</article>
+<article class="card" data-category="elections">
+  <div class="card-head">
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇬🇼 Guinea-Bissau</span>
+  </div>
+  <p class="question">Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">10%</span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: 10%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">Parliamentary elections are scheduled to be held in Guinea-Bissau on November 23, 2025.
+
+This market will resolve to the political party or coalition that wins the greatest number of seats in the National People&#x27;s Assembly of Guinea-Bissau.
+
+If voting in the National People&#x27;s Assembly of Guinea-Bissau election does not occur by December 31, 2026, this market will resolve to &quot;Other&quot;.
+
+In the event of a tie between this party or coalition and any other for the most seats won, this market will be resolved in favor of the party or coalition whose listed abbreviation or name appears first in alphabetical order.
+
+This market&#x27;s resolution will be based solely on the number of seats won by the named party or coalition in the National People&#x27;s Assembly.
+
+This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/).</p>
+  </details>
+</article>
+<article class="card" data-category="elections">
+  <div class="card-head">
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇨🇫 Central African Republic</span>
+  </div>
+  <p class="question">Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">6%</span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: 6%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
   <details>
     <summary>Details</summary>
 
@@ -338,119 +547,18 @@ This market will resolve based on the result of the election as indicated by a c
 <article class="card" data-category="elections">
   <div class="card-head">
     <span class="badge">Polymarket</span>
-    <span class="tag">Somaliland</span>
-  </div>
-  <p class="question">Will there be no Somaliland parliamentary election before 2027?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">94%</span>
-  </div>
-  <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
-  <p class="pending">No AI forecast yet</p>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.
-
-This market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. 
-
-If no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to &quot;No election before 2027&quot;.
-
-If an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
-
-In the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.
-
-This market&#x27;s resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. 
-
-This market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net).</p>
-  </details>
-</article>
-<article class="card" data-category="elections">
-  <div class="card-head">
-    <span class="badge">Polymarket</span>
-    <span class="tag">Congo</span>
-  </div>
-  <p class="question">Nguesso out as President of the Republic of the Congo by December 31, 2026?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">13%</span>
-  </div>
-  <div class="bar"><div class="bar-fill" style="width: 13%"></div></div>
-  <p class="pending">No AI forecast yet</p>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
-
-An announcement of Denis Sassou Nguesso&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
-
-If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
-
-The resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used.</p>
-  </details>
-</article>
-<article class="card" data-category="economy">
-  <div class="card-head">
-    <span class="badge">Polymarket</span>
-    <span class="tag">South Africa</span>
-  </div>
-  <p class="question">U.S. agrees to a new trade deal with &quot;South Africa&quot; before 2027?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">12%</span>
-  </div>
-  <div class="bar"><div class="bar-fill" style="width: 12%"></div></div>
-  <p class="pending">No AI forecast yet</p>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">This market will resolve to &quot;Yes&quot; if a free trade agreement with the specified country or entity becomes law in the United States by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
-
-This includes both agreements that become law through Senate ratification and Presidential approval, or through the enactment of a Congressional-Executive Agreement signed into law by the President.
-
-The resolution source will be a consensus of credible reporting.</p>
-  </details>
-</article>
-<article class="card" data-category="elections">
-  <div class="card-head">
-    <span class="badge">Polymarket</span>
-    <span class="tag">Guinea-Bissau</span>
-  </div>
-  <p class="question">Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">10%</span>
-  </div>
-  <div class="bar"><div class="bar-fill" style="width: 10%"></div></div>
-  <p class="pending">No AI forecast yet</p>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">Parliamentary elections are scheduled to be held in Guinea-Bissau on November 23, 2025.
-
-This market will resolve to the political party or coalition that wins the greatest number of seats in the National People&#x27;s Assembly of Guinea-Bissau.
-
-If voting in the National People&#x27;s Assembly of Guinea-Bissau election does not occur by December 31, 2026, this market will resolve to &quot;Other&quot;.
-
-In the event of a tie between this party or coalition and any other for the most seats won, this market will be resolved in favor of the party or coalition whose listed abbreviation or name appears first in alphabetical order.
-
-This market&#x27;s resolution will be based solely on the number of seats won by the named party or coalition in the National People&#x27;s Assembly.
-
-This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/).</p>
-  </details>
-</article>
-<article class="card" data-category="elections">
-  <div class="card-head">
-    <span class="badge">Polymarket</span>
-    <span class="tag">Zambia</span>
+    <span class="tag">🇿🇲 Zambia</span>
   </div>
   <p class="question">Will UPND win the second-most seats in the 2026 Zambia National Assembly Election?</p>
-  <div class="bench-row">
-    <span class="bench-label">Market</span>
-    <span class="bench-value">2%</span>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">2%</span>
   </div>
   <div class="bar"><div class="bar-fill" style="width: 2%"></div></div>
-  <p class="pending">No AI forecast yet</p>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
   <details>
     <summary>Details</summary>
 
@@ -471,17 +579,169 @@ This market&#x27;s resolution will be based solely on the number of seats won by
 This market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government.</p>
   </details>
 </article>
+<article class="card" data-category="elections">
+  <div class="card-head">
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇿🇲 Zambia</span>
+  </div>
+  <p class="question">Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?</p>
+  <div class="metric">
+    <span class="metric-label">Market</span>
+    <span class="metric-value">0%</span>
+  </div>
+  <div class="bar"><div class="bar-fill" style="width: 0%"></div></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.
+
+This market will resolve to the political party that wins the greatest number of seats in the National Assembly of Zambia as a result of this election.
+
+The number of seats will include all members of the National Assembly of Zambia serving as a result of this election, including appointed members and those elected by proportional representation.
+
+If the results of the specified election are not definitively known by July 31, 2027, this market will resolve to &quot;Other&quot;.
+
+In the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party whose name as listed in this market appears first in alphabetical order.
+
+A constituency-elected member will count towards the party they registered to contest the election with. A member elected by proportional representation will count towards the party whose list they were elected from. A member appointed by the President will count towards the party of their personal affiliation if such affiliation is clear. If their affiliation is ambiguous or unclear, they will count towards the party of the President.
+
+This market&#x27;s resolution will be based solely on the number of seats won by the named party. Independents will not count towards any party.
+
+This market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government.</p>
+  </details>
+</article>
+<article class="card" data-category="elections">
+  <div class="card-head">
+    <span class="badge">Metaculus</span>
+    <span class="tag">🇿🇲 Zambia</span>
+  </div>
+  <p class="question">Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia&#x27;s 2026 presidential election?</p>
+  <div class="metric">
+    <span class="metric-label">Community</span>
+    <span class="leer">Community forecast pending</span>
+  </div>
+  <div class="bar-leer"></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This question resolves as **Yes** if President Hakainde Hichilema receives 65% or more of the first round votes in the [2026 Zambian presidential election](https://en.wikipedia.org/wiki/2026_Zambian_general_election). The question resolves based on [official results](https://www.elections.org.zm/) or [credible sources](https://www.metaculus.com/faq/#definitions).&amp;#x20;</p>
+  </details>
+</article>
+<article class="card" data-category="security">
+  <div class="card-head">
+    <span class="badge">Metaculus</span>
+    <span class="tag">🇿🇦 South Africa</span>
+  </div>
+  <p class="question">Will Israel be found guilty in South Africa&#x27;s genocide case by the ICJ before 2027?</p>
+  <div class="metric">
+    <span class="metric-label">Community</span>
+    <span class="leer">Community forecast pending</span>
+  </div>
+  <div class="bar-leer"></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This question will resolve as **Yes** if, before January 1, 2027, the International Court of Justice finds that Israel has violated international law in South Africa&#x27;s genocide case. If this does not happen before January 1, 2027, this question will resolve as **No**.</p>
+  </details>
+</article>
+<article class="card" data-category="security">
+  <div class="card-head">
+    <span class="badge">Metaculus</span>
+    <span class="tag">🇸🇩 Sudan</span>
+  </div>
+  <p class="question">Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?</p>
+  <div class="metric">
+    <span class="metric-label">Community</span>
+    <span class="leer">Community forecast pending</span>
+  </div>
+  <div class="bar-leer"></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This question resolves **YES** if **either of the first two qualifying IPC Sudan acute food insecurity products** classifies **at least one area in Famine (IPC Phase 5)** at the area level, for any analysis or projection period falling on or after 1 June 2026. It resolves **NO** if the first two qualifying products both make the relevant area-level classifications but neither classifies any area in Famine (IPC Phase 5) — or if only one qualifying product has been published by 31 December 2026 and it classifies no area in Famine.
+
+A &quot;qualifying IPC Sudan acute food insecurity product&quot; is an IPC-produced Sudan product (a full IPC analysis, an IPC Global Initiative Special Snapshot, or an IPC Alert), published on the IPC website (ipcinfo.org) **after 14 May 2026**, that (a) makes area-level IPC phase classifications for Sudan and (b) whose current period or a formally classified projection period covers any time on or after 1 June 2026 (the June–September 2026 lean season or later). The &quot;first two qualifying products&quot; are the first two such products in publication order. A YES resolves as soon as either of them classifies an area in Famine.
+
+A Famine determination counts if it is made **either** by the IPC analysis team **or** by the Famine Review Committee (FRC) within that product. A **formal projected Famine classification** (an IPC Phase 5 / Famine classification assigned to a projection period) counts. An area flagged only as **&quot;at risk of Famine&quot;** does **not** count — IPC states risk of Famine is not a classification. Household-level IPC Phase 5 (Catastrophe) population figures do **not** count; an area-level Famine classification is required. Any IPC analysis unit — a town, locality, or IDP settlement — classified in Phase 5 Famine satisfies &quot;at least one area&quot;.</p>
+  </details>
+</article>
+<article class="card" data-category="security">
+  <div class="card-head">
+    <span class="badge">Metaculus</span>
+    <span class="tag">🇸🇩 Sudan</span>
+  </div>
+  <p class="question">Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?</p>
+  <div class="metric">
+    <span class="metric-label">Community</span>
+    <span class="leer">Community forecast pending</span>
+  </div>
+  <div class="bar-leer"></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This question resolves **YES** if, between 1 January 2026 and 31 December 2026 (UTC), any of the following entities publishes a Sudan-war total **excess-mortality estimate (direct + indirect)** with a **central / point estimate exceeding 200,000 deaths**, applied at **nationwide** scope (i.e., covering &quot;Sudan&quot;, &quot;the Sudan war&quot;, or &quot;the conflict&quot; - not a single state, single city, or single event):
+
+1. A peer-reviewed article in a PubMed-indexed medical or epidemiological journal (the *Lancet* family, *BMJ* family, *NEJM*, *JAMA*, *PLOS*, *Nature*, *Science*, *Conflict and Health*, or similar);
+2. A working paper or preprint by a named academic research group with a university affiliation, hosted on SSRN, medRxiv, ResearchGate, or an institutional site (e.g., LSHTM Sudan Research Group, Yale Humanitarian Research Lab, UCLouvain CRED);
+3. A formal publication of a UN body (UN Independent International Fact-Finding Mission for Sudan, OHCHR, OCHA, WHO, UNICEF) presenting the figure as the body&#x27;s own estimate, not a citation of others;
+4. A formal report or press release with stated methodology from a major international NGO with epidemiological capacity (MSF, ICRC, IRC, Save the Children, or similar);
+5. A national government report (US State Department, UK FCDO, EU EUAA, or similar) presenting its own modelled figure (not a citation);
+6. A documented release or revision of the [CRED EM-DAT](https://www.emdat.be/) or [Uppsala UCDP](https://ucdp.uu.se/) database that lists a Sudan-war cumulative total exceeding the threshold, accompanied by a public report or release note.
+
+This question resolves **NO** if no such publication appears by 31 December 2026 (UTC).</p>
+  </details>
+</article>
+<article class="card" data-category="economy">
+  <div class="card-head">
+    <span class="badge">Metaculus</span>
+    <span class="tag">🇸🇳 Senegal</span>
+  </div>
+  <p class="question">Will Senegal formally restructure its external debt before 2028?</p>
+  <div class="metric">
+    <span class="metric-label">Community</span>
+    <span class="leer">Community forecast pending</span>
+  </div>
+  <div class="bar-leer"></div>
+  <div class="metric metric-ai">
+    <span class="metric-label">Claude</span>
+    <span class="leer">No AI forecast yet</span>
+  </div>
+  <details>
+    <summary>Details</summary>
+
+    <p class="criteria">This question will resolve as Yes if, before January 1, 2028, Senegal announces a formal debt restructuring agreement.
+
+The question may resolve according to official announcements by the Senegalese government or consensus reporting in reputable financial journals like the Wall Street Journal or Financial Times.</p>
+  </details>
+</article>
 </div>
 
 <footer>
-<p>The model never sees the benchmark: <code>forecast.py</code> passes only the
-question and its resolution criteria, so the estimate is independent rather than
-a restatement of the market. Forecasts are produced with the Claude API
-(<code>claude-sonnet-4-6</code>) and may use web search for recent events.</p>
-<p>Questions and benchmarks on this page come from Polymarket. Market prices
-reflect real money at stake; community forecasts are the median of volunteer
-predictions and are labelled separately. Source and method:
-<a href="https://github.com/niklaswenzin/africa-ai-forecasting">https://github.com/niklaswenzin/africa-ai-forecasting</a></p>
+<p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
+web search; the benchmark is never passed into the prompt, so the estimate is
+independent rather than a restatement of the market.</p>
+<p>Benchmarks from Metaculus and Polymarket &middot; last updated 28 July 2026, 17:18 UTC &middot;
+<a href="https://github.com/niklaswenzin/africa-ai-forecasting">source and method</a></p>
 </footer>
 </div>
 
