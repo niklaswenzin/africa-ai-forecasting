@@ -158,6 +158,23 @@ def hole_event(market):
     return f"einzel-{market['id']}", market.get("question", "")
 
 
+def hole_kategorie_hinweis(market):
+    """Gibt "elections" zurueck, wenn die API die Frage als Wahl ausweist, sonst None.
+
+    Das Event-Feld electionType ist bei Wahlfragen mit Werten wie "Presidential",
+    "National Assembly" oder "Parliamentary" belegt und bei allen anderen leer.
+    Wo es steht, ist die Kategorie ohne Raten klar - das ist verlaesslicher als
+    jedes Keyword im Fragetext. fetch_markets.py nimmt diesen Hinweis vorrangig
+    und faellt nur sonst auf Keywords zurueck.
+
+    Es ist bewusst nur ein Hinweis und keine fertige Kategorie: die Zuordnung
+    selbst gehoert zentral in fetch_markets.py, damit alle Quellen dieselben
+    Regeln bekommen.
+    """
+    event = (market.get("events") or [{}])[0]
+    return "elections" if event.get("electionType") else None
+
+
 def normalisiere(market):
     """Macht aus einem rohen Polymarket-Objekt einen Eintrag im gemeinsamen Format.
 
@@ -177,6 +194,7 @@ def normalisiere(market):
         "volume": hole_volumen(market),
         "event_id": f"{QUELLE}-{event_id}",
         "event_title": event_titel,
+        "category_hint": hole_kategorie_hinweis(market),
     }
 
 
@@ -186,9 +204,9 @@ def lade_fragen():
     """Laedt alle offenen Polymarket-Fragen im gemeinsamen Format.
 
     Gemeinsames Format je Eintrag: id, source, question, market_p,
-    benchmark_type, description, volume, event_id, event_title. Jede Quelle in
-    diesem Projekt stellt genau diese Funktion bereit, damit fetch_markets.py
-    sie gleich behandeln kann.
+    benchmark_type, description, volume, event_id, event_title, category_hint.
+    Jede Quelle in diesem Projekt stellt genau diese Funktion bereit, damit
+    fetch_markets.py sie gleich behandeln kann.
 
     Eine einzelne Abfrage erreicht wegen des Offset-Deckels nur ~2000 Markets,
     und die serverseitige Volumen-Sortierung ist ueber die Seiten hinweg

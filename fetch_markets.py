@@ -135,6 +135,39 @@ SPORT_KEYWORDS = [
 ]
 
 
+# Kategorien fuer die Tab-Leiste auf der Seite. Die Reihenfolge in dieser Liste
+# ist die Pruefreihenfolge und damit inhaltlich entscheidend, nicht bloss
+# kosmetisch: die erste passende Kategorie gewinnt.
+#
+# security steht vorn, weil Fragen wie "Wahl nach dem Putsch in Guinea-Bissau"
+# beide Wortfelder treffen. Der Putsch ist dort das bestimmende Ereignis, die
+# Wahl nur sein Gegenstand - solche Fragen gehoeren unter security.
+# economy steht hinten, weil Begriffe wie "trade" oder "deal" auch in
+# politischen Fragen vorkommen und sonst zu viel einsammeln wuerden.
+#
+# Teilstring-Suche, nicht Wortgrenzen: so greift "elect" auch in "election",
+# "elections", "electoral" und "re-elect", ohne dass jede Form aufgelistet
+# werden muss.
+KATEGORIE_KEYWORDS = [
+    ("security", [
+        "war", "coup", "ceasefire", "conflict", "militant", "insurgen",
+        "rebel", "junta", "terror", "attack", "invasion", "troops",
+        "military", "violence", "unrest", "hostage", "genocide",
+    ]),
+    ("elections", [
+        "elect", "president", "parliament", "vote", "ballot", "candidate",
+        "prime minister", "seats", "referendum", "poll", "inaugurat",
+    ]),
+    ("economy", [
+        "gdp", "inflation", "imf", "world bank", "currency", "trade",
+        "debt", "default", "tariff", "export", "import", "oil price",
+        "central bank", "interest rate", "recession", "bailout", "budget",
+    ]),
+]
+
+KATEGORIE_STANDARD = "other"   # wenn keine Regel greift
+
+
 # --- Quellen abfragen ------------------------------------------------------
 
 def lade_alle_quellen():
@@ -213,6 +246,32 @@ def land_von_frage(frage):
         if re.search(r"(?<![a-z])" + re.escape(wort) + r"(?![a-z])", text):
             return land
     return frage.get("id")
+
+
+def bestimme_kategorie(frage):
+    """Ordnet eine Frage einer der Kategorien zu: elections, economy, security, other.
+
+    Zwei Stufen. Erstens der Hinweis der Quelle: Polymarket markiert Wahlfragen
+    ueber das Feld electionType, und wo die API es selbst weiss, raten wir nicht
+    nach. Zweitens, und nur wenn kein Hinweis vorliegt, die Keyword-Regeln in
+    der Reihenfolge von KATEGORIE_KEYWORDS.
+
+    Gesucht wird in Fragetext UND Event-Titel. Der Event-Titel traegt oft den
+    Zusammenhang, den die einzelne Frage weglaesst: "Will X win the most seats?"
+    allein sagt nichts, das zugehoerige Event heisst aber "Zambia National
+    Assembly Election Winner".
+    """
+    hinweis = frage.get("category_hint")
+    if hinweis:
+        return hinweis
+
+    text = (frage.get("question", "") + " " + frage.get("event_title", "")).lower()
+
+    for kategorie, keywords in KATEGORIE_KEYWORDS:
+        if any(wort in text for wort in keywords):
+            return kategorie
+
+    return KATEGORIE_STANDARD
 
 
 def ist_moderat(frage):
@@ -343,6 +402,7 @@ def baue_eintrag(frage):
         "benchmark_type": frage["benchmark_type"],
         "africa": True,
         "country": land_von_frage(frage),
+        "category": bestimme_kategorie(frage),
         "event_id": frage.get("event_id"),
         "event_title": frage.get("event_title", ""),
         "description": frage.get("description", ""),
