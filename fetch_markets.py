@@ -535,6 +535,43 @@ def baue_eintrag(frage):
 
 # --- Hauptablauf -----------------------------------------------------------
 
+def quellen_zaehlung(eintraege):
+    """Zaehlt, wie viele Fragen je Quelle in einer Eintragsliste stehen."""
+    zaehler = {}
+    for eintrag in eintraege:
+        name = eintrag.get("source", "unknown")
+        zaehler[name] = zaehler.get(name, 0) + 1
+    return zaehler
+
+
+def quelle_verschwunden(neu, alt):
+    """Gibt die Quellen zurueck, die vorher Fragen hatten und jetzt keine mehr.
+
+    Der Schutz "schreibe nichts, wenn gar keine Frage da ist" reichte nicht:
+    faellt EINE von mehreren Quellen aus, kommen immer noch Fragen zusammen,
+    und die Datei wird ueberschrieben - die Fragen der ausgefallenen Quelle
+    verschwinden dann stillschweigend von der Seite. Genau das ist beim ersten
+    Lauf der GitHub Action passiert (Metaculus lieferte nichts, die Seite fiel
+    von 18 auf 12 Karten).
+
+    Eine Quelle, die noch nie etwas geliefert hat, faellt hier nicht auf - das
+    ist richtig so, sonst wuerde jeder noch nicht angebundene Platzhalter den
+    Lauf blockieren.
+    """
+    neu_zaehler = quellen_zaehlung(neu)
+    return [name for name, anzahl in quellen_zaehlung(alt).items()
+            if anzahl > 0 and neu_zaehler.get(name, 0) == 0]
+
+
+def lade_vorherige():
+    """Liest die bestehende markets.json, oder eine leere Liste."""
+    try:
+        with open(MARKETS_DATEI, "r", encoding="utf-8") as datei:
+            return json.load(datei)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
 def main():
     print(f"Quellen abfragen ({len(QUELLEN)}):")
     nach_quelle = lade_alle_quellen()
@@ -553,6 +590,23 @@ def main():
         print(
             f"Fehler: keine einzige Frage gefunden. {MARKETS_DATEI} wird NICHT "
             f"ueberschrieben, der letzte Stand bleibt erhalten.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Eine Quelle, die bisher lieferte und jetzt schweigt, ist fast immer ein
+    # Ausfall (Token fehlt, API gesperrt, Rate Limit) und fast nie die
+    # Wahrheit. Wir schreiben dann NICHT, damit die betroffenen Fragen nicht
+    # stillschweigend von der Seite fallen, und melden es deutlich.
+    fehlend = quelle_verschwunden(eintraege, lade_vorherige())
+    if fehlend:
+        print(
+            f"Fehler: {', '.join(fehlend)} lieferte(n) diesmal nichts, vorher "
+            f"schon. Das sieht nach einem Ausfall aus (fehlendes Token, "
+            f"gesperrte API, Rate Limit), nicht nach einer echten Aenderung.\n"
+            f"{MARKETS_DATEI} wird NICHT ueberschrieben - sonst verschwaenden "
+            f"diese Fragen unbemerkt von der Seite. Bitte die Meldungen der "
+            f"Quelle weiter oben pruefen.",
             file=sys.stderr,
         )
         sys.exit(1)
