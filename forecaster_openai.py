@@ -47,6 +47,8 @@ import sys
 
 import requests
 
+import pruefung
+
 # --- Konstanten ------------------------------------------------------------
 
 PROGNOSTIKER = "openai"
@@ -74,6 +76,11 @@ ANWEISUNG = (
     "agreement), not merely a declaration of intent.\n"
     "Base your estimate on facts and events, never on betting odds or "
     "prediction markets.\n"
+    "DIRECTION - read carefully: probability is the probability that the "
+    "question resolves YES, not the complement. If you conclude the event is "
+    "unlikely, the number must be SMALL. Before answering, check that the "
+    "number and your reasoning point the same way: reasoning that says "
+    "\"unlikely\" must not carry a probability near 1.\n"
     "reasoning must be at most 3 sentences and in English."
 )
 
@@ -242,6 +249,10 @@ def hole_forecast(token, frage, kriterien):
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     body = baue_body(frage, kriterien)
 
+    letzte_daten = None
+    letzter_widerspruch = None
+    letzte_suchen = 0
+
     for versuch in range(MAX_VERSUCHE):
         try:
             antwort = requests.post(BASE_URL, headers=headers, json=body, timeout=TIMEOUT)
@@ -275,12 +286,34 @@ def hole_forecast(token, frage, kriterien):
         except (ValueError, TypeError):
             pass
 
-        if daten is not None and ist_gueltig(daten):
+        if daten is None or not ist_gueltig(daten):
+            if versuch == 0:
+                print(f"  {PROGNOSTIKER}: ungueltiges JSON, ich frage einmal "
+                      f"erneut ...", file=sys.stderr)
+            continue
+
+        # Zahl gegen Begruendung pruefen. Genau dieses Modell hat bei der
+        # ICJ-Frage "extraordinarily unlikely" begruendet und 0.995 geliefert.
+        widerspruch = pruefung.finde_widerspruch(
+            daten["probability"], daten.get("reasoning", ""), frage
+        )
+        if widerspruch is None:
             return daten, num_searches, False
 
+        letzte_daten, letzter_widerspruch = daten, widerspruch
+        letzte_suchen = num_searches
         if versuch == 0:
-            print(f"  {PROGNOSTIKER}: ungueltiges JSON, ich frage einmal erneut ...",
-                  file=sys.stderr)
+            print(f"  {PROGNOSTIKER}: unplausibel - "
+                  f"{pruefung.beschreibe(daten['probability'], widerspruch)}. "
+                  f"Ich frage einmal erneut ...", file=sys.stderr)
+
+    if letzte_daten is not None:
+        # Nicht selbst umdrehen: aus "klingt gegenteilig" folgt nicht, dass
+        # 1 minus p richtig waere. Behalten und markieren.
+        print(f"  {PROGNOSTIKER}: Widerspruch bleibt bestehen, Prognose wird "
+              f"markiert.", file=sys.stderr)
+        letzte_daten["flagged"] = letzter_widerspruch
+        return letzte_daten, letzte_suchen, False
 
     return None, 0, False
 

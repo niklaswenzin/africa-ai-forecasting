@@ -418,6 +418,16 @@ h1 {
   padding: .5rem 0 .35rem;
 }
 .meta { margin: .4rem 0 0; font-size: .755rem; color: var(--muted); }
+/* Widerspruch zwischen Zahl und Begruendung. Deutlich, aber nicht in der
+   Farbe der Differenz-Pfeile - sonst liest man es als Richtungsangabe. */
+.warnung {
+  margin: .35rem 0 0;
+  font-size: .72rem;
+  font-weight: 600;
+  color: #b45309;
+  cursor: help;
+}
+@media (prefers-color-scheme: dark) { .warnung { color: #f0a955; } }
 
 details { margin-top: .85rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
 summary {
@@ -545,7 +555,13 @@ AI_VORLAGE = """    <div class="metric-col">
       <span class="metric-value"><<MODELL_P>></span>
 <<DIFF_BLOCK>>
       <p class="meta"><<CONFIDENCE>> &middot; <<SUCHE>></p>
+<<WARNUNG>>
     </div>"""
+
+# Warnung, wenn die Zahl der eigenen Begruendung widerspricht. Bewusst
+# sichtbar auf der Karte: der Wert steht dann als grosse Abweichung weit oben,
+# und ohne Hinweis liest man ihn als starke Modellaussage statt als Fehler.
+WARNUNG_VORLAGE = """      <p class="warnung" title="<<GRUND>>">&#9888; number contradicts the reasoning</p>"""
 
 DIFF_VORLAGE = """      <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
 
@@ -636,6 +652,9 @@ def baue_modell_liste(prognose, market_p):
             "reasoning": eintrag["reasoning"] if eintrag else "",
             "searched": eintrag.get("searched", False) if eintrag else False,
             "num_searches": eintrag.get("num_searches", 0) if eintrag else 0,
+            # Gesetzt, wenn Zahl und Begruendung sich widersprechen und auch
+            # der Neuversuch das nicht aufgeloest hat (siehe pruefung.py).
+            "flagged": eintrag.get("flagged") if eintrag else None,
         })
 
     return modelle
@@ -760,6 +779,14 @@ def baue_ai_block(modell):
             .replace("<<DIFF>>", formatiere_diff(modell["diff"]))
         )
 
+    if modell.get("flagged"):
+        warnung = WARNUNG_VORLAGE.replace(
+            "<<GRUND>>",
+            html.escape(f'reasoning contains "{modell["flagged"]}"'),
+        )
+    else:
+        warnung = ""
+
     return (
         AI_VORLAGE
         .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
@@ -767,6 +794,7 @@ def baue_ai_block(modell):
         .replace("<<DIFF_BLOCK>>", diff_block)
         .replace("<<CONFIDENCE>>", html.escape(modell["confidence"]))
         .replace("<<SUCHE>>", beschreibe_suche(modell))
+        .replace("<<WARNUNG>>", warnung)
     )
 
 

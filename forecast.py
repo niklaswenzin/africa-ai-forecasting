@@ -19,6 +19,7 @@ import sys
 import anthropic
 
 import forecaster_openai
+import pruefung
 
 # --- Konstanten ------------------------------------------------------------
 
@@ -94,6 +95,12 @@ SYSTEM_PROMPT = (
     "davor oder danach und ohne Markdown-Codeblock. Das JSON hat genau diese "
     "Schluessel:\n"
     '  "probability": Zahl zwischen 0 und 1,\n'
+    "ACHTUNG Richtung: probability ist die Wahrscheinlichkeit, dass die Frage "
+    "mit JA aufgeloest wird - NICHT die Gegenwahrscheinlichkeit. Kommst du zu "
+    "dem Schluss, dass das Ereignis unwahrscheinlich ist, muss die Zahl KLEIN "
+    "sein. Pruefe vor der Ausgabe, ob Zahl und Begruendung dieselbe Richtung "
+    "haben: eine Begruendung, die \"unlikely\" sagt, darf keine Zahl nahe 1 "
+    "tragen.\n"
     '  "reasoning": kurze Begruendung, maximal 3 Saetze, auf ENGLISCH,\n'
     '  "confidence": genau einer der Werte "low", "medium" oder "high".\n'
     "Das Feld reasoning muss auf Englisch sein, weil es unveraendert auf der "
@@ -299,20 +306,53 @@ def ist_gueltig(daten):
     return True
 
 
-def hole_forecast(client, frage):
-    """Holt eine gueltige Prognose; bei ungueltigem JSON genau ein Neuversuch.
+def hole_forecast(client, frage, fragetext=""):
+    """Holt eine gueltige Prognose; bei einem Problem genau ein Neuversuch.
 
-    Gibt (JSON-Objekt, num_searches) zurueck, oder (None, num_searches), falls
-    es zweimal scheitert.
+    Zwei Gruende fuer einen Neuversuch: ungueltiges JSON, oder eine Zahl, die
+    der eigenen Begruendung widerspricht (siehe pruefung.py). Der zweite Fall
+    ist real aufgetreten - ein Modell begruendete "extraordinarily unlikely"
+    und schrieb 0.995.
+
+    Gibt (JSON-Objekt, num_searches) zurueck. Das Objekt kann das Feld
+    "flagged" tragen, wenn der Widerspruch auch beim zweiten Versuch bestand:
+    dann behalten wir die Prognose, markieren sie aber. Verwerfen waere
+    schlechter, denn ein Datenpunkt weniger faellt niemandem auf - eine
+    markierte Prognose schon.
     """
+    letzte_daten = None
+    letzter_widerspruch = None
+
     for versuch in range(2):  # 0 = erster Versuch, 1 = ein Neuversuch
         text, num_searches = frage_modell(client, frage)
         daten = parse_json(text)
-        if daten is not None and ist_gueltig(daten):
+
+        if daten is None or not ist_gueltig(daten):
+            if versuch == 0:
+                print("  Ungueltiges JSON, ich frage genau einmal erneut ...",
+                      file=sys.stderr)
+            continue
+
+        widerspruch = pruefung.finde_widerspruch(
+            daten["probability"], daten.get("reasoning", ""), fragetext
+        )
+        if widerspruch is None:
             return daten, num_searches
+
+        letzte_daten, letzter_widerspruch = daten, widerspruch
         if versuch == 0:
-            print("  Ungueltiges JSON, ich frage genau einmal erneut ...",
-                  file=sys.stderr)
+            print(f"  Unplausibel: "
+                  f"{pruefung.beschreibe(daten['probability'], widerspruch)}. "
+                  f"Ich frage genau einmal erneut ...", file=sys.stderr)
+
+    if letzte_daten is not None:
+        # Zweimal derselbe Widerspruch: wir korrigieren nicht selbst - aus
+        # "klingt gegenteilig" folgt nicht, dass 1 minus p richtig waere.
+        print(f"  Widerspruch bleibt bestehen, Prognose wird markiert.",
+              file=sys.stderr)
+        letzte_daten["flagged"] = letzter_widerspruch
+        return letzte_daten, num_searches
+
     return None, num_searches
 
 
@@ -356,7 +396,7 @@ def main():
 
         # --- Claude ---
         try:
-            daten, num_searches = hole_forecast(client, prompt)
+            daten, num_searches = hole_forecast(client, prompt, frage)
         except FATALE_FEHLER as fehler:
             # Kein Guthaben, ungueltiger Key, gesperrter Zugang: die naechsten
             # Fragen wuerden genauso scheitern. Schleife sofort beenden und
@@ -379,9 +419,11 @@ def main():
                 "confidence": daten["confidence"],
                 "searched": num_searches > 0,
                 "num_searches": num_searches,
+                "flagged": daten.get("flagged"),
             }
+            markierung = " ACHTUNG unplausibel" if daten.get("flagged") else ""
             print(f"  {PROGNOSTIKER}: p={daten['probability']} "
-                  f"({daten['confidence']}, {num_searches} Suchen)")
+                  f"({daten['confidence']}, {num_searches} Suchen){markierung}")
 
         # --- OpenAI ---
         if openai_token and not openai_abgebrochen:

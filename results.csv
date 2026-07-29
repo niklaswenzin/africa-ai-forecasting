@@ -1,18 +1,18 @@
 question,source,benchmark_type,market_p,claude_p,claude_diff,openai_p,openai_diff
-"Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.899,0.92,0.021,0.93,0.031
-Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.949,0.98,0.031,0.95,0.001
-Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.22,0.25,0.03,0.88,0.66
-Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.168,0.05,-0.118,0.003,-0.165
+"Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.899,0.78,-0.119,0.89,-0.009
+Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.949,0.92,-0.029,0.93,-0.019
+Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.22,0.25,0.03,0.92,0.7
+Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.168,0.05,-0.118,0.01,-0.158
 Will there be no Somaliland parliamentary election before 2027?,polymarket,market_price,0.945,0.92,-0.025,0.98,0.035
-Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?,polymarket,market_price,0.1715,0.05,-0.1215,0.03,-0.1415
-"Nguesso out as President of the Republic of the Congo by December 31, 2026?",polymarket,market_price,0.13,0.05,-0.08,0.04,-0.09
-Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?,unknown,,,0.02,,0.0005,
-Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.15,0.25,0.1,0.06,-0.09
+Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?,polymarket,market_price,0.1715,0.02,-0.1515,0.01,-0.1615
+"Nguesso out as President of the Republic of the Congo by December 31, 2026?",polymarket,market_price,0.13,0.02,-0.11,0.1,-0.03
+Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.15,0.25,0.1,0.12,-0.03
 "U.S. agrees to a new trade deal with ""South Africa"" before 2027?",polymarket,market_price,0.125,0.08,-0.045,0.03,-0.095
-Will UPND win the second-most seats in the 2026 Zambia National Assembly Election?,unknown,,,0.02,,0.57,
-Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?,polymarket,market_price,0.0045,0.08,0.0755,0.35,0.3455
-Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?,metaculus,community_forecast,,0.25,,0.08,
-Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?,metaculus,community_forecast,,0.02,,0.995,
-Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?,metaculus,community_forecast,,0.25,,0.72,
-"Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",metaculus,community_forecast,,0.32,,0.44,
-Will Senegal formally restructure its external debt before 2028?,metaculus,community_forecast,,0.62,,0.56,
+Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?,polymarket,market_price,0.9925,0.98,-0.0125,0.999,0.0065
+Will SP win the second-most seats in the 2026 Zambia National Assembly Election?,polymarket,market_price,0.007,0.05,0.043,0.03,0.023
+Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?,polymarket,market_price,0.0045,0.15,0.1455,0.3,0.2955
+Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?,metaculus,community_forecast,,0.62,,0.14,
+Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?,metaculus,community_forecast,,0.02,,0.01,
+Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?,metaculus,community_forecast,,0.62,,0.68,
+"Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",metaculus,community_forecast,,0.32,,0.38,
+Will Senegal formally restructure its external debt before 2028?,metaculus,community_forecast,,0.42,,0.58,
