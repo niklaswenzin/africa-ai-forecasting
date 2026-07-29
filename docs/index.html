@@ -324,6 +324,61 @@ details .criteria {
   white-space: pre-wrap;
 }
 
+/* Aufgeloeste Fragen: bewusst als Tabelle, nicht als Karten. Hier zaehlt der
+   Vergleich Zeile fuer Zeile, nicht die einzelne Frage. */
+.resolved { margin-top: 2.5rem; }
+.resolved h2 {
+  font-size: 1.1rem;
+  margin: 0 0 .3rem;
+  letter-spacing: -.01em;
+}
+.resolved h2 .count {
+  font-size: .8rem;
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: .3rem;
+}
+.resolved .sub { font-size: .82rem; margin-bottom: .8rem; }
+/* Auf schmalen Schirmen scrollt die Tabelle in ihrem eigenen Kasten,
+   damit die Seite selbst nie seitlich wandert. */
+.resolved table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .84rem;
+  display: block;
+  overflow-x: auto;
+}
+.resolved th {
+  text-align: left;
+  font-size: .67rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  font-weight: 650;
+  padding: 0 .7rem .4rem 0;
+  white-space: nowrap;
+}
+.resolved td {
+  padding: .5rem .7rem .5rem 0;
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+}
+.resolved .frage { min-width: 20rem; }
+.resolved .zahl { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.resolved .datum { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.resolved .brier { color: var(--muted); font-size: .76rem; margin-left: .3rem; }
+.outcome {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 650;
+  border-radius: 999px;
+  padding: .12rem .5rem;
+  white-space: nowrap;
+}
+.outcome.ja { color: var(--up); border: 1px solid var(--up); }
+.outcome.nein { color: var(--down); border: 1px solid var(--down); }
+
 footer {
   margin-top: 2.25rem;
   padding-top: 1rem;
@@ -1098,11 +1153,13 @@ The question may resolve according to official announcements by the Senegalese g
 </article>
 </div>
 
+
+
 <footer>
 <p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
 web search; the benchmark is never passed into the prompt, so the estimate is
 independent rather than a restatement of the market.</p>
-<p>Benchmarks from Metaculus and Polymarket &middot; last updated 29 July 2026, 10:59 UTC &middot;
+<p>Benchmarks from Metaculus and Polymarket &middot; last updated 29 July 2026, 11:04 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source and method</a></p>
 </footer>
 </div>

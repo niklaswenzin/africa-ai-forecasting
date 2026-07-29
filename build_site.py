@@ -19,10 +19,18 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Die Prognosen aufgeloester Fragen stehen nicht mehr in forecasts.json - sie
+# kommen aus der Historie. brier.py hat die noetige Logik bereits (fruehester
+# Snapshot mit Prognose je Frage), darum wird sie hier wiederverwendet statt
+# ein zweites Mal geschrieben. So kann die Seite nie einen anderen
+# Messzeitpunkt anzeigen, als der Brier Score verwendet.
+import brier
+
 # --- Konstanten ------------------------------------------------------------
 
 MARKETS_DATEI = "markets.json"
 FORECASTS_DATEI = "forecasts.json"
+RESOLVED_DATEI = Path("data") / "resolved.json"
 AUSGABE_ORDNER = Path("docs")
 AUSGABE_DATEI = AUSGABE_ORDNER / "index.html"
 
@@ -454,6 +462,61 @@ details .criteria {
   white-space: pre-wrap;
 }
 
+/* Aufgeloeste Fragen: bewusst als Tabelle, nicht als Karten. Hier zaehlt der
+   Vergleich Zeile fuer Zeile, nicht die einzelne Frage. */
+.resolved { margin-top: 2.5rem; }
+.resolved h2 {
+  font-size: 1.1rem;
+  margin: 0 0 .3rem;
+  letter-spacing: -.01em;
+}
+.resolved h2 .count {
+  font-size: .8rem;
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: .3rem;
+}
+.resolved .sub { font-size: .82rem; margin-bottom: .8rem; }
+/* Auf schmalen Schirmen scrollt die Tabelle in ihrem eigenen Kasten,
+   damit die Seite selbst nie seitlich wandert. */
+.resolved table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .84rem;
+  display: block;
+  overflow-x: auto;
+}
+.resolved th {
+  text-align: left;
+  font-size: .67rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  font-weight: 650;
+  padding: 0 .7rem .4rem 0;
+  white-space: nowrap;
+}
+.resolved td {
+  padding: .5rem .7rem .5rem 0;
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+}
+.resolved .frage { min-width: 20rem; }
+.resolved .zahl { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.resolved .datum { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.resolved .brier { color: var(--muted); font-size: .76rem; margin-left: .3rem; }
+.outcome {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 650;
+  border-radius: 999px;
+  padding: .12rem .5rem;
+  white-space: nowrap;
+}
+.outcome.ja { color: var(--up); border: 1px solid var(--up); }
+.outcome.nein { color: var(--down); border: 1px solid var(--down); }
+
 footer {
   margin-top: 2.25rem;
   padding-top: 1rem;
@@ -484,6 +547,8 @@ footer p { margin: 0 0 .35rem; }
 <div class="grid">
 <<KARTEN>>
 </div>
+
+<<AUFGELOEST>>
 
 <footer>
 <p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
@@ -570,6 +635,35 @@ OHNE_AI_VORLAGE = """    <div class="metric-col">
       <span class="leer">Not yet</span>
     </div>"""
 
+# Abschnitt fuer aufgeloeste Fragen. Wird nur eingesetzt, wenn es welche gibt -
+# eine leere Ueberschrift "Resolved" mit nichts darunter saehe nach einem
+# Fehler aus.
+AUFGELOEST_VORLAGE = """<section class="resolved">
+  <h2>Resolved <span class="count"><<ANZAHL>></span></h2>
+  <p class="sub">Scored against the earliest snapshot that held a forecast, so
+  model and benchmark are judged on the same information. Lower Brier is better;
+  0.25 is what a constant 50&#37; guess scores.</p>
+  <table>
+    <thead>
+      <tr><th>Question</th><th>Outcome</th><<KOEPFE>><th>Benchmark</th><th>Measured</th></tr>
+    </thead>
+    <tbody>
+<<ZEILEN>>
+    </tbody>
+  </table>
+</section>"""
+
+AUFGELOEST_ZEILE = """      <tr>
+        <td class="frage"><<FRAGE>></td>
+        <td><span class="outcome <<OUTCOME_KLASSE>>"><<OUTCOME>></span></td>
+<<ZELLEN>>
+        <td class="zahl"><<BENCH>></td>
+        <td class="datum"><<DATUM>></td>
+      </tr>"""
+
+# Eine Zelle je Prognostiker: Schaetzung von damals und ihr Brier Score.
+AUFGELOEST_ZELLE = """        <td class="zahl"><<WERT>></td>"""
+
 # Begruendung je Modell im aufklappbaren Teil. Beide stehen untereinander,
 # damit man sie direkt vergleichen kann - dort liegt der eigentliche
 # Erkenntniswert, nicht in den zwei Prozentzahlen.
@@ -591,6 +685,20 @@ def lade_json(pfad):
             file=sys.stderr,
         )
         sys.exit(1)
+
+
+def lade_json_optional(pfad, standard):
+    """Liest eine JSON-Datei, oder gibt den Standardwert zurueck.
+
+    Anders als lade_json ist eine fehlende Datei hier kein Abbruchgrund: eine
+    Seite ohne aufgeloeste Fragen ist der Normalfall, solange nichts
+    aufgeloest ist.
+    """
+    try:
+        with open(pfad, "r", encoding="utf-8") as datei:
+            return json.load(datei)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return standard
 
 
 def baue_karten_daten(markets, forecasts):
@@ -658,6 +766,67 @@ def baue_modell_liste(prognose, market_p):
         })
 
     return modelle
+
+
+def baue_aufgeloeste_daten():
+    """Baut die Eintraege fuer aufgeloeste Fragen, aelteste Aufloesung zuletzt.
+
+    Gezeigt wird der Stand vom MESSZEITPUNKT, nicht der letzte bekannte: also
+    die frueheste Aufnahme mit einer Prognose zu dieser Frage, und die
+    Vergleichszahl aus derselben Aufnahme. Genau so rechnet brier.py, und
+    genau darum darf die Seite es nicht anders machen - sonst stuenden auf der
+    Karte andere Zahlen als im Score.
+
+    Nur Fragen mit tatsaechlich bekanntem Ausgang. "void" (annulliert) und
+    "unavailable" (Quelle gibt den Ausgang nicht her, siehe
+    resolve_questions.py) haben keinen Ausgang und gehoeren nicht in eine
+    Trefferliste.
+    """
+    aufgeloest = lade_json_optional(RESOLVED_DATEI, [])
+    if not aufgeloest:
+        return []
+
+    prognosen = brier.erste_prognosen(brier.lade_aufnahmen())
+
+    eintraege = []
+    for eintrag in aufgeloest:
+        if eintrag.get("status") != "resolved":
+            continue
+        ausgang = eintrag.get("outcome")
+        if ausgang not in (0, 1):
+            continue
+
+        gemessen = prognosen.get(eintrag["id"])
+        if gemessen is None:
+            # Aufgeloest, aber nie mit einer Prognose gesehen. Anzeigen waere
+            # irrefuehrend: es gaebe nichts zu bewerten.
+            continue
+
+        modelle = []
+        for schluessel, anzeigename in PROGNOSTIKER:
+            prognose = gemessen["forecasts"].get(schluessel)
+            p = prognose.get("probability") if prognose else None
+            modelle.append({
+                "name": anzeigename,
+                "model_p": p,
+                "brier": None if p is None else round(brier.brier_einzeln(p, ausgang), 4),
+            })
+
+        market_p = gemessen.get("market_p")
+        eintraege.append({
+            "question": eintrag.get("question", ""),
+            "source": eintrag.get("source", "unknown"),
+            "outcome": ausgang,
+            "measured_at": (gemessen.get("taken_at") or "")[:10],
+            "market_p": market_p,
+            "market_brier": (None if market_p is None
+                             else round(brier.brier_einzeln(market_p, ausgang), 4)),
+            "modelle": modelle,
+        })
+
+    # Zuletzt Gemessenes zuerst: die juengste Aufloesung ist die interessante.
+    eintraege.sort(key=lambda e: e["measured_at"], reverse=True)
+    return eintraege
 
 
 # --- Formatierung ----------------------------------------------------------
@@ -861,6 +1030,56 @@ def baue_tabs(eintraege):
     return "\n".join(tabs)
 
 
+def formatiere_treffer(p, brier_wert):
+    """Zeigt Schaetzung und Brier Score einer aufgeloesten Frage.
+
+    Fehlt die Schaetzung, steht ein Strich - dann hat dieses Modell die Frage
+    nie prognostiziert, und eine 0 waere eine Behauptung.
+    """
+    if p is None:
+        return "&ndash;"
+    return f"{round(p * 100)}% <span class=\"brier\">{brier_wert:.3f}</span>"
+
+
+def baue_aufgeloest_abschnitt(eintraege):
+    """Baut den Abschnitt mit aufgeloesten Fragen, oder gibt leeren Text zurueck.
+
+    Leerer Text heisst: der Abschnitt erscheint gar nicht. Solange nichts
+    aufgeloest ist, waere eine Ueberschrift mit leerer Tabelle nur Rauschen -
+    und sie saehe aus wie ein Fehler statt wie ein erwarteter Zustand.
+    """
+    if not eintraege:
+        return ""
+
+    koepfe = "".join(f"<th>{html.escape(name)}</th>" for _, name in PROGNOSTIKER)
+
+    zeilen = []
+    for eintrag in eintraege:
+        zellen = "\n".join(
+            AUFGELOEST_ZELLE.replace(
+                "<<WERT>>", formatiere_treffer(m["model_p"], m["brier"])
+            )
+            for m in eintrag["modelle"]
+        )
+        zeilen.append(
+            AUFGELOEST_ZEILE
+            .replace("<<FRAGE>>", html.escape(eintrag["question"]))
+            .replace("<<OUTCOME_KLASSE>>", "ja" if eintrag["outcome"] == 1 else "nein")
+            .replace("<<OUTCOME>>", "Yes" if eintrag["outcome"] == 1 else "No")
+            .replace("<<ZELLEN>>", zellen)
+            .replace("<<BENCH>>", formatiere_treffer(eintrag["market_p"],
+                                                     eintrag["market_brier"]))
+            .replace("<<DATUM>>", html.escape(eintrag["measured_at"]))
+        )
+
+    return (
+        AUFGELOEST_VORLAGE
+        .replace("<<ANZAHL>>", str(len(eintraege)))
+        .replace("<<KOEPFE>>", koepfe)
+        .replace("<<ZEILEN>>", "\n".join(zeilen))
+    )
+
+
 def nenne_quellen(eintraege):
     """Zaehlt die tatsaechlich vertretenen Quellen auf, z. B. "Metaculus and Polymarket"."""
     # sorted() gibt eine stabile Reihenfolge, damit die Fusszeile nicht bei
@@ -912,14 +1131,15 @@ def sortierschluessel(eintrag):
     return (2, -(eintrag["market_p"] or 0))
 
 
-def baue_seite(eintraege, zeitstempel):
-    """Setzt Kopf, Tab-Leiste, alle Karten und Fusszeile zur fertigen Seite zusammen."""
+def baue_seite(eintraege, aufgeloest, zeitstempel):
+    """Setzt Kopf, Tab-Leiste, Karten, aufgeloeste Fragen und Fusszeile zusammen."""
     sortiert = sorted(eintraege, key=sortierschluessel)
     karten = "\n".join(baue_karte(e) for e in sortiert)
     anzahl_quellen = len({e["source"] for e in sortiert})
 
     return (
         SEITEN_VORLAGE
+        .replace("<<AUFGELOEST>>", baue_aufgeloest_abschnitt(aufgeloest))
         .replace("<<ZEITSTEMPEL>>", zeitstempel)
         .replace("<<ANZAHL_QUELLEN>>", str(anzahl_quellen))
         .replace("<<ANZAHL>>", str(len(sortiert)))
@@ -949,7 +1169,8 @@ def main():
     # also fuer den Datenstand.
     zeitstempel = datetime.now(timezone.utc).strftime("%d %B %Y, %H:%M UTC")
 
-    seite = baue_seite(eintraege, zeitstempel)
+    aufgeloest = baue_aufgeloeste_daten()
+    seite = baue_seite(eintraege, aufgeloest, zeitstempel)
 
     AUSGABE_ORDNER.mkdir(exist_ok=True)
     with open(AUSGABE_DATEI, "w", encoding="utf-8") as datei:
