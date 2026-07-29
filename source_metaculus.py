@@ -54,6 +54,7 @@ METACULUS_KATEGORIEN lassen sich vollstaendig erfassen.
 import json
 import os
 import sys
+import time
 
 import requests
 
@@ -75,6 +76,17 @@ PRO_SEITE = 100            # Seitengroesse fuer die Paginierung
 # breit laden und clientseitig filtern. 30 Seiten sind 30 Anfragen pro Lauf -
 # vertretbar bei einem Lauf alle sechs Stunden.
 MAX_SEITEN = 30
+
+# Wiederholungen bei Rate Limit und Serverfehlern. 429 tritt real auf: die
+# Action feuert bis zu MAX_SEITEN Anfragen kurz hintereinander, von einer
+# geteilten Runner-IP.
+WIEDERHOLBARE_CODES = (429, 500, 502, 503, 504)
+MAX_VERSUCHE = 4
+MAX_WARTEN = 30            # Sekunden, damit ein Lauf nicht ewig haengt
+
+# Kleine Pause zwischen den Seiten. Verlangsamt einen Lauf um wenige Sekunden
+# und senkt die Wahrscheinlichkeit, ueberhaupt in ein Limit zu laufen.
+PAUSE_ZWISCHEN_SEITEN = 0.25
 
 # Filter fuer die Abfrage. Wir wollen nur offene, binaere Fragen: alles andere
 # (numerische Fragen, Datumsfragen, geschlossene Fragen) passt nicht zu einer
@@ -323,11 +335,43 @@ def normalisiere(post):
 # --- Daten laden -----------------------------------------------------------
 
 def lade_seite(headers, offset):
-    """Holt eine Seite und gibt (posts, gibt_es_weitere) zurueck."""
+    """Holt eine Seite und gibt (posts, gibt_es_weitere) zurueck.
+
+    Wiederholt bei Rate Limit (429) und Serverfehlern mit wachsender Wartezeit.
+    Das ist kein Luxus: wir machen bis zu MAX_SEITEN Anfragen kurz
+    hintereinander, und in der GitHub Action kommen sie von einer geteilten
+    Runner-IP, die andere Nutzer schon belastet haben koennen. Ohne Wiederholung
+    faellt die ganze Quelle bei einem einzigen 429 aus - und die Fragen
+    verschwinden von der Seite.
+
+    Respektiert den Retry-After-Header, wenn die API einen mitschickt.
+    """
     params = dict(FILTER, limit=PRO_SEITE, offset=offset)
-    antwort = requests.get(
-        BASE_URL + ENDPOINT, params=params, headers=headers, timeout=TIMEOUT
-    )
+
+    for versuch in range(1, MAX_VERSUCHE + 1):
+        antwort = requests.get(
+            BASE_URL + ENDPOINT, params=params, headers=headers, timeout=TIMEOUT
+        )
+
+        if antwort.status_code not in WIEDERHOLBARE_CODES:
+            break
+
+        if versuch == MAX_VERSUCHE:
+            print(f"  {QUELLE}: HTTP {antwort.status_code} auch nach "
+                  f"{MAX_VERSUCHE} Versuchen.", file=sys.stderr)
+            break
+
+        # Retry-After kann Sekunden enthalten; sonst warten wir zunehmend
+        # laenger (2, 4, 8 ...), damit wir ein Limit nicht weiter befeuern.
+        try:
+            warten = float(antwort.headers.get("Retry-After", ""))
+        except ValueError:
+            warten = 2 ** versuch
+
+        print(f"  {QUELLE}: HTTP {antwort.status_code}, warte {warten:.0f}s "
+              f"(Versuch {versuch}/{MAX_VERSUCHE}) ...", file=sys.stderr)
+        time.sleep(min(warten, MAX_WARTEN))
+
     antwort.raise_for_status()
 
     daten = antwort.json()
@@ -373,9 +417,15 @@ def lade_fragen():
             if not weitere:
                 break
 
+            time.sleep(PAUSE_ZWISCHEN_SEITEN)
+
     except requests.exceptions.RequestException as fehler:
-        print(f"  {QUELLE}: Abfrage fehlgeschlagen ({type(fehler).__name__}), "
-              f"Quelle wird uebersprungen.", file=sys.stderr)
+        # Deutlich markiert, damit die Ursache im Action-Protokoll auf einen
+        # Blick zu finden ist. Die Meldung der Auswahlphase ("0 Fragen mit
+        # Afrika-Bezug") sagt nur, DASS nichts ankam, nicht warum.
+        print(f"  {QUELLE}: AUSFALL - Abfrage fehlgeschlagen "
+              f"({type(fehler).__name__}: {fehler}). Quelle liefert diesmal "
+              f"nichts.", file=sys.stderr)
         return []
 
     # Fragen ohne Median werden jetzt mitgenommen, nicht mehr verworfen. Fehlt
