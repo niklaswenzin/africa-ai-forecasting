@@ -336,6 +336,40 @@ def bestimme_kategorie(frage):
     return KATEGORIE_STANDARD
 
 
+def loest_noch_auf(frage):
+    """True, wenn die Aufloesung noch bevorsteht.
+
+    Fragen, deren Aufloesungsdatum verstrichen ist, sind keine Prognosefragen
+    mehr. Beobachtet: die aethiopische Wahl fand am 1. Juni 2026 statt, Abiy
+    Ahmed gewann, und der Polymarket-Markt stand 59 Tage spaeter immer noch
+    auf closed=false, weil das Orakel nicht abgerechnet hatte. Beide Modelle
+    "prognostizierten" die Frage daraufhin mit 0.99 und 0.80 - sie lasen das
+    Ergebnis nach, sie schaetzten nicht.
+
+    Solche Fragen wuerden allen Beteiligten glaenzende Brier Scores bescheren
+    fuer etwas, das niemand prognostiziert hat. Der Snapshot-Mechanismus
+    schuetzt davor nicht: er misst am fruehesten Zeitpunkt MIT Prognose, aber
+    auch die entstand nach dem Ereignis.
+
+    Fehlt oder verunglueckt das Datum, bleibt die Frage drin - lieber eine
+    Frage zu viel als eine stillschweigend verworfene.
+
+    Bekannte Luecke: eine Frage, deren Ereignis bereits eingetreten ist, deren
+    Aufloesungsdatum aber noch in der Zukunft liegt, faellt hier nicht auf.
+    Das Datum ist das einzige Signal, das die Quellen dazu hergeben.
+    """
+    zeit = frage.get("resolve_time") or ""
+    if not zeit:
+        return True
+
+    try:
+        ziel = datetime.fromisoformat(zeit.replace("Z", "+00:00"))
+    except ValueError:
+        return True
+
+    return ziel > datetime.now(timezone.utc)
+
+
 def hat_genug_liquiditaet(frage):
     """True, wenn die Vergleichszahl der Frage belastbar genug ist.
 
@@ -518,11 +552,13 @@ def waehle_fragen(nach_quelle):
     for name, fragen in nach_quelle.items():
         alle_afrika = [f for f in fragen if hat_afrika_bezug(f)]
 
-        # Fragen mit zu duennem Benchmark fliegen hier raus, vor jeder
-        # weiteren Auswahl. Sonst konkurrierten sie um Plaetze, die eine
-        # belastbare Frage besser fuellt.
-        afrika = [f for f in alle_afrika if hat_genug_liquiditaet(f)]
-        zu_duenn = len(alle_afrika) - len(afrika)
+        # Zwei Ausschluesse vor jeder weiteren Auswahl. Sonst konkurrierten
+        # unbrauchbare Fragen um Plaetze, die eine belastbare besser fuellt.
+        noch_offen = [f for f in alle_afrika if loest_noch_auf(f)]
+        ueberfaellig = len(alle_afrika) - len(noch_offen)
+
+        afrika = [f for f in noch_offen if hat_genug_liquiditaet(f)]
+        zu_duenn = len(noch_offen) - len(afrika)
         afrika_je_quelle[name] = afrika
 
         mit_quote = [f for f in afrika if f.get("market_p") is not None]
@@ -535,8 +571,12 @@ def waehle_fragen(nach_quelle):
 
         anzahl_events = len({f.get("event_id") for f in afrika})
         ohne_quote = len(afrika) - len(mit_quote)
-        hinweis = (f", {zu_duenn} wegen zu duenner Vergleichszahl verworfen"
-                   if zu_duenn else "")
+        gruende = []
+        if ueberfaellig:
+            gruende.append(f"{ueberfaellig} ueberfaellig")
+        if zu_duenn:
+            gruende.append(f"{zu_duenn} zu duenne Vergleichszahl")
+        hinweis = f", verworfen: {', '.join(gruende)}" if gruende else ""
         print(f"  {name}: {len(afrika)} Fragen mit Afrika-Bezug "
               f"aus {anzahl_events} Events "
               f"({len(moderate[name])} mit moderater Quote, "

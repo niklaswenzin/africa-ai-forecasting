@@ -1,12 +1,12 @@
 question,source,benchmark_type,market_p,claude_p,claude_diff,openai_p,openai_diff
 "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.899,0.78,-0.119,0.89,-0.009
-Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.949,0.92,-0.029,0.93,-0.019
+Will Abiy Ahmed be the next Prime Minister of Ethiopia?,unknown,,,0.92,,0.93,
 Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.22,0.25,0.03,0.92,0.7
-Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.168,0.05,-0.118,0.01,-0.158
+Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,unknown,,,0.05,,0.01,
 Will there be no Somaliland parliamentary election before 2027?,polymarket,market_price,0.945,0.92,-0.025,0.98,0.035
-Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?,polymarket,market_price,0.172,0.02,-0.152,0.01,-0.162
+Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?,unknown,,,0.02,,0.01,
 "Nguesso out as President of the Republic of the Congo by December 31, 2026?",polymarket,market_price,0.13,0.02,-0.11,0.1,-0.03
-Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.18,0.25,0.07,0.12,-0.06
+Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.22,0.25,0.03,0.12,-0.1
 "U.S. agrees to a new trade deal with ""South Africa"" before 2027?",unknown,,,0.08,,0.03,
 Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?,unknown,,,0.98,,0.999,
 Will SP win the second-most seats in the 2026 Zambia National Assembly Election?,unknown,,,0.05,,0.03,

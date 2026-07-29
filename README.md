@@ -116,6 +116,28 @@ from scoring rather than guessed at: counting an unknown outcome as "No" would b
 score in a direction nobody could later trace. Until the access tier changes, the Brier
 score will rest on Polymarket questions only.
 
+**Most African markets on Polymarket are past their resolution date.** Of 46
+questions with an African subject, 36 had a resolution date in the past while still
+showing `closed: false` — the event happened, the oracle never settled the market.
+Ethiopia's June 2026 election is the clearest case: Abiy Ahmed won, and 59 days later
+the market was still open. Both models "forecast" that question at 0.99 and 0.80 —
+they were reading the result, not predicting it.
+
+Such questions are excluded. Scoring them would hand every participant an excellent
+Brier score for something nobody forecast, and the snapshot mechanism offers no
+protection: it measures at the earliest snapshot holding a forecast, but that forecast
+was also made after the event. The exclusion is why only 5 of 10 questions currently
+carry a benchmark. A question whose event has already occurred but whose resolution
+date still lies ahead is not caught — the date is the only signal the sources provide.
+
+**Minimum liquidity.** A benchmark nobody trades is not a benchmark. One Zambian
+market showed a price of 0.4% on 1,141 USD of total volume; a single small trade moves
+a price like that. Questions whose benchmark falls below 5,000 USD of volume are
+excluded — a threshold read off the actual distribution, where the usable range starts
+around 6,500 and an isolated cluster sits between 71 and 4,200. The rule applies only
+where a benchmark exists: a Metaculus question without a visible median is kept, since
+there is no benchmark that could be uninformative.
+
 **African questions are scarce.** In a recent run the pipeline saw 11,616 unique open
 Polymarket markets and found 48 with an African subject. The real total is higher and
 cannot be enumerated exactly: the Gamma API caps the offset at 2,000 per sort order, so
