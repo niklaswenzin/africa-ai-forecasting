@@ -51,7 +51,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-2063128",
@@ -60,7 +60,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-2326375",
@@ -69,7 +69,16 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
+  },
+  {
+    "id": "polymarket-2412368",
+    "source": "polymarket",
+    "question": "Will Tunisia recognize Israel by December 31?",
+    "status": "open",
+    "outcome": null,
+    "resolved_at": "",
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-3081798",
@@ -78,7 +87,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-3081841",
@@ -87,7 +96,16 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
+  },
+  {
+    "id": "polymarket-3081844",
+    "source": "polymarket",
+    "question": "Will SP win the second-most seats in the 2026 Zambia National Assembly Election?",
+    "status": "open",
+    "outcome": null,
+    "resolved_at": "",
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-620335",
@@ -96,7 +114,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-666832",
@@ -105,7 +123,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-668328",
@@ -114,7 +132,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-668685",
@@ -123,7 +141,16 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
+  },
+  {
+    "id": "polymarket-799982",
+    "source": "polymarket",
+    "question": "Will the United Hearts Movement win the most seats in the 2025 Central African Republic National Assembly election?",
+    "status": "open",
+    "outcome": null,
+    "resolved_at": "",
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-799988",
@@ -132,7 +159,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-921660",
@@ -141,7 +168,7 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   },
   {
     "id": "polymarket-948391",
@@ -150,6 +177,6 @@
     "status": "open",
     "outcome": null,
     "resolved_at": "",
-    "checked_at": "2026-07-29T07:33:56.345618Z"
+    "checked_at": "2026-07-29T09:34:50.806355Z"
   }
 ]

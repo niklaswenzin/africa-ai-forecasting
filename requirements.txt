@@ -1,0 +1,4 @@
+# Abhaengigkeiten des Projekts. Bewusst kurz gehalten (siehe CLAUDE.md):
+# alles andere laeuft ueber die Standardbibliothek, auch die OpenAI-Anbindung.
+requests
+anthropic
