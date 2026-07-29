@@ -16,9 +16,10 @@ erzeugen, das Modell gegen die Marktquote auswerten.
 
 ## Tech-Stack
 - Python 3.10 oder neuer. Abhängigkeiten: requests und anthropic, weitere nur nach Rückfrage. Die OpenAI-Anbindung läuft bewusst über requests statt über das openai-Paket.
-- Claude-Modell: claude-haiku-4-5, als Konstante am Anfang von forecast.py. OpenAI-Modell: gpt-5.6-luna, als Konstante in forecaster_openai.py. Beide bewusst in derselben Preisklasse (rund $1 Input je 1M Token) — sonst vergleicht man Preise statt Modelle.
-- Achtung bei einem Claude-Modellwechsel: das Web-Such-Tool ist an die Modellgeneration gebunden. Haiku 4.5 braucht `web_search_20250305`, neuere Modelle `web_search_20260209`. Ein reiner Modell-Tausch ohne diese Zeile bricht die Pipeline.
-- temperature=0 nur bei Claude. gpt-5.6-luna weist den Parameter mit HTTP 400 ab; die Prognosen dieses Modells sind darum weniger stabil. Diese Asymmetrie in jeder Auswertung erwähnen.
+- Claude-Modell: claude-sonnet-5, als Konstante am Anfang von forecast.py. OpenAI-Modell: gpt-5.6-luna, als Konstante in forecaster_openai.py. Die Preisklassen sind seit dem Wechsel auf Sonnet 5 NICHT mehr gleich ($3/$15 gegen $1/$6) — das gehört in jede Auswertung.
+- Achtung bei einem Claude-Modellwechsel, drei Stellen hängen an der Modellgeneration: das Web-Such-Tool (`web_search_20260209` für Sonnet 5 und neuer, `web_search_20250305` für Haiku 4.5), die Sampling-Parameter (Sonnet 5 lehnt `temperature` mit HTTP 400 ab, Haiku 4.5 verlangte es nicht, akzeptierte es aber), und `MAX_TOKENS` (deckelt Denken und Antwort gemeinsam). Vor jedem Wechsel an der API prüfen, nicht annehmen.
+- Kein `temperature` mehr: beide Modelle lehnen Sampling-Parameter ab. Auf Haiku 4.5 war `temperature=0` gesetzt und hat messbar nichts stabilisiert (Ø 10.7 Punkte Bewegung zwischen zwei Läufen, mehr als beim OpenAI-Modell ohne jede Steuerung) — die Web-Suche liefert je Lauf andere Treffer, und das wirkt vor dem Sampling.
+- Jede Prognose trägt die Modell-ID im Feld `model`. Nach einem Modellwechsel oder einem abgebrochenen Lauf stehen sonst Werte verschiedener Modelle unter demselben Schlüssel, ohne dass es erkennbar wäre.
 - API-Keys über Umgebungsvariablen oder die lokale .env-Datei (durch .gitignore ausgeschlossen): ANTHROPIC_API_KEY, OPENAI_API_KEY, METACULUS_API_TOKEN. Nie im Code, nie in Commits.
 - Polymarket Gamma API: Basis https://gamma-api.polymarket.com, Endpoint /markets, öffentlich ohne Key. Query-Parameter vor der Implementierung in der offiziellen Doku (docs.polymarket.com) verifizieren, nicht raten.
 

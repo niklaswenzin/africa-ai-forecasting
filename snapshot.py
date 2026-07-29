@@ -88,6 +88,9 @@ def baue_eintrag(markt, prognose):
     modelle = {}
     for name, eintrag in ((prognose or {}).get("forecasts") or {}).items():
         modelle[name] = {
+            # Die Modell-ID gehoert in jede Aufnahme: eine Zeitreihe ueber
+            # einen Modellwechsel hinweg waere sonst nicht deutbar.
+            "model": eintrag.get("model", "unbekannt"),
             "probability": eintrag.get("probability"),
             "confidence": eintrag.get("confidence", ""),
             "num_searches": eintrag.get("num_searches", 0),

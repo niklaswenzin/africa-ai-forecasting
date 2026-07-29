@@ -23,28 +23,35 @@ import pruefung
 
 # --- Konstanten ------------------------------------------------------------
 
-# Guenstigstes aktuelles Claude-Modell ($1 Input / $5 Output je 1M Token,
-# vorher claude-sonnet-4-6 mit $3/$15). Bewusst dieselbe Preisklasse wie
-# gpt-5.6-luna in forecaster_openai.py: sonst vergleicht man Preise statt
-# Modelle.
+# Von claude-haiku-4-5 auf Sonnet 5 gewechselt, nachdem Haiku in 5 von 10
+# Faellen auf exakt 0.25 landete - bei inhaltlich voellig verschiedenen Fragen.
+# Das sah nach einem Ankerwert bei Unsicherheit aus, nicht nach zehn
+# Einschaetzungen, und haette jeden Brier Score wertlos gemacht.
 #
-# Einschraenkung, die wir bewusst in Kauf nehmen: Haiku liest die
-# Aufloesungskriterien weniger genau als Sonnet. Genau daran haengt dieses
-# Projekt aber (Absichtserklaerung gegen formales Abkommen), also ist mit
-# schwaecheren Prognosen zu rechnen.
-MODEL = "claude-haiku-4-5"
+# Preis: $3 Input / $15 Output je 1M Token gegen $1/$6 bei gpt-5.6-luna. Die
+# bewusste Preisparitaet der beiden Prognostiker ist damit aufgehoben - das
+# gehoert in jede Auswertung, sonst vergleicht man auch Preisklassen.
+MODEL = "claude-sonnet-5"
 PROGNOSTIKER = "claude"         # Schluessel im forecasts.json-Eintrag
 
-# Haiku 4.5 akzeptiert Sampling-Parameter, neuere Modelle nicht mehr. 0 macht
-# die Prognosen ueber Laeufe hinweg stabiler - das ist noetig, weil dieselbe
-# Frage sonst zwischen Laeufen um bis zu 44 Punkte springt. Achtung: das
-# OpenAI-Modell unterstuetzt temperature NICHT, dort geht das nicht.
-TEMPERATURE = 0
+# KEIN temperature: Sonnet 5 weist Sampling-Parameter mit HTTP 400 ab
+# (verifiziert). Auf Haiku 4.5 war temperature=0 gesetzt, hat aber nachweislich
+# nichts stabilisiert - zwischen zwei Laeufen bewegten sich die Prognosen im
+# Schnitt um 10.7 Punkte, mehr als beim OpenAI-Modell ganz ohne Steuerung.
+# Der Grund liegt vor dem Sampling: die Web-Suche liefert je Lauf andere
+# Treffer, und daraus folgt eine andere Zahl.
+#
+# Nebeneffekt der Umstellung: beide Prognostiker sind jetzt symmetrisch, denn
+# gpt-5.6-luna akzeptiert temperature ebenfalls nicht.
 
 MARKETS_DATEI = "markets.json"
 FORECASTS_DATEI = "forecasts.json"
 ENV_DATEI = ".env"
-MAX_TOKENS = 4096               # mehr Platz, weil Suchergebnisse dazukommen
+# Deckelt Denken UND Antworttext gemeinsam. Sonnet 5 entscheidet pro Anfrage
+# selbst, ob es vor der Antwort nachdenkt; mit 4096 (dem Wert fuer Haiku)
+# koennte eine Antwort mitten im JSON abbrechen. 16000 ist der empfohlene
+# Wert fuer Anfragen ohne Streaming.
+MAX_TOKENS = 16000
 PLATZHALTER = "dein-key-hier"   # Platzhalter aus der .env-Vorlage
 MAX_PAUSE_RUNDEN = 5            # Sicherheitsgrenze fuer die pause_turn-Schleife
 SUCH_BUDGET = 3                 # hartes Limit: so viele Suchen INSGESAMT pro Frage
@@ -65,12 +72,13 @@ FATALE_FEHLER = (
 # Hinweis: max_uses gilt PRO Request. Weil die serverseitige Suche pausieren und
 # neu starten kann, setzen wir max_uses spaeter pro Runde auf das Restbudget,
 # damit die Gesamtzahl der Suchen pro Frage SUCH_BUDGET nicht ueberschreitet.
-# Achtung Tool-Version: web_search_20260209 (mit dynamischer Filterung) laeuft
-# nur auf den neueren Modellen. Haiku 4.5 braucht die Basisvariante
-# web_search_20250305 - ein reiner Modellwechsel ohne diese Zeile haette die
-# Pipeline zerlegt.
+# Achtung Tool-Version: sie haengt an der Modellgeneration. Sonnet 5 kann
+# web_search_20260209 (mit dynamischer Filterung), Haiku 4.5 konnte nur die
+# Basisvariante web_search_20250305. Beide sind auf Sonnet 5 gueltig, wir
+# nehmen die neuere. Ein Modellwechsel ohne Blick auf diese Zeile bricht die
+# Pipeline - genau das waere beim Wechsel auf Haiku fast passiert.
 WEB_SEARCH_TOOL = {
-    "type": "web_search_20250305",
+    "type": "web_search_20260209",
     "name": "web_search",
     "blocked_domains": [
         "polymarket.com",
@@ -181,6 +189,7 @@ def umform_alt(eintrag):
         "question": eintrag.get("question", ""),
         "forecasts": {
             PROGNOSTIKER: {
+                "model": "unbekannt",   # aus dem alten Format ohne Modellangabe
                 "probability": eintrag["probability"],
                 "reasoning": eintrag.get("reasoning", ""),
                 "confidence": eintrag.get("confidence", ""),
@@ -228,7 +237,6 @@ def frage_modell(client, frage):
             antwort = client.messages.create(
                 model=MODEL,
                 max_tokens=MAX_TOKENS,
-                temperature=TEMPERATURE,
                 system=SYSTEM_PROMPT,
                 tools=[tool],
                 messages=messages,
@@ -238,7 +246,6 @@ def frage_modell(client, frage):
             antwort = client.messages.create(
                 model=MODEL,
                 max_tokens=MAX_TOKENS,
-                temperature=TEMPERATURE,
                 system=SYSTEM_PROMPT,
                 tools=[WEB_SEARCH_TOOL],
                 tool_choice={"type": "none"},
@@ -414,6 +421,11 @@ def main():
 
         if daten is not None:
             eintrag_forecasts[PROGNOSTIKER] = {
+                # Welches Modell diese Zahl erzeugt hat. Ohne dieses Feld ist
+                # nach einem Modellwechsel nicht mehr erkennbar, welche
+                # Prognose von welchem Modell stammt - besonders heikel, wenn
+                # ein Lauf abbricht und teils alte Werte uebernommen werden.
+                "model": MODEL,
                 "probability": daten["probability"],
                 "reasoning": daten["reasoning"],
                 "confidence": daten["confidence"],
@@ -437,6 +449,7 @@ def main():
                 openai_abgebrochen = True
             elif gpt is not None:
                 eintrag_forecasts[forecaster_openai.PROGNOSTIKER] = {
+                    "model": forecaster_openai.MODELL,
                     "probability": gpt["probability"],
                     "reasoning": gpt["reasoning"],
                     "confidence": gpt["confidence"],
