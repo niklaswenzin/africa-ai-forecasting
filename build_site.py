@@ -5,9 +5,13 @@ Seite docs/index.html. Kein Framework, keine zusaetzlichen Bibliotheken:
 nur die Standardbibliothek, das Filtern uebernimmt etwas Vanilla-JS.
 
 Ausgangspunkt sind die Fragen aus markets.json, nicht die Prognosen. Jede
-ausgewaehlte Frage bekommt eine Karte. Sowohl die Vergleichszahl als auch der
-Claude-Forecast koennen fehlen, und beide Faelle haben eine eigene, ruhige
-Darstellung - nie ein Pfeil ohne Zahl, nie eine leere Stelle.
+ausgewaehlte Frage bekommt eine Karte mit der Vergleichszahl und beiden
+Modellen. Jede dieser Zahlen kann fehlen, und jeder Fall hat eine eigene,
+ruhige Darstellung - nie ein Pfeil ohne Zahl, nie eine leere Stelle.
+
+Auf der Karte stehen nur die drei Zahlen und die Abweichung. Konfidenz und
+Suchanzahl sind Angaben ueber den Weg, nicht ueber das Ergebnis; sie bleiben
+in forecasts.json und in den Aufnahmen erhalten, erscheinen aber nicht.
 
 Die Seite selbst ist auf Englisch, weil sie oeffentlich ist. Kommentare und
 Funktionsnamen bleiben deutsch wie im Rest des Projekts.
@@ -539,8 +543,10 @@ footer p { margin: 0 0 .35rem; }
 <div class="wrap">
 <header>
   <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Claude estimates the probability of open questions on African
-  politics and economics, without ever seeing the benchmark it is compared against.</p>
+  <p class="sub">Two AI models forecast open questions on African politics and
+  economics, side by side with prediction-market prices and community forecasts.
+  Neither model ever sees the benchmark it is measured against; once a question
+  resolves, both are scored against what actually happened.</p>
   <div class="stats">
     <div class="stat"><span class="stat-value"><<ANZAHL>></span><span class="stat-label">Questions</span></div>
     <div class="stat"><span class="stat-value"><<ANZAHL_QUELLEN>></span><span class="stat-label">Sources</span></div>
@@ -622,11 +628,15 @@ BENCHMARK_FEHLT_VORLAGE = """    <div class="metric-col">
       <span class="leer"><<HINWEIS>></span>
     </div>"""
 
+# Konfidenz und Suchanzahl stehen bewusst NICHT auf der Karte. Beides sind
+# Angaben ueber den Weg, nicht ueber das Ergebnis, und sie lenkten von den
+# drei Zahlen ab, um die es geht. Gespeichert bleiben sie in forecasts.json
+# und in jeder Aufnahme - fuer eine spaetere Auswertung, etwa ob hohe
+# Konfidenz tatsaechlich mit besseren Treffern einhergeht.
 AI_VORLAGE = """    <div class="metric-col">
       <span class="metric-label"><<MODELL_NAME>></span>
       <span class="metric-value"><<MODELL_P>></span>
 <<DIFF_BLOCK>>
-      <p class="meta"><<CONFIDENCE>> &middot; <<SUCHE>></p>
 <<WARNUNG>>
     </div>"""
 
@@ -907,12 +917,6 @@ def flagge_fuer_land(land):
     return LAND_FLAGGE.get(land, FLAGGE_STANDARD)
 
 
-def beschreibe_suche(eintrag):
-    """Formuliert den Hinweis, ob und wie oft das Modell gesucht hat."""
-    if not eintrag["searched"]:
-        return "no web search"
-    anzahl = eintrag["num_searches"]
-    return f"{anzahl} web search{'es' if anzahl != 1 else ''}"
 
 
 # --- HTML bauen ------------------------------------------------------------
@@ -968,8 +972,6 @@ def baue_ai_block(modell):
         .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
         .replace("<<MODELL_P>>", formatiere_prozent(modell["model_p"]))
         .replace("<<DIFF_BLOCK>>", diff_block)
-        .replace("<<CONFIDENCE>>", html.escape(modell["confidence"]))
-        .replace("<<SUCHE>>", beschreibe_suche(modell))
         .replace("<<WARNUNG>>", warnung)
     )
 
