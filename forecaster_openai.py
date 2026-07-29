@@ -21,13 +21,24 @@ Mit Token gegen die echte API verifiziert (2026-07-29)
 - Die Antwort enthaelt in output[] zuerst einen reasoning-Block und erst
   danach die message. Auf output[0] zuzugreifen liefert darum nichts.
 
-Bekannte Einschraenkung: keine Web-Suche
-----------------------------------------
-Claude bekommt in forecast.py ein serverseitiges Web-Such-Tool, dieses Modell
-nicht. Der Vergleich misst also nicht nur "Claude gegen GPT", sondern auch
-"mit Recherche gegen ohne". Das ist eine echte Verzerrung zugunsten von Claude
-bei allem, was nach dem Trainingsstand passiert ist, und muss auf der Seite
-und im README stehen, solange es so ist.
+Web-Suche, verifiziert am 2026-07-29
+-----------------------------------
+Das Modell bekommt dasselbe Zugestaendnis wie Claude: ein serverseitiges
+Such-Tool mit gesperrten Wettmarkt-Domains. Ohne das mass der Vergleich nicht
+"Claude gegen GPT", sondern "mit Recherche gegen ohne" - bei der Marokko-Frage
+sprang dieses Modell von 0.40 ohne Suche auf 0.94 mit Suche, bei einer
+Marktquote von 0.90. Die Verzerrung war also groesser als jeder gemessene
+Modellunterschied.
+
+- Tool-Typ "web_search", Sperrliste unter filters.blocked_domains.
+- Suche und erzwungenes JSON-Schema funktionieren zusammen (beides HTTP 200,
+  drei Suchen und trotzdem schemakonformes JSON).
+- Suchen erscheinen in output[] als Eintraege vom Typ "web_search_call" und
+  lassen sich darueber zaehlen.
+
+Noch offen: ein hartes Limit fuer die Zahl der Suchen wie Claudes max_uses
+liess sich nicht verifizieren. Wir zaehlen sie darum nur mit, statt sie zu
+deckeln - beobachtet wurden 2 bis 3 pro Frage.
 """
 
 import json
@@ -88,6 +99,23 @@ SCHEMA = {
     "additionalProperties": False,
 }
 
+# Serverseitiges Such-Tool. Dieselben Wettmarkt-Domains sind gesperrt wie bei
+# Claude in forecast.py - andernfalls koennte das Modell die Marktquote
+# einfach nachlesen, und die methodische Leitplanke des Projekts ("die Quote
+# gelangt nie in den Prompt") waere ueber den Umweg der Suche ausgehebelt.
+WEB_SEARCH_TOOL = {
+    "type": "web_search",
+    "filters": {
+        "blocked_domains": [
+            "polymarket.com",
+            "kalshi.com",
+            "manifold.markets",
+            "predictit.org",
+            "metaculus.com",
+        ]
+    },
+}
+
 # Fehler, bei denen jeder weitere Aufruf genauso scheitern wuerde. Analog zu
 # FATALE_FEHLER in forecast.py, hier ueber HTTP-Codes statt Exception-Klassen.
 FATALE_CODES = (400, 401, 403, 404)
@@ -139,6 +167,7 @@ def baue_body(frage, kriterien):
         "model": MODELL,
         "instructions": ANWEISUNG,
         "input": baue_eingabe(frage, kriterien),
+        "tools": [WEB_SEARCH_TOOL],
         "text": {
             "format": {
                 "type": "json_schema",
@@ -164,6 +193,18 @@ def lies_text(antwort):
             if block.get("type") == "output_text":
                 return block.get("text", "")
     return ""
+
+
+def zaehle_suchen(antwort):
+    """Zaehlt die tatsaechlich ausgefuehrten Web-Suchen.
+
+    Suchen erscheinen in output[] als eigene Eintraege vom Typ
+    "web_search_call", neben den reasoning- und message-Eintraegen. Die Zahl
+    macht auf der Karte transparent, ob eine Prognose auf Recherche beruht -
+    genauso wie num_searches bei Claude.
+    """
+    return sum(1 for eintrag in antwort.get("output", []) or []
+               if eintrag.get("type") == "web_search_call")
 
 
 def ist_gueltig(daten):
@@ -193,9 +234,10 @@ def ist_gueltig(daten):
 def hole_forecast(token, frage, kriterien):
     """Holt eine Prognose als Dict, oder None.
 
-    Gibt zusaetzlich zurueck, ob der Fehler fatal war, damit der Aufrufer eine
-    leere Guthaben- oder Schluesselsituation vom einmaligen Aussetzer
-    unterscheiden kann. Rueckgabe: (daten_oder_None, fatal_bool).
+    Rueckgabe: (daten_oder_None, num_searches, fatal_bool). Das fatal-Flag
+    trennt eine leere Guthaben- oder Schluesselsituation vom einmaligen
+    Aussetzer - bei ersterer soll der Aufrufer diesen Prognostiker fuer den
+    Rest des Laufs abschalten, statt in jeden weiteren Fehler zu laufen.
     """
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     body = baue_body(frage, kriterien)
@@ -206,7 +248,7 @@ def hole_forecast(token, frage, kriterien):
         except requests.exceptions.RequestException as fehler:
             print(f"  {PROGNOSTIKER}: Verbindungsfehler ({type(fehler).__name__}).",
                   file=sys.stderr)
-            return None, False
+            return None, 0, False
 
         if antwort.status_code in FATALE_CODES:
             meldung = ""
@@ -216,7 +258,7 @@ def hole_forecast(token, frage, kriterien):
                 meldung = antwort.text[:200]
             print(f"  {PROGNOSTIKER}: Abbruch, HTTP {antwort.status_code}: {meldung}",
                   file=sys.stderr)
-            return None, True
+            return None, 0, True
 
         if antwort.status_code != 200:
             # Rate Limit oder Serverfehler: voruebergehend, naechster Versuch.
@@ -224,20 +266,23 @@ def hole_forecast(token, frage, kriterien):
                   file=sys.stderr)
             continue
 
+        roh = antwort.json()
+        num_searches = zaehle_suchen(roh)
+
         daten = None
         try:
-            daten = json.loads(lies_text(antwort.json()))
+            daten = json.loads(lies_text(roh))
         except (ValueError, TypeError):
             pass
 
         if daten is not None and ist_gueltig(daten):
-            return daten, False
+            return daten, num_searches, False
 
         if versuch == 0:
             print(f"  {PROGNOSTIKER}: ungueltiges JSON, ich frage einmal erneut ...",
                   file=sys.stderr)
 
-    return None, False
+    return None, 0, False
 
 
 if __name__ == "__main__":
@@ -249,9 +294,10 @@ if __name__ == "__main__":
         print(f"Fehler: {TOKEN_NAME} ist nicht gesetzt.", file=sys.stderr)
         sys.exit(1)
 
-    daten, _ = hole_forecast(
+    daten, suchen, _ = hole_forecast(
         schluessel,
         "Will Somaliland join the Abraham Accords before 2027?",
         "Resolves Yes only if a formal normalization agreement is signed.",
     )
+    print(f"{suchen} Web-Suchen")
     print(json.dumps(daten, ensure_ascii=False, indent=2) if daten else "keine Prognose")

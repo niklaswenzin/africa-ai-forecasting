@@ -385,7 +385,7 @@ def main():
 
         # --- OpenAI ---
         if openai_token and not openai_abgebrochen:
-            gpt, fatal = forecaster_openai.hole_forecast(
+            gpt, gpt_suchen, fatal = forecaster_openai.hole_forecast(
                 openai_token, frage, markt.get("description", "")
             )
             if fatal:
@@ -398,13 +398,11 @@ def main():
                     "probability": gpt["probability"],
                     "reasoning": gpt["reasoning"],
                     "confidence": gpt["confidence"],
-                    # Dieses Modell bekommt kein Such-Tool - siehe den
-                    # Docstring in forecaster_openai.py.
-                    "searched": False,
-                    "num_searches": 0,
+                    "searched": gpt_suchen > 0,
+                    "num_searches": gpt_suchen,
                 }
                 print(f"  {forecaster_openai.PROGNOSTIKER}: p={gpt['probability']} "
-                      f"({gpt['confidence']}, keine Suche)")
+                      f"({gpt['confidence']}, {gpt_suchen} Suchen)")
 
         if not eintrag_forecasts:
             print("  Warnung: kein Modell hat eine gueltige Prognose geliefert.",
