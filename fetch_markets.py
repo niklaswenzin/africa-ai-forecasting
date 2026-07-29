@@ -39,6 +39,27 @@ ANZAHL = 30
 MODERAT_MIN = 0.05         # bevorzugte Quote: nicht extremer als diese Grenzen
 MODERAT_MAX = 0.95
 
+# Mindestliquiditaet je Quelle. Gilt NUR fuer Fragen, die auch eine
+# Vergleichszahl haben: wo es keinen Benchmark gibt, kann er auch nicht
+# uninformativ sein. Eine Metaculus-Frage ohne Community-Median bleibt also
+# unabhaengig von ihrer Beteiligung drin - dort zaehlt nur der Forecast.
+#
+# Polymarket, Einheit ist Handelsvolumen in Dollar. An den echten Afrika-
+# Fragen gemessen: der Bestand liegt zwischen 6'500 und 167'000 (Median rund
+# 20'000), darunter sitzt isoliert eine Gruppe mit 71 bis 4'200. Bei 90 Dollar
+# Gesamtvolumen bewegt ein einziger Kleinsttrade den Preis - das ist keine
+# Marktmeinung. 5'000 liegt in der Luecke zwischen beiden Gruppen.
+#
+# Metaculus, Einheit ist Zahl der Prognostiker. Der Wert ist VORLAEUFIG und
+# ungetestet: solange der Community-Median gesperrt ist, greift die Regel dort
+# nie. Beobachtete Beteiligung liegt bei 0 bis 144 (Median 9). Sobald die
+# Zugriffsstufe steht, gehoert er an echten Daten geprueft.
+MIN_LIQUIDITAET = {
+    "polymarket": 5000,
+    "kalshi": 5000,
+    "metaculus": 15,
+}
+
 # Obergrenze fuer Fragen OHNE Vergleichszahl. Betrifft derzeit nur Metaculus:
 # der Community-Median ist fuer unser Konto gesperrt, die Fragen sind aber
 # trotzdem wertvoll, weil Claude sie prognostizieren kann. Eine Karte ohne
@@ -315,6 +336,29 @@ def bestimme_kategorie(frage):
     return KATEGORIE_STANDARD
 
 
+def hat_genug_liquiditaet(frage):
+    """True, wenn die Vergleichszahl der Frage belastbar genug ist.
+
+    Der Punkt ist nicht die Frage, sondern ihr Benchmark: eine Quote, die aus
+    90 Dollar Handelsvolumen entsteht, sagt nichts ueber die Wahrscheinlichkeit
+    aus - sie steht dort, wo zufaellig zuletzt jemand gehandelt hat. Auf der
+    Seite erschiene sie trotzdem als "Markt sagt 0 Prozent", und im Brier Score
+    wuerde sie spaeter zaehlen, als waere sie eine ernsthafte Schaetzung.
+
+    Fragen OHNE Vergleichszahl bleiben immer drin: dort gibt es keinen
+    Benchmark, der uninformativ sein koennte, und die Karte zeigt ohnehin nur
+    die Modellprognosen.
+    """
+    if frage.get("market_p") is None:
+        return True
+
+    schwelle = MIN_LIQUIDITAET.get(frage.get("source"))
+    if schwelle is None:
+        return True          # unbekannte Quelle: nicht aussperren
+
+    return frage.get("volume", 0.0) >= schwelle
+
+
 def ist_moderat(frage):
     """True, wenn die Quote existiert und nicht extrem ist (zwischen den Grenzen)."""
     p = frage.get("market_p")
@@ -472,7 +516,13 @@ def waehle_fragen(nach_quelle):
     moderate = {}
     extreme = {}
     for name, fragen in nach_quelle.items():
-        afrika = [f for f in fragen if hat_afrika_bezug(f)]
+        alle_afrika = [f for f in fragen if hat_afrika_bezug(f)]
+
+        # Fragen mit zu duennem Benchmark fliegen hier raus, vor jeder
+        # weiteren Auswahl. Sonst konkurrierten sie um Plaetze, die eine
+        # belastbare Frage besser fuellt.
+        afrika = [f for f in alle_afrika if hat_genug_liquiditaet(f)]
+        zu_duenn = len(alle_afrika) - len(afrika)
         afrika_je_quelle[name] = afrika
 
         mit_quote = [f for f in afrika if f.get("market_p") is not None]
@@ -485,10 +535,12 @@ def waehle_fragen(nach_quelle):
 
         anzahl_events = len({f.get("event_id") for f in afrika})
         ohne_quote = len(afrika) - len(mit_quote)
+        hinweis = (f", {zu_duenn} wegen zu duenner Vergleichszahl verworfen"
+                   if zu_duenn else "")
         print(f"  {name}: {len(afrika)} Fragen mit Afrika-Bezug "
               f"aus {anzahl_events} Events "
               f"({len(moderate[name])} mit moderater Quote, "
-              f"{ohne_quote} ohne Vergleichszahl).")
+              f"{ohne_quote} ohne Vergleichszahl{hinweis}).")
 
     gewaehlt = []
     gesehene_events = set()
