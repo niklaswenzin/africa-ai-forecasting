@@ -25,6 +25,8 @@ from pathlib import Path
 # ein zweites Mal geschrieben. So kann die Seite nie einen anderen
 # Messzeitpunkt anzeigen, als der Brier Score verwendet.
 import brier
+import forecast
+import forecaster_openai
 
 # --- Konstanten ------------------------------------------------------------
 
@@ -62,12 +64,16 @@ BENCHMARK_FEHLT = {
     "community_forecast": "Community forecast pending",
 }
 
-# Prognostiker in fester Reihenfolge: Schluessel in forecasts.json und
-# Anzeigename auf der Karte. Ein dritter kaeme hier dazu, ohne dass die
-# Karten-Vorlage angefasst werden muss.
+# Prognostiker in fester Reihenfolge: Schluessel in forecasts.json,
+# Anzeigename auf der Karte, und die tatsaechlich verwendete Modell-ID.
+#
+# Die Modell-IDs werden aus den Prognostiker-Modulen gelesen, nicht hier
+# abgeschrieben. Die Fusszeile nannte sonst weiter claude-sonnet-4-6, obwohl
+# laengst claude-haiku-4-5 lief - genau das ist auf der Live-Seite passiert.
+# So kann der Text nicht mehr veralten.
 PROGNOSTIKER = [
-    ("claude", "Claude"),
-    ("openai", "GPT"),
+    ("claude", "Claude", forecast.MODEL),
+    ("openai", "GPT", forecaster_openai.MODELL),
 ]
 
 KATEGORIE_NAMEN = [
@@ -551,8 +557,9 @@ footer p { margin: 0 0 .35rem; }
 <<AUFGELOEST>>
 
 <footer>
-<p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
-web search; the benchmark is never passed into the prompt, so the estimate is
+<p>Forecasts come from <<MODELL_LISTE>>. Both receive the same question, the same
+resolution criteria and the same web-search tool, with prediction-market sites
+blocked. The benchmark is never passed into the prompt, so each estimate is
 independent rather than a restatement of the market.</p>
 <p>Benchmarks from <<QUELLEN_LISTE>> &middot; last updated <<ZEITSTEMPEL>> &middot;
 <a href="<<REPO_URL>>">source and method</a></p>
@@ -742,7 +749,7 @@ def baue_modell_liste(prognose, market_p):
     vorhanden = (prognose or {}).get("forecasts") or {}
 
     modelle = []
-    for schluessel, anzeigename in PROGNOSTIKER:
+    for schluessel, anzeigename, _modell_id in PROGNOSTIKER:
         eintrag = vorhanden.get(schluessel)
         model_p = eintrag["probability"] if eintrag else None
 
@@ -803,7 +810,7 @@ def baue_aufgeloeste_daten():
             continue
 
         modelle = []
-        for schluessel, anzeigename in PROGNOSTIKER:
+        for schluessel, anzeigename, _modell_id in PROGNOSTIKER:
             prognose = gemessen["forecasts"].get(schluessel)
             p = prognose.get("probability") if prognose else None
             modelle.append({
@@ -1051,7 +1058,7 @@ def baue_aufgeloest_abschnitt(eintraege):
     if not eintraege:
         return ""
 
-    koepfe = "".join(f"<th>{html.escape(name)}</th>" for _, name in PROGNOSTIKER)
+    koepfe = "".join(f"<th>{html.escape(name)}</th>" for _, name, _m in PROGNOSTIKER)
 
     zeilen = []
     for eintrag in eintraege:
@@ -1078,6 +1085,19 @@ def baue_aufgeloest_abschnitt(eintraege):
         .replace("<<KOEPFE>>", koepfe)
         .replace("<<ZEILEN>>", "\n".join(zeilen))
     )
+
+
+def nenne_modelle():
+    """Nennt die tatsaechlich verwendeten Modelle mit ihrer ID.
+
+    Aus den Konstanten der Prognostiker-Module gelesen, damit die Fusszeile
+    bei einem Modellwechsel nicht stehen bleibt.
+    """
+    teile = [f"{html.escape(name)} (<code>{html.escape(modell)}</code>)"
+             for _, name, modell in PROGNOSTIKER]
+    if len(teile) == 1:
+        return teile[0]
+    return ", ".join(teile[:-1]) + " and " + teile[-1]
 
 
 def nenne_quellen(eintraege):
@@ -1140,6 +1160,7 @@ def baue_seite(eintraege, aufgeloest, zeitstempel):
     return (
         SEITEN_VORLAGE
         .replace("<<AUFGELOEST>>", baue_aufgeloest_abschnitt(aufgeloest))
+        .replace("<<MODELL_LISTE>>", nenne_modelle())
         .replace("<<ZEITSTEMPEL>>", zeitstempel)
         .replace("<<ANZAHL_QUELLEN>>", str(anzahl_quellen))
         .replace("<<ANZAHL>>", str(len(sortiert)))
