@@ -1,0 +1,270 @@
+{
+  "format_version": 1,
+  "taken_at": "2026-07-29T10:18:17.420036Z",
+  "questions": [
+    {
+      "id": "polymarket-620335",
+      "source": "polymarket",
+      "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+      "market_p": 0.899,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Morocco",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.92,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.93,
+          "confidence": "high",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "polymarket-2063128",
+      "source": "polymarket",
+      "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
+      "market_p": 0.949,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Ethiopia",
+      "resolve_time": "2026-06-01T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.98,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.95,
+          "confidence": "high",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-1076686",
+      "source": "polymarket",
+      "question": "Will Somaliland join the Abraham Accords before 2027?",
+      "market_p": 0.22,
+      "benchmark_type": "market_price",
+      "category": "diplomacy",
+      "country": "Somaliland",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.88,
+          "confidence": "medium",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-668328",
+      "source": "polymarket",
+      "question": "Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?",
+      "market_p": 0.168,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Guinea-Bissau",
+      "resolve_time": "2025-11-23T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.05,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.003,
+          "confidence": "high",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "polymarket-948391",
+      "source": "polymarket",
+      "question": "Will there be no Somaliland parliamentary election before 2027?",
+      "market_p": 0.945,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Somaliland",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.92,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.98,
+          "confidence": "high",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-668685",
+      "source": "polymarket",
+      "question": "Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?",
+      "market_p": 0.1715,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Guinea-Bissau",
+      "resolve_time": "2025-11-23T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.05,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.03,
+          "confidence": "high",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "polymarket-921660",
+      "source": "polymarket",
+      "question": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
+      "market_p": 0.13,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Congo",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.05,
+          "confidence": "high",
+          "num_searches": 2
+        },
+        "openai": {
+          "probability": 0.04,
+          "confidence": "medium",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-799988",
+      "source": "polymarket",
+      "question": "Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?",
+      "market_p": 0.1285,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Central African Republic",
+      "resolve_time": "2025-12-28T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.02,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.0005,
+          "confidence": "high",
+          "num_searches": 5
+        }
+      }
+    },
+    {
+      "id": "polymarket-2326375",
+      "source": "polymarket",
+      "question": "Will the Republic of the Congo have an Ebola case in 2026?",
+      "market_p": 0.16,
+      "benchmark_type": "market_price",
+      "category": "other",
+      "country": "Congo",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.06,
+          "confidence": "medium",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "polymarket-666832",
+      "source": "polymarket",
+      "question": "U.S. agrees to a new trade deal with \"South Africa\" before 2027?",
+      "market_p": 0.125,
+      "benchmark_type": "market_price",
+      "category": "economy",
+      "country": "South Africa",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.08,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.03,
+          "confidence": "high",
+          "num_searches": 1
+        }
+      }
+    },
+    {
+      "id": "polymarket-3081841",
+      "source": "polymarket",
+      "question": "Will UPND win the second-most seats in the 2026 Zambia National Assembly Election?",
+      "market_p": 0.0275,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Zambia",
+      "resolve_time": "2026-08-13T23:59:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.02,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.57,
+          "confidence": "medium",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-3081798",
+      "source": "polymarket",
+      "question": "Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?",
+      "market_p": 0.0045,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Zambia",
+      "resolve_time": "2026-08-13T03:59:00Z",
+      "forecasts": {
+        "claude": {
+          "probability": 0.08,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "probability": 0.35,
+          "confidence": "medium",
+          "num_searches": 2
+        }
+      }
+    }
+  ]
+}
