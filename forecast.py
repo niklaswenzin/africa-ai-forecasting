@@ -18,9 +18,28 @@ import sys
 
 import anthropic
 
+import forecaster_openai
+
 # --- Konstanten ------------------------------------------------------------
 
-MODEL = "claude-sonnet-4-6"     # wie in CLAUDE.md vorgegeben
+# Guenstigstes aktuelles Claude-Modell ($1 Input / $5 Output je 1M Token,
+# vorher claude-sonnet-4-6 mit $3/$15). Bewusst dieselbe Preisklasse wie
+# gpt-5.6-luna in forecaster_openai.py: sonst vergleicht man Preise statt
+# Modelle.
+#
+# Einschraenkung, die wir bewusst in Kauf nehmen: Haiku liest die
+# Aufloesungskriterien weniger genau als Sonnet. Genau daran haengt dieses
+# Projekt aber (Absichtserklaerung gegen formales Abkommen), also ist mit
+# schwaecheren Prognosen zu rechnen.
+MODEL = "claude-haiku-4-5"
+PROGNOSTIKER = "claude"         # Schluessel im forecasts.json-Eintrag
+
+# Haiku 4.5 akzeptiert Sampling-Parameter, neuere Modelle nicht mehr. 0 macht
+# die Prognosen ueber Laeufe hinweg stabiler - das ist noetig, weil dieselbe
+# Frage sonst zwischen Laeufen um bis zu 44 Punkte springt. Achtung: das
+# OpenAI-Modell unterstuetzt temperature NICHT, dort geht das nicht.
+TEMPERATURE = 0
+
 MARKETS_DATEI = "markets.json"
 FORECASTS_DATEI = "forecasts.json"
 ENV_DATEI = ".env"
@@ -45,8 +64,12 @@ FATALE_FEHLER = (
 # Hinweis: max_uses gilt PRO Request. Weil die serverseitige Suche pausieren und
 # neu starten kann, setzen wir max_uses spaeter pro Runde auf das Restbudget,
 # damit die Gesamtzahl der Suchen pro Frage SUCH_BUDGET nicht ueberschreitet.
+# Achtung Tool-Version: web_search_20260209 (mit dynamischer Filterung) laeuft
+# nur auf den neueren Modellen. Haiku 4.5 braucht die Basisvariante
+# web_search_20250305 - ein reiner Modellwechsel ohne diese Zeile haette die
+# Pipeline zerlegt.
 WEB_SEARCH_TOOL = {
-    "type": "web_search_20260209",
+    "type": "web_search_20250305",
     "name": "web_search",
     "blocked_domains": [
         "polymarket.com",
@@ -127,7 +150,38 @@ def lade_alte_forecasts():
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
-    return {eintrag["id"]: eintrag for eintrag in alte if "id" in eintrag}
+    return {eintrag["id"]: umform_alt(eintrag) for eintrag in alte if "id" in eintrag}
+
+
+def umform_alt(eintrag):
+    """Bringt einen Eintrag aus dem alten Ein-Modell-Format ins neue Format.
+
+    Frueher stand die Prognose flach im Eintrag (probability, reasoning,
+    confidence), weil es nur Claude gab. Jetzt liegen beide Modelle unter
+    "forecasts". Alte Eintraege wandern unter den Claude-Schluessel, statt
+    beim Einlesen einen Fehler auszuloesen - sie stammen zwar von einem
+    anderen Claude-Modell, sind aber besser als eine leere Karte.
+    """
+    if "forecasts" in eintrag:
+        return eintrag
+
+    if "probability" not in eintrag:
+        return {"id": eintrag["id"], "question": eintrag.get("question", ""),
+                "forecasts": {}}
+
+    return {
+        "id": eintrag["id"],
+        "question": eintrag.get("question", ""),
+        "forecasts": {
+            PROGNOSTIKER: {
+                "probability": eintrag["probability"],
+                "reasoning": eintrag.get("reasoning", ""),
+                "confidence": eintrag.get("confidence", ""),
+                "searched": eintrag.get("searched", False),
+                "num_searches": eintrag.get("num_searches", 0),
+            }
+        },
+    }
 
 
 # --- Prompt bauen ----------------------------------------------------------
@@ -167,6 +221,7 @@ def frage_modell(client, frage):
             antwort = client.messages.create(
                 model=MODEL,
                 max_tokens=MAX_TOKENS,
+                temperature=TEMPERATURE,
                 system=SYSTEM_PROMPT,
                 tools=[tool],
                 messages=messages,
@@ -176,6 +231,7 @@ def frage_modell(client, frage):
             antwort = client.messages.create(
                 model=MODEL,
                 max_tokens=MAX_TOKENS,
+                temperature=TEMPERATURE,
                 system=SYSTEM_PROMPT,
                 tools=[WEB_SEARCH_TOOL],
                 tool_choice={"type": "none"},
@@ -280,49 +336,90 @@ def main():
     # behalten wir ihren letzten guten Stand, statt sie ersatzlos zu verlieren.
     alte = lade_alte_forecasts()
 
+    # Zweiter Prognostiker. Fehlt sein Token, laeuft der Lauf einfach nur mit
+    # Claude weiter - eine halbe Vergleichstabelle ist besser als gar keine.
+    openai_token = forecaster_openai.lade_token()
+    if not openai_token:
+        print(f"Hinweis: kein {forecaster_openai.TOKEN_NAME} gesetzt, "
+              f"es wird nur {PROGNOSTIKER} prognostiziert.", file=sys.stderr)
+
     forecasts = []
     abgebrochen = False
+    openai_abgebrochen = False
 
     for i, markt in enumerate(markets, start=1):
         frage = markt["question"]
         prompt = baue_user_prompt(markt)  # Frage + Aufloesungskriterien
-        print(f"[{i}/{len(markets)}] Frage an das Modell: {frage}")
+        print(f"[{i}/{len(markets)}] {frage}")
 
+        eintrag_forecasts = {}
+
+        # --- Claude ---
         try:
             daten, num_searches = hole_forecast(client, prompt)
         except FATALE_FEHLER as fehler:
             # Kein Guthaben, ungueltiger Key, gesperrter Zugang: die naechsten
-            # elf Fragen wuerden genauso scheitern. Schleife sofort beenden und
+            # Fragen wuerden genauso scheitern. Schleife sofort beenden und
             # das Erreichte sichern, statt sinnlos weiterzulaufen.
-            print(f"  Abbruch: {type(fehler).__name__}: {fehler}", file=sys.stderr)
+            print(f"  Abbruch {PROGNOSTIKER}: {type(fehler).__name__}: {fehler}",
+                  file=sys.stderr)
             abgebrochen = True
             break
         except anthropic.APIError as fehler:
             # Voruebergehend (Rate Limit, Serverfehler, Verbindung): nur diese
             # eine Frage ueberspringen, die uebrigen weiter versuchen.
-            print(f"  Warnung: {type(fehler).__name__}, Frage uebersprungen.",
+            print(f"  Warnung {PROGNOSTIKER}: {type(fehler).__name__}, uebersprungen.",
                   file=sys.stderr)
-            continue
+            daten, num_searches = None, 0
 
-        if daten is None:
-            print("  Warnung: keine gueltige Prognose erhalten, ueberspringe.",
+        if daten is not None:
+            eintrag_forecasts[PROGNOSTIKER] = {
+                "probability": daten["probability"],
+                "reasoning": daten["reasoning"],
+                "confidence": daten["confidence"],
+                "searched": num_searches > 0,
+                "num_searches": num_searches,
+            }
+            print(f"  {PROGNOSTIKER}: p={daten['probability']} "
+                  f"({daten['confidence']}, {num_searches} Suchen)")
+
+        # --- OpenAI ---
+        if openai_token and not openai_abgebrochen:
+            gpt, fatal = forecaster_openai.hole_forecast(
+                openai_token, frage, markt.get("description", "")
+            )
+            if fatal:
+                # Gleiche Logik wie oben: kein Guthaben oder ungueltiger Key
+                # wiederholt sich bei jeder weiteren Frage. Claude laeuft aber
+                # weiter, darum nur diesen Prognostiker abschalten.
+                openai_abgebrochen = True
+            elif gpt is not None:
+                eintrag_forecasts[forecaster_openai.PROGNOSTIKER] = {
+                    "probability": gpt["probability"],
+                    "reasoning": gpt["reasoning"],
+                    "confidence": gpt["confidence"],
+                    # Dieses Modell bekommt kein Such-Tool - siehe den
+                    # Docstring in forecaster_openai.py.
+                    "searched": False,
+                    "num_searches": 0,
+                }
+                print(f"  {forecaster_openai.PROGNOSTIKER}: p={gpt['probability']} "
+                      f"({gpt['confidence']}, keine Suche)")
+
+        if not eintrag_forecasts:
+            print("  Warnung: kein Modell hat eine gueltige Prognose geliefert.",
                   file=sys.stderr)
             continue
 
         # Wir speichern die id mit, damit evaluate.py spaeter die Marktquote
         # ueber die id wieder zuordnen kann. Die Quote selbst bleibt hier weg.
-        # searched/num_searches machen transparent, ob die Prognose auf Suche beruht.
+        # Beide Modelle liegen unter "forecasts", damit ein drittes spaeter
+        # ohne Schema-Aenderung dazukommen kann.
         forecasts.append({
             "id": markt["id"],
             "question": frage,
-            "probability": daten["probability"],
-            "reasoning": daten["reasoning"],
-            "confidence": daten["confidence"],
-            "searched": num_searches > 0,
-            "num_searches": num_searches,
+            "forecasts": eintrag_forecasts,
         })
-        print(f"  p={daten['probability']}  confidence={daten['confidence']}  "
-              f"searched={num_searches > 0} ({num_searches})")
 
     # Fuer jede Frage ohne frische Prognose die alte uebernehmen, falls es eine
     # gibt. So bleibt die Seite vollstaendig, auch wenn ein Lauf mittendrin

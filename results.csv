@@ -1,5 +1,18 @@
-question,source,benchmark_type,model_p,market_p,diff
-"Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.82,0.899,-0.079
-Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.97,0.9375,0.0325
-Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.62,0.235,0.385
-Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.05,0.166,-0.116
+question,source,benchmark_type,market_p,claude_p,claude_diff,openai_p,openai_diff
+"Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.899,0.78,-0.119,0.4,-0.499
+Will Abiy Ahmed be the next Prime Minister of Ethiopia?,polymarket,market_price,0.938,0.99,0.052,0.8,-0.138
+Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.235,0.35,0.115,0.14,-0.095
+Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?,polymarket,market_price,0.166,0.05,-0.116,0.38,0.214
+Will there be no Somaliland parliamentary election before 2027?,polymarket,market_price,0.945,0.85,-0.095,0.35,-0.595
+Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?,polymarket,market_price,0.103,0,-0.103,0.57,0.467
+"Nguesso out as President of the Republic of the Congo by December 31, 2026?",polymarket,market_price,0.13,0.05,-0.08,0.22,0.09
+Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?,polymarket,market_price,0.0575,0.05,-0.0075,0.005,-0.0525
+Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.155,0.25,0.095,0.02,-0.135
+"U.S. agrees to a new trade deal with ""South Africa"" before 2027?",polymarket,market_price,0.125,0.15,0.025,0.03,-0.095
+Will UPND win the second-most seats in the 2026 Zambia National Assembly Election?,polymarket,market_price,0.0155,0.08,0.0645,0.27,0.2545
+Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?,polymarket,market_price,0.005,0.08,0.075,0.001,-0.004
+Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?,metaculus,community_forecast,,0.25,,0.15,
+Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?,metaculus,community_forecast,,0.02,,0.07,
+Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?,metaculus,community_forecast,,0.62,,0.82,
+"Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",metaculus,community_forecast,,0.35,,0.43,
+Will Senegal formally restructure its external debt before 2028?,metaculus,community_forecast,,0.62,,0.65,

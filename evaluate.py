@@ -17,6 +17,11 @@ MARKETS_DATEI = "markets.json"
 FORECASTS_DATEI = "forecasts.json"
 RESULTS_DATEI = "results.csv"
 
+# Die Prognostiker in fester Reihenfolge. Sie bestimmt die Spaltenreihenfolge
+# in results.csv; ein dritter kaeme hier dazu, ohne dass sonst etwas
+# angefasst werden muss.
+PROGNOSTIKER = ("claude", "openai")
+
 
 # --- Daten laden -----------------------------------------------------------
 
@@ -46,39 +51,50 @@ def baue_markt_map(markets):
 
 
 def baue_zeilen(forecasts, nach_id):
-    """Baut pro Prognose eine Ergebniszeile.
+    """Baut pro Frage eine Ergebniszeile mit beiden Modellen.
 
-    Spalten: question, source, benchmark_type, model_p, market_p, diff.
+    Spalten: question, source, benchmark_type, market_p, dann je Modell die
+    Schaetzung und ihre Abweichung zum Benchmark. Ein Modell ohne Prognose
+    laesst seine beiden Spalten leer, statt die Zeile zu verwerfen - sonst
+    verschwindet eine Frage aus der Auswertung, nur weil ein Modell aussetzte.
+
     source und benchmark_type stehen mit dabei, weil ein Polymarket-Preis und
     ein Metaculus-Community-Median nicht dasselbe sind und eine spaetere
     Auswertung sie trennen koennen muss.
     """
     zeilen = []
     for prognose in forecasts:
-        model_p = prognose["probability"]
         markt = nach_id.get(prognose["id"])  # ueber die id zuordnen
         market_p = markt.get("market_p") if markt else None
 
         if market_p is None:
-            # Keine Marktquote vorhanden -> diff bleibt leer, wir melden es.
             print(
-                f"Hinweis: keine Marktquote fuer id {prognose['id']}, "
-                f"diff bleibt leer.",
+                f"Hinweis: keine Vergleichszahl fuer id {prognose['id']}, "
+                f"die diff-Spalten bleiben leer.",
                 file=sys.stderr,
             )
-            diff = None
-        else:
-            # Positiv = Modell schaetzt hoeher als der Markt.
-            diff = round(model_p - market_p, 4)
 
-        zeilen.append({
+        zeile = {
             "question": prognose["question"],
             "source": markt.get("source", "unknown") if markt else "unknown",
             "benchmark_type": markt.get("benchmark_type", "") if markt else "",
-            "model_p": model_p,
             "market_p": market_p,
-            "diff": diff,
-        })
+        }
+
+        for name in PROGNOSTIKER:
+            eintrag = (prognose.get("forecasts") or {}).get(name)
+            model_p = eintrag["probability"] if eintrag else None
+
+            if model_p is None or market_p is None:
+                diff = None
+            else:
+                # Positiv = Modell schaetzt hoeher als der Benchmark.
+                diff = round(model_p - market_p, 4)
+
+            zeile[f"{name}_p"] = model_p
+            zeile[f"{name}_diff"] = diff
+
+        zeilen.append(zeile)
     return zeilen
 
 
@@ -90,7 +106,9 @@ def schreibe_csv(zeilen):
     newline="" ist unter Windows wichtig, sonst schreibt der csv-Writer
     zusaetzliche Leerzeilen zwischen die Datensaetze.
     """
-    spalten = ["question", "source", "benchmark_type", "model_p", "market_p", "diff"]
+    spalten = ["question", "source", "benchmark_type", "market_p"]
+    for name in PROGNOSTIKER:
+        spalten.extend([f"{name}_p", f"{name}_diff"])
     try:
         with open(RESULTS_DATEI, "w", newline="", encoding="utf-8") as datei:
             writer = csv.DictWriter(datei, fieldnames=spalten)
@@ -120,10 +138,11 @@ def main():
     schreibe_csv(zeilen)
     print(f"{len(zeilen)} Zeilen in {RESULTS_DATEI} geschrieben.")
 
-    # Kurze Uebersicht auf der Konsole.
+    # Kurze Uebersicht auf der Konsole: Benchmark, dann beide Modelle.
     for z in zeilen:
-        print(f"  [{z['source']}] model={z['model_p']}  markt={z['market_p']}  "
-              f"diff={z['diff']}  {z['question']}")
+        modelle = "  ".join(f"{name}={z[f'{name}_p']}" for name in PROGNOSTIKER)
+        print(f"  [{z['source']}] benchmark={z['market_p']}  {modelle}  "
+              f"{z['question'][:52]}")
 
 
 if __name__ == "__main__":

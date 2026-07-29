@@ -228,24 +228,17 @@ h1 {
 /* Zahlenblock: Benchmark und Claude nebeneinander statt untereinander. Die
    breiteren Karten machen den direkten Vergleich moeglich - beide Zahlen auf
    einer Hoehe, das Auge muss nicht mehr springen. */
+/* auto-fit statt fester Spaltenzahl: kommt ein dritter Prognostiker dazu,
+   ordnet sich das Raster selbst neu, ohne dass das CSS angefasst wird. */
 .metrics {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .9rem;
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  gap: .8rem;
 }
-@media (max-width: 460px) { .metrics { grid-template-columns: 1fr; gap: .6rem; } }
 .metric-col { min-width: 0; }
 .metric-col + .metric-col {
   border-left: 1px solid var(--line-soft);
-  padding-left: .9rem;
-}
-@media (max-width: 460px) {
-  .metric-col + .metric-col {
-    border-left: none;
-    border-top: 1px solid var(--line-soft);
-    padding-left: 0;
-    padding-top: .6rem;
-  }
+  padding-left: .8rem;
 }
 .metric-label {
   display: block;
@@ -304,6 +297,16 @@ summary {
   font-weight: 550;
 }
 details p { margin: .55rem 0 0; font-size: .85rem; color: var(--text-soft); }
+/* Modellname ueber der jeweiligen Begruendung - ohne ihn waeren die beiden
+   Absaetze nicht auseinanderzuhalten. */
+.reason-head {
+  font-size: .68rem !important;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 650;
+  color: var(--muted) !important;
+  margin-top: .8rem !important;
+}
 details .criteria {
   margin: .55rem 0 0;
   font-size: .78rem;
@@ -344,66 +347,51 @@ footer p { margin: 0 0 .35rem; }
 <button class="tab cat-other" data-filter="other"><span class="punkt"></span>Other<span class="count">1</span></button></nav>
 
 <div class="grid">
-<article class="card cat-diplomacy" data-category="diplomacy">
-  <div class="card-head">
-    <span class="badge cat-pill">Diplomacy</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🌍 Somaliland</span>
-  </div>
-  <p class="question">Will Somaliland join the Abraham Accords before 2027?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">24%</span>
-      <div class="bar"><div class="bar-fill" style="width: 24%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">62%</span>
-      <span class="diff up">&#9650; 38 pts</span>
-      <p class="meta">medium confidence &middot; 3 web searches</p>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-    <p>On December 26, 2025, Israel and Somaliland signed a joint declaration of mutual recognition explicitly framed &#x27;in the spirit of the Abraham Accords,&#x27; and Somaliland&#x27;s president pledged to formally join the Accords. However, the resolution requires a formal normalization agreement clearly attributed to the Abraham Accords, not merely a pledge. Given the strong momentum, existing diplomatic ties, and stated intent from both sides, a formal Abraham Accords signing before end of 2026 is likely but not yet confirmed, and Somaliland&#x27;s ambiguous international legal status may complicate formal accession.</p>
-    <p class="criteria">This market will resolve to &quot;Yes&quot; if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
-
-A formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.
-
-The resolution source will be official government statements, however a consensus for credible reporting may also be used.</p>
-  </details>
-</article>
 <article class="card cat-elections" data-category="elections">
   <div class="card-head">
     <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
-    <span class="tag">🇬🇼 Guinea-Bissau</span>
+    <span class="tag">🌍 Somaliland</span>
   </div>
-  <p class="question">Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?</p>
+  <p class="question">Will there be no Somaliland parliamentary election before 2027?</p>
   <div class="metrics">
     <div class="metric-col">
       <span class="metric-label">Market</span>
-      <span class="metric-value">17%</span>
-      <div class="bar"><div class="bar-fill" style="width: 17%"></div></div>
+      <span class="metric-value">94%</span>
+      <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="metric-value">5%</span>
-      <span class="diff down">&#9660; 12 pts</span>
-      <p class="meta">high confidence &middot; 3 web searches</p>
+      <span class="metric-value">85%</span>
+      <span class="diff down">&#9660; 10 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">35%</span>
+      <span class="diff down">&#9660; 60 pts</span>
+      <p class="meta">medium &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-    <p>Embaló was ousted in a military coup on November 26, 2025, one day before official results were due. Guinea-Bissau&#x27;s electoral commission announced it could no longer complete the election after soldiers seized and destroyed all voting data and servers. A military transitional government was installed, making it extremely unlikely the market resolves in Embaló&#x27;s favor unless the election is somehow reconstituted — which seems very unlikely given the destroyed records and changed political landscape.</p>
-    <p class="criteria">Presidential elections are scheduled to be held in Guinea-Bissau on November 23, 2025. If no candidate secures more than 50% of the valid votes in the first round, a second round will be held on November 30, 2025.
+    <p class="reason-head">Claude</p>
+    <p>Somaliland parliamentary elections have been officially postponed from May 2026 to March 2027. With only 5 months remaining until the December 31, 2026 deadline and no current indications of moving elections back to 2026, it is highly likely no election will occur before 2027. However, Somaliland&#x27;s history of electoral delays creates some uncertainty.</p>
+    <p class="reason-head">GPT</p>
+    <p>The Somaliland NEC has publicly scheduled parliamentary elections for late March 2026, making an election before 2027 more likely than not. However, parliamentary elections have been repeatedly delayed in Somaliland, and voter-registration, party-organization, funding, or political disputes could still push the vote beyond December 2026.</p>
+    <p class="criteria">Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.
 
-This market will resolve according to the listed candidate that wins this election. 
+This market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. 
 
-This market includes any potential second round. If the result of this election isn&#x27;t known by December 31, 2026, 11:59 PM ET, the market will resolve to &quot;Other&quot;.
+If no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to &quot;No election before 2027&quot;.
 
-This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/).</p>
+If an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
+
+In the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.
+
+This market&#x27;s resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. 
+
+This market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net).</p>
   </details>
 </article>
 <article class="card cat-elections" data-category="elections">
@@ -421,14 +409,23 @@ This market will resolve based on the result of the election as indicated by a c
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="metric-value">82%</span>
-      <span class="diff down">&#9660; 8 pts</span>
-      <p class="meta">medium confidence &middot; 3 web searches</p>
+      <span class="metric-value">78%</span>
+      <span class="diff down">&#9660; 12 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">40%</span>
+      <span class="diff down">&#9660; 50 pts</span>
+      <p class="meta">medium &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-    <p>Morocco&#x27;s parliamentary elections are scheduled for September 23, 2026. Akhannouch has already announced he will not seek re-election as RNI party leader, effectively ending his path to remain PM. Post-election government formation in Morocco typically takes several weeks, making it highly likely a new PM is appointed before December 31, 2026. The main downside risk is a prolonged coalition negotiation pushing the formal transfer past year-end.</p>
+    <p class="reason-head">Claude</p>
+    <p>Akhannouch announced stepping down as party leader in January 2026, signaling his exit from politics. The September 23 elections will likely result in a new government formation by year-end. Even if his RNI party wins, the King is unlikely to reappoint him as PM given his announced withdrawal and unpopularity. A transition to a new PM is highly probable within the timeframe.</p>
+    <p class="reason-head">GPT</p>
+    <p>Morocco’s 2026 legislative elections create a meaningful chance that the governing coalition changes or that the RNI selects a different prime minister, while public criticism of Akhannouch adds some replacement risk. However, the RNI-led coalition remains viable, and Akhannouch could continue if it retains or renews its governing mandate; there is no clear indication of imminent removal or resignation.</p>
     <p class="criteria">This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
 
 An announcement of Aziz Akhannouch&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
@@ -436,162 +433,6 @@ An announcement of Aziz Akhannouch&#x27;s resignation/removal before this market
 If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
 
 The resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used.</p>
-  </details>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇪🇹 Ethiopia</span>
-  </div>
-  <p class="question">Will Abiy Ahmed be the next Prime Minister of Ethiopia?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">94%</span>
-      <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">97%</span>
-      <span class="diff flat">&#9650; 3 pts</span>
-      <p class="meta">high confidence &middot; 3 web searches</p>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-    <p>Abiy Ahmed&#x27;s Prosperity Party won 438 of 501 contested seats in the June 1, 2026 general elections, securing a dominant parliamentary majority. Multiple credible sources confirm Abiy is set to be sworn in for another term in early October 2026. The only residual uncertainty is a small risk of an unexpected constitutional change (e.g., switch to presidential system) or unforeseen event before the swearing-in.</p>
-    <p class="criteria">General elections are scheduled to be held in Ethiopia on June 1, 2026.
-
-This market will resolve to the next individual who officially assumes the office of Prime Minister of Ethiopia following the 2026 General elections.
-
-To count for resolution, the individual must be officially appointed and sworn in as Prime Minister of Ethiopia. Any interim or caretaker Prime Minister will not count toward the resolution of this market.
-
-If no such Prime Minister takes office by December 31, 2028, 11:59 PM ET, this market will resolve to “Other”.
-
-The primary resolution source for this market will be official information from the Government of Ethiopia; however, a consensus of credible reporting may also be used.</p>
-  </details>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🌍 Somaliland</span>
-  </div>
-  <p class="question">Will there be no Somaliland parliamentary election before 2027?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">94%</span>
-      <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.
-
-This market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. 
-
-If no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to &quot;No election before 2027&quot;.
-
-If an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
-
-In the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.
-
-This market&#x27;s resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. 
-
-This market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net).</p>
-  </details>
-</article>
-<article class="card cat-other" data-category="other">
-  <div class="card-head">
-    <span class="badge cat-pill">Other</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇨🇬 Congo</span>
-  </div>
-  <p class="question">Will the Republic of the Congo have an Ebola case in 2026?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">16%</span>
-      <div class="bar"><div class="bar-fill" style="width: 16%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">This market will resolve to &quot;Yes&quot; if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
-
-Any active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.
-
-The primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice.</p>
-  </details>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇨🇬 Congo</span>
-  </div>
-  <p class="question">Nguesso out as President of the Republic of the Congo by December 31, 2026?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">13%</span>
-      <div class="bar"><div class="bar-fill" style="width: 13%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
-
-An announcement of Denis Sassou Nguesso&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
-
-If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
-
-The resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used.</p>
-  </details>
-</article>
-<article class="card cat-economy" data-category="economy">
-  <div class="card-head">
-    <span class="badge cat-pill">Economy</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇿🇦 South Africa</span>
-  </div>
-  <p class="question">U.S. agrees to a new trade deal with &quot;South Africa&quot; before 2027?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">12%</span>
-      <div class="bar"><div class="bar-fill" style="width: 12%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">This market will resolve to &quot;Yes&quot; if a free trade agreement with the specified country or entity becomes law in the United States by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
-
-This includes both agreements that become law through Senate ratification and Presidential approval, or through the enactment of a Congressional-Executive Agreement signed into law by the President.
-
-The resolution source will be a consensus of credible reporting.</p>
   </details>
 </article>
 <article class="card cat-elections" data-category="elections">
@@ -609,12 +450,23 @@ The resolution source will be a consensus of credible reporting.</p>
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">0%</span>
+      <span class="diff down">&#9660; 10 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">57%</span>
+      <span class="diff up">&#9650; 47 pts</span>
+      <p class="meta">low &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>The November 23, 2025 election results were annulled by a military coup before official publication. No official CNE results exist to determine which party won the most seats. The resolution criteria cannot be met as they require official government results, which do not exist for this election.</p>
+    <p class="reason-head">GPT</p>
+    <p>The Nô Kumpu Guiné platform appears to bring together several major opposition parties and could consolidate the anti-incumbent vote, giving it a plausible path to surpass the fragmented governing camp. However, Guinea-Bissau’s fluid alliances, weak polling evidence, and substantial risk of electoral disruption make a clear plurality uncertain. The election is currently scheduled to occur, but the possibility of delay also modestly reduces the probability of a YES resolution.</p>
     <p class="criteria">Parliamentary elections are scheduled to be held in Guinea-Bissau on November 23, 2025.
 
 This market will resolve to the political party or coalition that wins the greatest number of seats in the National People&#x27;s Assembly of Guinea-Bissau.
@@ -632,42 +484,6 @@ This market will resolve based on the result of the election as indicated by a c
   <div class="card-head">
     <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
-    <span class="tag">🇨🇫 Central African Republic</span>
-  </div>
-  <p class="question">Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?</p>
-  <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">6%</span>
-      <div class="bar"><div class="bar-fill" style="width: 6%"></div></div>
-    </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
-    </div>
-  </div>
-  <details>
-    <summary>Details</summary>
-
-    <p class="criteria">The 2025 Central African Republic general election is scheduled to be held on December 28, 2025, to elect the 140 members of the National Assembly (CAR’s unicameral parliament).
-
-This market will resolve according to the party that controls the most seats in the Central African Republic National Assembly as a result of the next Central African parliamentary election.
-
-If initial voting in the next Central African parliamentary election does not occur by June 30, 2026, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
-
-This market may remain open to consider any second-round votes held to determine winners in individual single-member constituencies, as long as the remaining undecided seats can still change which party wins the most seats overall, or maximally until December 31, 2026, 11:59 PM ET, after which the market will resolve based on the results available at that time.
-
-In the case of a tie between this party and any other for the most seats held, this market will resolve in favor of the party whose listed abbreviation comes first in alphabetical order.
-
-This market’s resolution will be based solely on the number of seats won by this party, not any coalition of which it may be a part.
-
-This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/).</p>
-  </details>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
     <span class="tag">🇿🇲 Zambia</span>
   </div>
   <p class="question">Will UPND win the second-most seats in the 2026 Zambia National Assembly Election?</p>
@@ -679,12 +495,23 @@ This market will resolve based on the result of the election as indicated by a c
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">8%</span>
+      <span class="diff up">&#9650; 6 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">27%</span>
+      <span class="diff up">&#9650; 25 pts</span>
+      <p class="meta">low &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>All available polling data, seat projections, and analyses indicate UPND will win the most seats, not the second-most. UPND leads with 60% presidential support and projected structural advantages. The opposition is fragmented across multiple coalitions. For UPND to win second-most seats would require a dramatic reversal of current trends.</p>
+    <p class="reason-head">GPT</p>
+    <p>UPND is currently the governing party and is more likely than any single rival to retain the largest parliamentary representation in 2026, despite economic dissatisfaction and opposition efforts to unite. However, a coordinated opposition campaign—particularly involving PF-aligned forces or former President Lungu—could defeat UPND electorally while leaving it as the largest opposition party, making second place plausible. Opposition fragmentation and UPND’s incumbency advantages make UPND finishing third or lower less likely than either first or second.</p>
     <p class="criteria">Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.
 
 This market will resolve to the political party that wins the second-highest number of seats in the National Assembly of Zambia as a result of this election.
@@ -706,6 +533,248 @@ This market will resolve based on the results of the elections, as indicated by 
   <div class="card-head">
     <span class="badge cat-pill">Elections</span>
     <span class="badge">Polymarket</span>
+    <span class="tag">🇬🇼 Guinea-Bissau</span>
+  </div>
+  <p class="question">Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">17%</span>
+      <div class="bar"><div class="bar-fill" style="width: 17%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">5%</span>
+      <span class="diff down">&#9660; 12 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">38%</span>
+      <span class="diff up">&#9650; 21 pts</span>
+      <p class="meta">low &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>The November 23, 2025 election was interrupted by a military coup on November 26 before official results could be released by the CNE. Although leaked minutes suggest Dias won, the resolution criteria explicitly require official CNE results. With no official results published and new elections scheduled for December 6, 2026, the market will likely resolve to &#x27;Other&#x27; by the December 31, 2026 deadline.</p>
+    <p class="reason-head">GPT</p>
+    <p>Embaló has the advantages of incumbency, state visibility, and a fragmented opposition, but his tenure has been highly controversial and the opposition PAIGC-linked forces remain electorally competitive. Guinea-Bissau’s unstable political environment also creates meaningful risk that the scheduled election or its official outcome is disrupted, which would not necessarily count as an Embaló victory.</p>
+    <p class="criteria">Presidential elections are scheduled to be held in Guinea-Bissau on November 23, 2025. If no candidate secures more than 50% of the valid votes in the first round, a second round will be held on November 30, 2025.
+
+This market will resolve according to the listed candidate that wins this election. 
+
+This market includes any potential second round. If the result of this election isn&#x27;t known by December 31, 2026, 11:59 PM ET, the market will resolve to &quot;Other&quot;.
+
+This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Guinea-Bissau, specifically the National Election Commission (Comissão Nacional de Eleições, CNE) (http://www.cne.gw/).</p>
+  </details>
+</article>
+<article class="card cat-elections" data-category="elections">
+  <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇪🇹 Ethiopia</span>
+  </div>
+  <p class="question">Will Abiy Ahmed be the next Prime Minister of Ethiopia?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">94%</span>
+      <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">99%</span>
+      <span class="diff up">&#9650; 5 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">80%</span>
+      <span class="diff down">&#9660; 14 pts</span>
+      <p class="meta">medium &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>Abiy Ahmed&#x27;s Prosperity Party won 438 seats in the June 2026 elections, securing a clear parliamentary majority. Parliament officially confirmed him for a new five-year term, meeting the formal requirement of official appointment and swearing-in as Prime Minister following the 2026 elections. This is not an interim position.</p>
+    <p class="reason-head">GPT</p>
+    <p>Abiy Ahmed and the Prosperity Party retain strong control over Ethiopia’s federal political system, making his reappointment after the 2026 election the most likely outcome. The main risks are election disruption, worsening internal conflict, or a negotiated/internal party succession, but the formal appointment and swearing-in requirement leaves no indication that another candidate is currently more likely.</p>
+    <p class="criteria">General elections are scheduled to be held in Ethiopia on June 1, 2026.
+
+This market will resolve to the next individual who officially assumes the office of Prime Minister of Ethiopia following the 2026 General elections.
+
+To count for resolution, the individual must be officially appointed and sworn in as Prime Minister of Ethiopia. Any interim or caretaker Prime Minister will not count toward the resolution of this market.
+
+If no such Prime Minister takes office by December 31, 2028, 11:59 PM ET, this market will resolve to “Other”.
+
+The primary resolution source for this market will be official information from the Government of Ethiopia; however, a consensus of credible reporting may also be used.</p>
+  </details>
+</article>
+<article class="card cat-other" data-category="other">
+  <div class="card-head">
+    <span class="badge cat-pill">Other</span>
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇨🇬 Congo</span>
+  </div>
+  <p class="question">Will the Republic of the Congo have an Ebola case in 2026?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">16%</span>
+      <div class="bar"><div class="bar-fill" style="width: 16%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">25%</span>
+      <span class="diff up">&#9650; 10 pts</span>
+      <p class="meta">medium &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">2%</span>
+      <span class="diff down">&#9660; 14 pts</span>
+      <p class="meta">medium &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>No confirmed cases have been reported in the Republic of the Congo as of late July 2026, despite the rapid spread of Ebola in neighboring DRC. While the outbreak is the fastest-growing on record, it remains concentrated in eastern DRC provinces. The Republic of the Congo shares a border with DRC and has heightened surveillance, but cross-border spread would require specific transmission chains. With 5 months remaining, the risk is non-trivial but moderate.</p>
+    <p class="reason-head">GPT</p>
+    <p>The Republic of the Congo has experienced Ebola outbreaks historically, and its proximity to the DRC creates some risk of importation. However, Ebola transmission there is rare, and no established outbreak or confirmed case currently indicates a high near-term likelihood through the end of 2026.</p>
+    <p class="criteria">This market will resolve to &quot;Yes&quot; if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+
+Any active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.
+
+The primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice.</p>
+  </details>
+</article>
+<article class="card cat-diplomacy" data-category="diplomacy">
+  <div class="card-head">
+    <span class="badge cat-pill">Diplomacy</span>
+    <span class="badge">Polymarket</span>
+    <span class="tag">🌍 Somaliland</span>
+  </div>
+  <p class="question">Will Somaliland join the Abraham Accords before 2027?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">24%</span>
+      <div class="bar"><div class="bar-fill" style="width: 24%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">35%</span>
+      <span class="diff up">&#9650; 12 pts</span>
+      <p class="meta">medium &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">14%</span>
+      <span class="diff down">&#9660; 10 pts</span>
+      <p class="meta">medium &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>Somaliland has pledged to join the Abraham Accords following Israel&#x27;s December 2025 recognition, but has not yet formally signed as of July 2026. While political will exists, formal accession requires a completed bilateral agreement. With 5 months remaining, this is possible but faces obstacles including Somaliland&#x27;s contested international status and regional opposition.</p>
+    <p class="reason-head">GPT</p>
+    <p>Somaliland has no broad international recognition and would face substantial diplomatic and legal obstacles to signing a formal agreement with Israel under the Abraham Accords. Although strategic contacts or a prospective Israel-Somaliland recognition arrangement could emerge, publicly acknowledged formal normalization by the end of 2026 appears unlikely.</p>
+    <p class="criteria">This market will resolve to &quot;Yes&quot; if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+
+A formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.
+
+The resolution source will be official government statements, however a consensus for credible reporting may also be used.</p>
+  </details>
+</article>
+<article class="card cat-economy" data-category="economy">
+  <div class="card-head">
+    <span class="badge cat-pill">Economy</span>
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇿🇦 South Africa</span>
+  </div>
+  <p class="question">U.S. agrees to a new trade deal with &quot;South Africa&quot; before 2027?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">12%</span>
+      <div class="bar"><div class="bar-fill" style="width: 12%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">15%</span>
+      <span class="diff flat">&#9650; 2 pts</span>
+      <p class="meta">medium &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">3%</span>
+      <span class="diff down">&#9660; 10 pts</span>
+      <p class="meta">high &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>While South Africa and the US are beginning formal negotiations on a reciprocal trade agreement, historical precedent shows SACU FTA negotiations took years and were suspended in 2006. The requirement for a fully negotiated, drafted, and congressionally-enacted agreement by December 31, 2026 leaves only ~5 months, and structural constraints from SACU membership complicate bilateral negotiations. Diplomatic tensions further reduce likelihood.</p>
+    <p class="reason-head">GPT</p>
+    <p>The United States and South Africa do not currently have a bilateral free trade agreement, and their trade relationship has recently faced political tensions rather than a formal FTA negotiation process. Enacting an FTA into U.S. law by December 31, 2026 would require unusually rapid negotiations and congressional approval, making this unlikely.</p>
+    <p class="criteria">This market will resolve to &quot;Yes&quot; if a free trade agreement with the specified country or entity becomes law in the United States by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+
+This includes both agreements that become law through Senate ratification and Presidential approval, or through the enactment of a Congressional-Executive Agreement signed into law by the President.
+
+The resolution source will be a consensus of credible reporting.</p>
+  </details>
+</article>
+<article class="card cat-elections" data-category="elections">
+  <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇨🇬 Congo</span>
+  </div>
+  <p class="question">Nguesso out as President of the Republic of the Congo by December 31, 2026?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">13%</span>
+      <div class="bar"><div class="bar-fill" style="width: 13%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">5%</span>
+      <span class="diff down">&#9660; 8 pts</span>
+      <p class="meta">high &middot; 2 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">22%</span>
+      <span class="diff up">&#9650; 9 pts</span>
+      <p class="meta">medium &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>Sassou Nguesso was just re-elected in March 2026 with 94.82% of the vote and inaugurated in April 2026 for a five-year term. He maintains firm control over the political system with no credible threats to his presidency. The timeframe until December 31, 2026 is only five months, making removal or resignation highly unlikely absent unforeseen health emergencies or major political crises, for which there are no current indicators.</p>
+    <p class="reason-head">GPT</p>
+    <p>Sassou Nguesso is highly entrenched, and his ruling party is expected to retain control of the 2026 presidential process, making a voluntary or electoral exit unlikely. However, he will be 83 by the end of 2026, so death, serious illness, an internal succession move, or an unlikely coup creates a meaningful chance that he ceases to hold office.</p>
+    <p class="criteria">This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
+
+An announcement of Denis Sassou Nguesso&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
+
+If the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.
+
+The resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used.</p>
+  </details>
+</article>
+<article class="card cat-elections" data-category="elections">
+  <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
+    <span class="badge">Polymarket</span>
     <span class="tag">🇿🇲 Zambia</span>
   </div>
   <p class="question">Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?</p>
@@ -717,12 +786,23 @@ This market will resolve based on the results of the elections, as indicated by 
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">8%</span>
+      <span class="diff up">&#9650; 8 pts</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">0%</span>
+      <span class="diff flat">&#9679; &lt;1 pt</span>
+      <p class="meta">high &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>NRPUP faces insurmountable structural disadvantages: fielding candidates in only ~150 of 226 constituencies versus UPND&#x27;s complete coverage, trailing significantly in presidential vote share (25% vs 67% in projections), and lacking unopposed seats. Even winning all contested seats would be insufficient to overcome UPND&#x27;s automatic gains in uncontested constituencies and proportional representation advantage.</p>
+    <p class="reason-head">GPT</p>
+    <p>NRPUP appears to have little established electoral strength or parliamentary presence in Zambia, while the main contest is likely to be led by larger parties such as UPND and PF or its successor/allied opposition forces. It is therefore extremely unlikely to win the greatest number of National Assembly seats in 2026.</p>
     <p class="criteria">Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.
 
 This market will resolve to the political party that wins the greatest number of seats in the National Assembly of Zambia as a result of this election.
@@ -743,6 +823,53 @@ This market will resolve based on the results of the elections, as indicated by 
 <article class="card cat-elections" data-category="elections">
   <div class="card-head">
     <span class="badge cat-pill">Elections</span>
+    <span class="badge">Polymarket</span>
+    <span class="tag">🇨🇫 Central African Republic</span>
+  </div>
+  <p class="question">Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?</p>
+  <div class="metrics">
+    <div class="metric-col">
+      <span class="metric-label">Market</span>
+      <span class="metric-value">6%</span>
+      <div class="bar"><div class="bar-fill" style="width: 6%"></div></div>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">Claude</span>
+      <span class="metric-value">5%</span>
+      <span class="diff flat">&#9660; 1 pt</span>
+      <p class="meta">high &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">0%</span>
+      <span class="diff down">&#9660; 5 pts</span>
+      <p class="meta">high &middot; no web search</p>
+    </div>
+  </div>
+  <details>
+    <summary>Details</summary>
+    <p class="reason-head">Claude</p>
+    <p>The United Hearts Movement (MCU) won 50 of 74 declared seats in the first round of the December 2025 election, establishing a commanding lead. The UNDP is not mentioned in any results and historically won only 13 seats in 2015-16. For UNDP to win the most seats overall would require an unprecedented reversal in the second round.</p>
+    <p class="reason-head">GPT</p>
+    <p>The National Union for Democracy and Progress is not the dominant parliamentary force in the Central African Republic; President Touadéra’s MCU and allied parties are far more likely to win the most seats. Given the party’s limited prior representation and the fragmented but pro-government electoral environment, an outright plurality for NUDP is highly unlikely, even if the election occurs on schedule.</p>
+    <p class="criteria">The 2025 Central African Republic general election is scheduled to be held on December 28, 2025, to elect the 140 members of the National Assembly (CAR’s unicameral parliament).
+
+This market will resolve according to the party that controls the most seats in the Central African Republic National Assembly as a result of the next Central African parliamentary election.
+
+If initial voting in the next Central African parliamentary election does not occur by June 30, 2026, 11:59 PM ET, this market will resolve to &quot;Other&quot;.
+
+This market may remain open to consider any second-round votes held to determine winners in individual single-member constituencies, as long as the remaining undecided seats can still change which party wins the most seats overall, or maximally until December 31, 2026, 11:59 PM ET, after which the market will resolve based on the results available at that time.
+
+In the case of a tie between this party and any other for the most seats held, this market will resolve in favor of the party whose listed abbreviation comes first in alphabetical order.
+
+This market’s resolution will be based solely on the number of seats won by this party, not any coalition of which it may be a part.
+
+This market will resolve based on the result of the election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Government of the Central African Republic, specifically the National Elections Authority (https://www.ane-rca.org/).</p>
+  </details>
+</article>
+<article class="card cat-elections" data-category="elections">
+  <div class="card-head">
+    <span class="badge cat-pill">Elections</span>
     <span class="badge">Metaculus</span>
     <span class="tag">🇿🇲 Zambia</span>
   </div>
@@ -754,12 +881,23 @@ This market will resolve based on the results of the elections, as indicated by 
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">25%</span>
+
+      <p class="meta">medium &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">15%</span>
+
+      <p class="meta">medium &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>Recent polls show Hichilema leading with 55-63% of the vote, consistently below the 65% threshold. While he won 59% in 2021 and has improved economic indicators, reaching 65% would require a significant increase from current polling. The fragmented opposition and his incumbency advantage support a strong victory, but not necessarily a landslide of 65%+.</p>
+    <p class="reason-head">GPT</p>
+    <p>Hichilema won about 59% in 2021, so reaching 65% would require a substantial additional share despite the typical electoral costs of incumbency and economic dissatisfaction. Opposition fragmentation could help him, but a result at or above 65% remains relatively unlikely absent an unusually weak or divided opposition field.</p>
     <p class="criteria">This question resolves as **Yes** if President Hakainde Hichilema receives 65% or more of the first round votes in the [2026 Zambian presidential election](https://en.wikipedia.org/wiki/2026_Zambian_general_election). The question resolves based on [official results](https://www.elections.org.zm/) or [credible sources](https://www.metaculus.com/faq/#definitions).&amp;#x20;</p>
   </details>
 </article>
@@ -777,12 +915,23 @@ This market will resolve based on the results of the elections, as indicated by 
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">2%</span>
+
+      <p class="meta">high &middot; 2 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">7%</span>
+
+      <p class="meta">high &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>The ICJ case is still in the written pleadings phase with South Africa&#x27;s reply deadline set for November 22, 2027. Oral hearings and judgment would necessarily follow, making a merits decision before January 1, 2027 procedurally impossible. Even optimistic timelines suggest judgment by late 2027 or early 2028.</p>
+    <p class="reason-head">GPT</p>
+    <p>The ICJ has issued provisional-measures orders, but these did not determine that Israel committed genocide or otherwise finally violated international law. Given the normal timetable for written pleadings and hearings in a contentious genocide case, a merits judgment before January 1, 2027 appears unlikely.</p>
     <p class="criteria">This question will resolve as **Yes** if, before January 1, 2027, the International Court of Justice finds that Israel has violated international law in South Africa&#x27;s genocide case. If this does not happen before January 1, 2027, this question will resolve as **No**.</p>
   </details>
 </article>
@@ -800,12 +949,23 @@ This market will resolve based on the results of the elections, as indicated by 
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">62%</span>
+
+      <p class="meta">medium &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">82%</span>
+
+      <p class="meta">medium &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>The first qualifying IPC Sudan product (June 3, 2026) covering June-September 2026 projections identifies 14 areas at risk of Famine but does not formally classify any area in Phase 5 Famine. While malnutrition thresholds have been surpassed in Um Baru, Kernoi, and At Tina, these are not formal area-level Famine classifications. The second qualifying product would need to formally classify at least one area in Phase 5 for the question to resolve YES. Given the severe conditions and conflict trajectory, this remains plausible but uncertain.</p>
+    <p class="reason-head">GPT</p>
+    <p>Sudan already has multiple IPC/FRC-identified famine areas, and the continuing conflict, displacement, access constraints, and disrupted food systems make persistence or re-emergence of area-level Famine classifications into the June–September 2026 period likely. The main uncertainty is whether qualifying IPC products are published by the deadline and whether improving access or political conditions leads to classifications below Phase 5.</p>
     <p class="criteria">This question resolves **YES** if **either of the first two qualifying IPC Sudan acute food insecurity products** classifies **at least one area in Famine (IPC Phase 5)** at the area level, for any analysis or projection period falling on or after 1 June 2026. It resolves **NO** if the first two qualifying products both make the relevant area-level classifications but neither classifies any area in Famine (IPC Phase 5) — or if only one qualifying product has been published by 31 December 2026 and it classifies no area in Famine.
 
 A &quot;qualifying IPC Sudan acute food insecurity product&quot; is an IPC-produced Sudan product (a full IPC analysis, an IPC Global Initiative Special Snapshot, or an IPC Alert), published on the IPC website (ipcinfo.org) **after 14 May 2026**, that (a) makes area-level IPC phase classifications for Sudan and (b) whose current period or a formally classified projection period covers any time on or after 1 June 2026 (the June–September 2026 lean season or later). The &quot;first two qualifying products&quot; are the first two such products in publication order. A YES resolves as soon as either of them classifies an area in Famine.
@@ -827,12 +987,23 @@ A Famine determination counts if it is made **either** by the IPC analysis team 
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">35%</span>
+
+      <p class="meta">medium &middot; 4 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">43%</span>
+
+      <p class="meta">medium &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>While estimates ranging from 150,000-400,000 exist in media reports, peer-reviewed publications and formal organization estimates have remained below 200,000 (e.g., Lancet study: 61,000 for Khartoum alone; academic estimates: 62,000 total). The methodological challenges in conflict zones and the conservative approach of published research suggest moderate but not high probability of a &gt;200,000 estimate appearing by year-end 2026.</p>
+    <p class="reason-head">GPT</p>
+    <p>The conflict’s duration, famine, displacement, and severe undercounting make a nationwide excess-mortality estimate above 200,000 plausible by 2026, especially if researchers extrapolate from existing Khartoum and other local studies. However, the resolution requires a qualifying publication with a central estimate—not merely a cited or upper-bound figure—and methodological caution may keep formal estimates below the threshold or delay publication.</p>
     <p class="criteria">This question resolves **YES** if, between 1 January 2026 and 31 December 2026 (UTC), any of the following entities publishes a Sudan-war total **excess-mortality estimate (direct + indirect)** with a **central / point estimate exceeding 200,000 deaths**, applied at **nationwide** scope (i.e., covering &quot;Sudan&quot;, &quot;the Sudan war&quot;, or &quot;the conflict&quot; - not a single state, single city, or single event):
 
 1. A peer-reviewed article in a PubMed-indexed medical or epidemiological journal (the *Lancet* family, *BMJ* family, *NEJM*, *JAMA*, *PLOS*, *Nature*, *Science*, *Conflict and Health*, or similar);
@@ -859,12 +1030,23 @@ This question resolves **NO** if no such publication appears by 31 December 2026
     </div>
     <div class="metric-col">
       <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-value">62%</span>
+
+      <p class="meta">medium &middot; 3 web searches</p>
+    </div>
+    <div class="metric-col">
+      <span class="metric-label">GPT</span>
+      <span class="metric-value">65%</span>
+
+      <p class="meta">medium &middot; no web search</p>
     </div>
   </div>
   <details>
     <summary>Details</summary>
-
+    <p class="reason-head">Claude</p>
+    <p>Senegal has just begun selecting a financial advisor (July 2026) and faces severe debt pressures making restructuring likely. However, formal restructuring agreements typically take 2-4 years based on comparable cases (Ghana, Zambia, Ethiopia). With only 18 months until January 2028, while acceleration is possible given the crisis, completing formal negotiations and signing an agreement by the deadline is moderately likely but not highly probable.</p>
+    <p class="reason-head">GPT</p>
+    <p>Senegal’s undisclosed borrowing has sharply worsened its debt burden, disrupted its IMF program, and created substantial external debt-service pressures, making creditor negotiations or a reprofiling increasingly likely before 2028. However, the government has emphasized avoiding default and may pursue fiscal consolidation and new IMF support without reaching a formal restructuring agreement, so the probability is below certain.</p>
     <p class="criteria">This question will resolve as Yes if, before January 1, 2028, Senegal announces a formal debt restructuring agreement.
 
 The question may resolve according to official announcements by the Senegalese government or consensus reporting in reputable financial journals like the Wall Street Journal or Financial Times.</p>
@@ -876,7 +1058,7 @@ The question may resolve according to official announcements by the Senegalese g
 <p>Forecasts come from the Claude API (<code>claude-sonnet-4-6</code>) with optional
 web search; the benchmark is never passed into the prompt, so the estimate is
 independent rather than a restatement of the market.</p>
-<p>Benchmarks from Metaculus and Polymarket &middot; last updated 28 July 2026, 18:58 UTC &middot;
+<p>Benchmarks from Metaculus and Polymarket &middot; last updated 29 July 2026, 07:09 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source and method</a></p>
 </footer>
 </div>

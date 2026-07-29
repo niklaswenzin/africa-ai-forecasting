@@ -2,37 +2,341 @@
   {
     "id": "polymarket-620335",
     "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
-    "probability": 0.82,
-    "reasoning": "Morocco's parliamentary elections are scheduled for September 23, 2026. Akhannouch has already announced he will not seek re-election as RNI party leader, effectively ending his path to remain PM. Post-election government formation in Morocco typically takes several weeks, making it highly likely a new PM is appointed before December 31, 2026. The main downside risk is a prolonged coalition negotiation pushing the formal transfer past year-end.",
-    "confidence": "medium",
-    "searched": true,
-    "num_searches": 3
+    "forecasts": {
+      "claude": {
+        "probability": 0.78,
+        "reasoning": "Akhannouch announced stepping down as party leader in January 2026, signaling his exit from politics. The September 23 elections will likely result in a new government formation by year-end. Even if his RNI party wins, the King is unlikely to reappoint him as PM given his announced withdrawal and unpopularity. A transition to a new PM is highly probable within the timeframe.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.4,
+        "reasoning": "Morocco’s 2026 legislative elections create a meaningful chance that the governing coalition changes or that the RNI selects a different prime minister, while public criticism of Akhannouch adds some replacement risk. However, the RNI-led coalition remains viable, and Akhannouch could continue if it retains or renews its governing mandate; there is no clear indication of imminent removal or resignation.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
   },
   {
     "id": "polymarket-2063128",
     "question": "Will Abiy Ahmed be the next Prime Minister of Ethiopia?",
-    "probability": 0.97,
-    "reasoning": "Abiy Ahmed's Prosperity Party won 438 of 501 contested seats in the June 1, 2026 general elections, securing a dominant parliamentary majority. Multiple credible sources confirm Abiy is set to be sworn in for another term in early October 2026. The only residual uncertainty is a small risk of an unexpected constitutional change (e.g., switch to presidential system) or unforeseen event before the swearing-in.",
-    "confidence": "high",
-    "searched": true,
-    "num_searches": 3
+    "forecasts": {
+      "claude": {
+        "probability": 0.99,
+        "reasoning": "Abiy Ahmed's Prosperity Party won 438 seats in the June 2026 elections, securing a clear parliamentary majority. Parliament officially confirmed him for a new five-year term, meeting the formal requirement of official appointment and swearing-in as Prime Minister following the 2026 elections. This is not an interim position.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.8,
+        "reasoning": "Abiy Ahmed and the Prosperity Party retain strong control over Ethiopia’s federal political system, making his reappointment after the 2026 election the most likely outcome. The main risks are election disruption, worsening internal conflict, or a negotiated/internal party succession, but the formal appointment and swearing-in requirement leaves no indication that another candidate is currently more likely.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
   },
   {
     "id": "polymarket-1076686",
     "question": "Will Somaliland join the Abraham Accords before 2027?",
-    "probability": 0.62,
-    "reasoning": "On December 26, 2025, Israel and Somaliland signed a joint declaration of mutual recognition explicitly framed 'in the spirit of the Abraham Accords,' and Somaliland's president pledged to formally join the Accords. However, the resolution requires a formal normalization agreement clearly attributed to the Abraham Accords, not merely a pledge. Given the strong momentum, existing diplomatic ties, and stated intent from both sides, a formal Abraham Accords signing before end of 2026 is likely but not yet confirmed, and Somaliland's ambiguous international legal status may complicate formal accession.",
-    "confidence": "medium",
-    "searched": true,
-    "num_searches": 3
+    "forecasts": {
+      "claude": {
+        "probability": 0.35,
+        "reasoning": "Somaliland has pledged to join the Abraham Accords following Israel's December 2025 recognition, but has not yet formally signed as of July 2026. While political will exists, formal accession requires a completed bilateral agreement. With 5 months remaining, this is possible but faces obstacles including Somaliland's contested international status and regional opposition.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.14,
+        "reasoning": "Somaliland has no broad international recognition and would face substantial diplomatic and legal obstacles to signing a formal agreement with Israel under the Abraham Accords. Although strategic contacts or a prospective Israel-Somaliland recognition arrangement could emerge, publicly acknowledged formal normalization by the end of 2026 appears unlikely.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
   },
   {
     "id": "polymarket-668328",
     "question": "Will Umaro Sissoco Embaló win the 2025 Guinea-Bissau presidential election?",
-    "probability": 0.05,
-    "reasoning": "Embaló was ousted in a military coup on November 26, 2025, one day before official results were due. Guinea-Bissau's electoral commission announced it could no longer complete the election after soldiers seized and destroyed all voting data and servers. A military transitional government was installed, making it extremely unlikely the market resolves in Embaló's favor unless the election is somehow reconstituted — which seems very unlikely given the destroyed records and changed political landscape.",
-    "confidence": "high",
-    "searched": true,
-    "num_searches": 3
+    "forecasts": {
+      "claude": {
+        "probability": 0.05,
+        "reasoning": "The November 23, 2025 election was interrupted by a military coup on November 26 before official results could be released by the CNE. Although leaked minutes suggest Dias won, the resolution criteria explicitly require official CNE results. With no official results published and new elections scheduled for December 6, 2026, the market will likely resolve to 'Other' by the December 31, 2026 deadline.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.38,
+        "reasoning": "Embaló has the advantages of incumbency, state visibility, and a fragmented opposition, but his tenure has been highly controversial and the opposition PAIGC-linked forces remain electorally competitive. Guinea-Bissau’s unstable political environment also creates meaningful risk that the scheduled election or its official outcome is disrupted, which would not necessarily count as an Embaló victory.",
+        "confidence": "low",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-948391",
+    "question": "Will there be no Somaliland parliamentary election before 2027?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.85,
+        "reasoning": "Somaliland parliamentary elections have been officially postponed from May 2026 to March 2027. With only 5 months remaining until the December 31, 2026 deadline and no current indications of moving elections back to 2026, it is highly likely no election will occur before 2027. However, Somaliland's history of electoral delays creates some uncertainty.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.35,
+        "reasoning": "The Somaliland NEC has publicly scheduled parliamentary elections for late March 2026, making an election before 2027 more likely than not. However, parliamentary elections have been repeatedly delayed in Somaliland, and voter-registration, party-organization, funding, or political disputes could still push the vote beyond December 2026.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-668685",
+    "question": "Will Platforma Reupblicana “Nô Kumpu Guiné” win the most seats in the 2025 Guinea-Bissau National People’s Assembly election?",
+    "forecasts": {
+      "claude": {
+        "probability": 0,
+        "reasoning": "The November 23, 2025 election results were annulled by a military coup before official publication. No official CNE results exist to determine which party won the most seats. The resolution criteria cannot be met as they require official government results, which do not exist for this election.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.57,
+        "reasoning": "The Nô Kumpu Guiné platform appears to bring together several major opposition parties and could consolidate the anti-incumbent vote, giving it a plausible path to surpass the fragmented governing camp. However, Guinea-Bissau’s fluid alliances, weak polling evidence, and substantial risk of electoral disruption make a clear plurality uncertain. The election is currently scheduled to occur, but the possibility of delay also modestly reduces the probability of a YES resolution.",
+        "confidence": "low",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-921660",
+    "question": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.05,
+        "reasoning": "Sassou Nguesso was just re-elected in March 2026 with 94.82% of the vote and inaugurated in April 2026 for a five-year term. He maintains firm control over the political system with no credible threats to his presidency. The timeframe until December 31, 2026 is only five months, making removal or resignation highly unlikely absent unforeseen health emergencies or major political crises, for which there are no current indicators.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 2
+      },
+      "openai": {
+        "probability": 0.22,
+        "reasoning": "Sassou Nguesso is highly entrenched, and his ruling party is expected to retain control of the 2026 presidential process, making a voluntary or electoral exit unlikely. However, he will be 83 by the end of 2026, so death, serious illness, an internal succession move, or an unlikely coup creates a meaningful chance that he ceases to hold office.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-799988",
+    "question": "Will the National Union for Democracy and Progress win the most seats in the 2025 Central African Republic National Assembly election?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.05,
+        "reasoning": "The United Hearts Movement (MCU) won 50 of 74 declared seats in the first round of the December 2025 election, establishing a commanding lead. The UNDP is not mentioned in any results and historically won only 13 seats in 2015-16. For UNDP to win the most seats overall would require an unprecedented reversal in the second round.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.005,
+        "reasoning": "The National Union for Democracy and Progress is not the dominant parliamentary force in the Central African Republic; President Touadéra’s MCU and allied parties are far more likely to win the most seats. Given the party’s limited prior representation and the fragmented but pro-government electoral environment, an outright plurality for NUDP is highly unlikely, even if the election occurs on schedule.",
+        "confidence": "high",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-2326375",
+    "question": "Will the Republic of the Congo have an Ebola case in 2026?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.25,
+        "reasoning": "No confirmed cases have been reported in the Republic of the Congo as of late July 2026, despite the rapid spread of Ebola in neighboring DRC. While the outbreak is the fastest-growing on record, it remains concentrated in eastern DRC provinces. The Republic of the Congo shares a border with DRC and has heightened surveillance, but cross-border spread would require specific transmission chains. With 5 months remaining, the risk is non-trivial but moderate.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.02,
+        "reasoning": "The Republic of the Congo has experienced Ebola outbreaks historically, and its proximity to the DRC creates some risk of importation. However, Ebola transmission there is rare, and no established outbreak or confirmed case currently indicates a high near-term likelihood through the end of 2026.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-666832",
+    "question": "U.S. agrees to a new trade deal with \"South Africa\" before 2027?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.15,
+        "reasoning": "While South Africa and the US are beginning formal negotiations on a reciprocal trade agreement, historical precedent shows SACU FTA negotiations took years and were suspended in 2006. The requirement for a fully negotiated, drafted, and congressionally-enacted agreement by December 31, 2026 leaves only ~5 months, and structural constraints from SACU membership complicate bilateral negotiations. Diplomatic tensions further reduce likelihood.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.03,
+        "reasoning": "The United States and South Africa do not currently have a bilateral free trade agreement, and their trade relationship has recently faced political tensions rather than a formal FTA negotiation process. Enacting an FTA into U.S. law by December 31, 2026 would require unusually rapid negotiations and congressional approval, making this unlikely.",
+        "confidence": "high",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-3081841",
+    "question": "Will UPND win the second-most seats in the 2026 Zambia National Assembly Election?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.08,
+        "reasoning": "All available polling data, seat projections, and analyses indicate UPND will win the most seats, not the second-most. UPND leads with 60% presidential support and projected structural advantages. The opposition is fragmented across multiple coalitions. For UPND to win second-most seats would require a dramatic reversal of current trends.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.27,
+        "reasoning": "UPND is currently the governing party and is more likely than any single rival to retain the largest parliamentary representation in 2026, despite economic dissatisfaction and opposition efforts to unite. However, a coordinated opposition campaign—particularly involving PF-aligned forces or former President Lungu—could defeat UPND electorally while leaving it as the largest opposition party, making second place plausible. Opposition fragmentation and UPND’s incumbency advantages make UPND finishing third or lower less likely than either first or second.",
+        "confidence": "low",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "polymarket-3081798",
+    "question": "Will NRPUP win the most seats in the 2026 Zambia National Assembly Election?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.08,
+        "reasoning": "NRPUP faces insurmountable structural disadvantages: fielding candidates in only ~150 of 226 constituencies versus UPND's complete coverage, trailing significantly in presidential vote share (25% vs 67% in projections), and lacking unopposed seats. Even winning all contested seats would be insufficient to overcome UPND's automatic gains in uncontested constituencies and proportional representation advantage.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.001,
+        "reasoning": "NRPUP appears to have little established electoral strength or parliamentary presence in Zambia, while the main contest is likely to be led by larger parties such as UPND and PF or its successor/allied opposition forces. It is therefore extremely unlikely to win the greatest number of National Assembly seats in 2026.",
+        "confidence": "high",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "metaculus-43844",
+    "question": "Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.25,
+        "reasoning": "Recent polls show Hichilema leading with 55-63% of the vote, consistently below the 65% threshold. While he won 59% in 2021 and has improved economic indicators, reaching 65% would require a significant increase from current polling. The fragmented opposition and his incumbency advantage support a strong victory, but not necessarily a landslide of 65%+.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.15,
+        "reasoning": "Hichilema won about 59% in 2021, so reaching 65% would require a substantial additional share despite the typical electoral costs of incumbency and economic dissatisfaction. Opposition fragmentation could help him, but a result at or above 65% remains relatively unlikely absent an unusually weak or divided opposition field.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "metaculus-31071",
+    "question": "Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.02,
+        "reasoning": "The ICJ case is still in the written pleadings phase with South Africa's reply deadline set for November 22, 2027. Oral hearings and judgment would necessarily follow, making a merits decision before January 1, 2027 procedurally impossible. Even optimistic timelines suggest judgment by late 2027 or early 2028.",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 2
+      },
+      "openai": {
+        "probability": 0.07,
+        "reasoning": "The ICJ has issued provisional-measures orders, but these did not determine that Israel committed genocide or otherwise finally violated international law. Given the normal timetable for written pleadings and hearings in a contentious genocide case, a merits judgment before January 1, 2027 appears unlikely.",
+        "confidence": "high",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "metaculus-43590",
+    "question": "Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.62,
+        "reasoning": "The first qualifying IPC Sudan product (June 3, 2026) covering June-September 2026 projections identifies 14 areas at risk of Famine but does not formally classify any area in Phase 5 Famine. While malnutrition thresholds have been surpassed in Um Baru, Kernoi, and At Tina, these are not formal area-level Famine classifications. The second qualifying product would need to formally classify at least one area in Phase 5 for the question to resolve YES. Given the severe conditions and conflict trajectory, this remains plausible but uncertain.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.82,
+        "reasoning": "Sudan already has multiple IPC/FRC-identified famine areas, and the continuing conflict, displacement, access constraints, and disrupted food systems make persistence or re-emergence of area-level Famine classifications into the June–September 2026 period likely. The main uncertainty is whether qualifying IPC products are published by the deadline and whether improving access or political conditions leads to classifications below Phase 5.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "metaculus-43315",
+    "question": "Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.35,
+        "reasoning": "While estimates ranging from 150,000-400,000 exist in media reports, peer-reviewed publications and formal organization estimates have remained below 200,000 (e.g., Lancet study: 61,000 for Khartoum alone; academic estimates: 62,000 total). The methodological challenges in conflict zones and the conservative approach of published research suggest moderate but not high probability of a >200,000 estimate appearing by year-end 2026.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 4
+      },
+      "openai": {
+        "probability": 0.43,
+        "reasoning": "The conflict’s duration, famine, displacement, and severe undercounting make a nationwide excess-mortality estimate above 200,000 plausible by 2026, especially if researchers extrapolate from existing Khartoum and other local studies. However, the resolution requires a qualifying publication with a central estimate—not merely a cited or upper-bound figure—and methodological caution may keep formal estimates below the threshold or delay publication.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
+  },
+  {
+    "id": "metaculus-43793",
+    "question": "Will Senegal formally restructure its external debt before 2028?",
+    "forecasts": {
+      "claude": {
+        "probability": 0.62,
+        "reasoning": "Senegal has just begun selecting a financial advisor (July 2026) and faces severe debt pressures making restructuring likely. However, formal restructuring agreements typically take 2-4 years based on comparable cases (Ghana, Zambia, Ethiopia). With only 18 months until January 2028, while acceleration is possible given the crisis, completing formal negotiations and signing an agreement by the deadline is moderately likely but not highly probable.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
+      },
+      "openai": {
+        "probability": 0.65,
+        "reasoning": "Senegal’s undisclosed borrowing has sharply worsened its debt burden, disrupted its IMF program, and created substantial external debt-service pressures, making creditor negotiations or a reprofiling increasingly likely before 2028. However, the government has emphasized avoiding default and may pursue fiscal consolidation and new IMF support without reaching a formal restructuring agreement, so the probability is below certain.",
+        "confidence": "medium",
+        "searched": false,
+        "num_searches": 0
+      }
+    }
   }
 ]

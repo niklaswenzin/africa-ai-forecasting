@@ -54,6 +54,14 @@ BENCHMARK_FEHLT = {
     "community_forecast": "Community forecast pending",
 }
 
+# Prognostiker in fester Reihenfolge: Schluessel in forecasts.json und
+# Anzeigename auf der Karte. Ein dritter kaeme hier dazu, ohne dass die
+# Karten-Vorlage angefasst werden muss.
+PROGNOSTIKER = [
+    ("claude", "Claude"),
+    ("openai", "GPT"),
+]
+
 KATEGORIE_NAMEN = [
     ("elections", "Elections"),
     ("security", "Security"),
@@ -350,24 +358,17 @@ h1 {
 /* Zahlenblock: Benchmark und Claude nebeneinander statt untereinander. Die
    breiteren Karten machen den direkten Vergleich moeglich - beide Zahlen auf
    einer Hoehe, das Auge muss nicht mehr springen. */
+/* auto-fit statt fester Spaltenzahl: kommt ein dritter Prognostiker dazu,
+   ordnet sich das Raster selbst neu, ohne dass das CSS angefasst wird. */
 .metrics {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .9rem;
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  gap: .8rem;
 }
-@media (max-width: 460px) { .metrics { grid-template-columns: 1fr; gap: .6rem; } }
 .metric-col { min-width: 0; }
 .metric-col + .metric-col {
   border-left: 1px solid var(--line-soft);
-  padding-left: .9rem;
-}
-@media (max-width: 460px) {
-  .metric-col + .metric-col {
-    border-left: none;
-    border-top: 1px solid var(--line-soft);
-    padding-left: 0;
-    padding-top: .6rem;
-  }
+  padding-left: .8rem;
 }
 .metric-label {
   display: block;
@@ -426,6 +427,16 @@ summary {
   font-weight: 550;
 }
 details p { margin: .55rem 0 0; font-size: .85rem; color: var(--text-soft); }
+/* Modellname ueber der jeweiligen Begruendung - ohne ihn waeren die beiden
+   Absaetze nicht auseinanderzuhalten. */
+.reason-head {
+  font-size: .68rem !important;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 650;
+  color: var(--muted) !important;
+  margin-top: .8rem !important;
+}
 details .criteria {
   margin: .55rem 0 0;
   font-size: .78rem;
@@ -530,18 +541,24 @@ BENCHMARK_FEHLT_VORLAGE = """    <div class="metric-col">
     </div>"""
 
 AI_VORLAGE = """    <div class="metric-col">
-      <span class="metric-label">Claude</span>
+      <span class="metric-label"><<MODELL_NAME>></span>
       <span class="metric-value"><<MODELL_P>></span>
 <<DIFF_BLOCK>>
-      <p class="meta"><<CONFIDENCE>> confidence &middot; <<SUCHE>></p>
+      <p class="meta"><<CONFIDENCE>> &middot; <<SUCHE>></p>
     </div>"""
 
 DIFF_VORLAGE = """      <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
 
 OHNE_AI_VORLAGE = """    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="leer">No AI forecast yet</span>
+      <span class="metric-label"><<MODELL_NAME>></span>
+      <span class="leer">Not yet</span>
     </div>"""
+
+# Begruendung je Modell im aufklappbaren Teil. Beide stehen untereinander,
+# damit man sie direkt vergleichen kann - dort liegt der eigentliche
+# Erkenntniswert, nicht in den zwei Prozentzahlen.
+REASONING_VORLAGE = """    <p class="reason-head"><<MODELL_NAME>></p>
+    <p><<REASONING>></p>"""
 
 
 # --- Daten laden -----------------------------------------------------------
@@ -574,12 +591,7 @@ def baue_karten_daten(markets, forecasts):
     for markt in markets:
         prognose = nach_id.get(markt["id"])
         market_p = markt.get("market_p")
-        model_p = prognose["probability"] if prognose else None
-
-        if market_p is None or model_p is None:
-            diff = None
-        else:
-            diff = round(model_p - market_p, 4)
+        modelle = baue_modell_liste(prognose, market_p)
 
         eintraege.append({
             "question": markt["question"],
@@ -588,16 +600,45 @@ def baue_karten_daten(markets, forecasts):
             "category": markt.get("category", "other"),
             "country": markt.get("country", ""),
             "market_p": market_p,
-            "model_p": model_p,
-            "diff": diff,
-            "confidence": prognose["confidence"] if prognose else "",
-            "reasoning": prognose["reasoning"] if prognose else "",
-            "searched": prognose.get("searched", False) if prognose else False,
-            "num_searches": prognose.get("num_searches", 0) if prognose else 0,
+            "modelle": modelle,
             "criteria": markt.get("description", ""),
         })
 
     return eintraege
+
+
+def baue_modell_liste(prognose, market_p):
+    """Baut pro Prognostiker einen Block mit Wert, Abweichung und Begruendung.
+
+    Feste Reihenfolge aus PROGNOSTIKER, damit die Spalten auf allen Karten an
+    derselben Stelle stehen. Fehlt ein Modell fuer diese Frage, kommt es
+    trotzdem in die Liste - mit model_p None, damit die Karte den Platz
+    freihaelt statt die Spalten zu verschieben.
+    """
+    vorhanden = (prognose or {}).get("forecasts") or {}
+
+    modelle = []
+    for schluessel, anzeigename in PROGNOSTIKER:
+        eintrag = vorhanden.get(schluessel)
+        model_p = eintrag["probability"] if eintrag else None
+
+        if model_p is None or market_p is None:
+            diff = None
+        else:
+            diff = round(model_p - market_p, 4)
+
+        modelle.append({
+            "key": schluessel,
+            "name": anzeigename,
+            "model_p": model_p,
+            "diff": diff,
+            "confidence": eintrag["confidence"] if eintrag else "",
+            "reasoning": eintrag["reasoning"] if eintrag else "",
+            "searched": eintrag.get("searched", False) if eintrag else False,
+            "num_searches": eintrag.get("num_searches", 0) if eintrag else 0,
+        })
+
+    return modelle
 
 
 # --- Formatierung ----------------------------------------------------------
@@ -701,31 +742,46 @@ def baue_benchmark_block(eintrag):
     )
 
 
-def baue_ai_block(eintrag):
-    """Baut den Claude-Teil der Karte, oder den Hinweis, dass er noch fehlt.
+def baue_ai_block(modell):
+    """Baut die Spalte eines Prognostikers, oder den Hinweis, dass er fehlt.
 
     Der Differenz-Pfeil erscheint NUR, wenn beide Zahlen vorliegen. Ein Pfeil
     ohne Gegenwert waere eine Behauptung ohne Grundlage.
     """
-    if eintrag["model_p"] is None:
-        return OHNE_AI_VORLAGE
+    if modell["model_p"] is None:
+        return OHNE_AI_VORLAGE.replace("<<MODELL_NAME>>", html.escape(modell["name"]))
 
-    if eintrag["diff"] is None:
+    if modell["diff"] is None:
         diff_block = ""
     else:
         diff_block = (
             DIFF_VORLAGE
-            .replace("<<DIFF_KLASSE>>", klasse_fuer_diff(eintrag["diff"]))
-            .replace("<<DIFF>>", formatiere_diff(eintrag["diff"]))
+            .replace("<<DIFF_KLASSE>>", klasse_fuer_diff(modell["diff"]))
+            .replace("<<DIFF>>", formatiere_diff(modell["diff"]))
         )
 
     return (
         AI_VORLAGE
-        .replace("<<MODELL_P>>", formatiere_prozent(eintrag["model_p"]))
+        .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
+        .replace("<<MODELL_P>>", formatiere_prozent(modell["model_p"]))
         .replace("<<DIFF_BLOCK>>", diff_block)
-        .replace("<<CONFIDENCE>>", html.escape(eintrag["confidence"]))
-        .replace("<<SUCHE>>", beschreibe_suche(eintrag))
+        .replace("<<CONFIDENCE>>", html.escape(modell["confidence"]))
+        .replace("<<SUCHE>>", beschreibe_suche(modell))
     )
+
+
+def baue_reasoning_block(eintrag):
+    """Baut die Begruendungen aller Modelle, die eine geliefert haben."""
+    teile = []
+    for modell in eintrag["modelle"]:
+        if not modell["reasoning"]:
+            continue
+        teile.append(
+            REASONING_VORLAGE
+            .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
+            .replace("<<REASONING>>", html.escape(modell["reasoning"]))
+        )
+    return "\n".join(teile)
 
 
 def baue_karte(eintrag):
@@ -736,12 +792,8 @@ def baue_karte(eintrag):
     die Seite sonst zerlegen.
     """
     kriterien = eintrag["criteria"].strip() or "No resolution criteria provided."
-
-    if eintrag["reasoning"]:
-        reasoning_block = f"    <p>{html.escape(eintrag['reasoning'])}</p>"
-    else:
-        reasoning_block = ""
-
+    reasoning_block = baue_reasoning_block(eintrag)
+    ai_bloecke = "\n".join(baue_ai_block(m) for m in eintrag["modelle"])
     land = eintrag["country"] or "Africa"
 
     return (
@@ -753,7 +805,7 @@ def baue_karte(eintrag):
         .replace("<<LAND>>", html.escape(land))
         .replace("<<FRAGE>>", html.escape(eintrag["question"]))
         .replace("<<BENCHMARK_BLOCK>>", baue_benchmark_block(eintrag))
-        .replace("<<AI_BLOCK>>", baue_ai_block(eintrag))
+        .replace("<<AI_BLOCK>>", ai_bloecke)
         .replace("<<REASONING_BLOCK>>", reasoning_block)
         .replace("<<KRITERIEN>>", html.escape(kriterien))
     )
@@ -792,14 +844,25 @@ def nenne_quellen(eintraege):
     return html.escape(", ".join(namen[:-1]) + " and " + namen[-1])
 
 
+def alle_diffs(eintrag):
+    """Alle vorhandenen Abweichungen einer Karte, ueber alle Modelle."""
+    return [m["diff"] for m in eintrag["modelle"] if m["diff"] is not None]
+
+
+def hat_prognose(eintrag):
+    """True, wenn mindestens ein Modell fuer diese Frage geschaetzt hat."""
+    return any(m["model_p"] is not None for m in eintrag["modelle"])
+
+
 def mittlere_abweichung(eintraege):
     """Durchschnittliche absolute Abweichung in Prozentpunkten, als Text.
 
-    Nur ueber Karten, bei denen beide Zahlen vorliegen. Gibt es keine solche
-    Karte, steht ein Strich - eine 0 waere hier eine Falschaussage, sie hiesse
-    "Modell und Benchmark sind sich einig".
+    Gemittelt ueber alle Modell-Benchmark-Paare, nicht ueber Karten: bei zwei
+    Modellen zaehlt jede Karte doppelt, wenn beide geschaetzt haben. Gibt es
+    kein einziges Paar, steht ein Strich - eine 0 waere eine Falschaussage,
+    sie hiesse "Modelle und Benchmark sind sich einig".
     """
-    diffs = [abs(e["diff"]) for e in eintraege if e["diff"] is not None]
+    diffs = [abs(d) for e in eintraege for d in alle_diffs(e)]
     if not diffs:
         return "&ndash;"
     return f"{round(sum(diffs) / len(diffs) * 100)} pts"
@@ -808,18 +871,16 @@ def mittlere_abweichung(eintraege):
 def sortierschluessel(eintrag):
     """Sortierung der Karten.
 
-    Drei Gruppen, in dieser Reihenfolge: erst Karten mit beiden Zahlen, nach
-    groesster Abweichung - dort ist der Vergleich sichtbar und das ist der
-    interessante Teil. Dann Karten mit Forecast, aber ohne Vergleichszahl.
-    Zuletzt Karten, die noch auf ihren Forecast warten.
+    Drei Gruppen: erst Karten mit Vergleich, nach der GROESSTEN Abweichung
+    eines ihrer Modelle - eine Karte, bei der ein Modell weit vom Benchmark
+    abweicht, ist interessant, auch wenn das andere nahe dranliegt. Dann
+    Karten mit Prognose, aber ohne Vergleichszahl. Zuletzt die noch offenen.
     """
-    hat_diff = eintrag["diff"] is not None
-    hat_modell = eintrag["model_p"] is not None
-
-    if hat_diff:
-        return (0, -abs(eintrag["diff"]))
-    if hat_modell:
-        return (1, -eintrag["model_p"])
+    diffs = alle_diffs(eintrag)
+    if diffs:
+        return (0, -max(abs(d) for d in diffs))
+    if hat_prognose(eintrag):
+        return (1, 0.0)
     return (2, -(eintrag["market_p"] or 0))
 
 
@@ -866,7 +927,7 @@ def main():
     with open(AUSGABE_DATEI, "w", encoding="utf-8") as datei:
         datei.write(seite)
 
-    mit_prognose = sum(1 for e in eintraege if e["model_p"] is not None)
+    mit_prognose = sum(1 for e in eintraege if hat_prognose(e))
     mit_benchmark = sum(1 for e in eintraege if e["market_p"] is not None)
     print(f"{len(eintraege)} Karten nach {AUSGABE_DATEI} geschrieben "
           f"({mit_prognose} mit Prognose, {mit_benchmark} mit Vergleichszahl).")
