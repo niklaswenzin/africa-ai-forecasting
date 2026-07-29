@@ -96,12 +96,25 @@ and at present it is partly an artefact of sampling variance rather than a consi
 position. Reducing temperature, or sampling each question several times and averaging,
 would address this; neither is implemented yet.
 
-**No accuracy score yet.** Every question currently tracked is still open, so there is
-no Brier score and no calibration measurement — only the difference between model and
-market, which says nothing about who is right. Scoring properly requires resolved
-questions, and to be fair it needs a market price snapshot taken well before
-resolution: near the end a market converges to 0 or 1 and beats any forecaster
-trivially.
+**No accuracy score yet — but the machinery is in place.** Every question currently
+tracked is still open, so `brier.py` has nothing to score. What already runs is the
+part that has to be right *before* the first question resolves: `snapshot.py` records
+every run to `data/history/`, and `resolve_questions.py` records outcomes to
+`data/resolved.json`.
+
+The reason snapshots exist at all is fairness of the comparison. Model and benchmark
+are scored from the **same snapshot** — the earliest one holding a forecast for that
+question — so both are judged on identical information. Scoring the market against its
+price shortly before resolution would make it unbeatable: a market converges to 0 or 1
+once the outcome is obvious, and would then "beat" a model forecast made weeks earlier.
+That is a measurement artefact, not a result.
+
+**Metaculus outcomes are not readable.** For every resolved question checked, the API
+returns `resolution: null` under this account's access tier — the same restriction that
+hides the community median. Those questions are recorded as `unavailable` and excluded
+from scoring rather than guessed at: counting an unknown outcome as "No" would bias the
+score in a direction nobody could later trace. Until the access tier changes, the Brier
+score will rest on Polymarket questions only.
 
 **African questions are scarce.** In a recent run the pipeline saw 11,616 unique open
 Polymarket markets and found 48 with an African subject. The real total is higher and
