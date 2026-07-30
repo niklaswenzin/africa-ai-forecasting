@@ -1,6 +1,6 @@
 question,source,benchmark_type,market_p,claude_p,claude_diff,openai_p,openai_diff
 "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",polymarket,market_price,0.899,0.72,-0.179,0.95,0.051
-Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.215,0.25,0.035,0.72,0.505
+Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.225,0.25,0.025,0.72,0.495
 Will there be no Somaliland parliamentary election before 2027?,polymarket,market_price,0.945,0.92,-0.025,0.995,0.05
 "Nguesso out as President of the Republic of the Congo by December 31, 2026?",polymarket,market_price,0.13,0.02,-0.11,0.1,-0.03
 Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.135,0.25,0.115,0.06,-0.075
