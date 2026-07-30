@@ -3,7 +3,7 @@ question,source,benchmark_type,market_p,claude_p,claude_diff,openai_p,openai_dif
 Will Somaliland join the Abraham Accords before 2027?,polymarket,market_price,0.215,0.25,0.035,0.72,0.505
 Will there be no Somaliland parliamentary election before 2027?,polymarket,market_price,0.945,0.92,-0.025,0.995,0.05
 "Nguesso out as President of the Republic of the Congo by December 31, 2026?",polymarket,market_price,0.13,0.02,-0.11,0.1,-0.03
-Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.135,0.25,0.115,0.06,-0.075
+Will the Republic of the Congo have an Ebola case in 2026?,polymarket,market_price,0.16,0.25,0.09,0.06,-0.1
 Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?,metaculus,community_forecast,,0.25,,0.23,
 Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?,metaculus,community_forecast,,0.02,,0.02,
 Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?,metaculus,community_forecast,,0.25,,0.65,

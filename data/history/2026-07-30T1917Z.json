@@ -1,0 +1,246 @@
+{
+  "format_version": 1,
+  "taken_at": "2026-07-30T19:17:08.040536Z",
+  "questions": [
+    {
+      "id": "polymarket-620335",
+      "source": "polymarket",
+      "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+      "market_p": 0.8955,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Morocco",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.72,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.95,
+          "confidence": "high",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-1076686",
+      "source": "polymarket",
+      "question": "Will Somaliland join the Abraham Accords before 2027?",
+      "market_p": 0.215,
+      "benchmark_type": "market_price",
+      "category": "diplomacy",
+      "country": "Somaliland",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.72,
+          "confidence": "medium",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "polymarket-948391",
+      "source": "polymarket",
+      "question": "Will there be no Somaliland parliamentary election before 2027?",
+      "market_p": 0.945,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Somaliland",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.92,
+          "confidence": "high",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.995,
+          "confidence": "high",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "polymarket-921660",
+      "source": "polymarket",
+      "question": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
+      "market_p": 0.13,
+      "benchmark_type": "market_price",
+      "category": "elections",
+      "country": "Congo",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.02,
+          "confidence": "high",
+          "num_searches": 2
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.1,
+          "confidence": "medium",
+          "num_searches": 1
+        }
+      }
+    },
+    {
+      "id": "polymarket-2326375",
+      "source": "polymarket",
+      "question": "Will the Republic of the Congo have an Ebola case in 2026?",
+      "market_p": 0.16,
+      "benchmark_type": "market_price",
+      "category": "other",
+      "country": "Congo",
+      "resolve_time": "2026-12-31T00:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.06,
+          "confidence": "medium",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "metaculus-43844",
+      "source": "metaculus",
+      "question": "Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?",
+      "market_p": null,
+      "benchmark_type": "community_forecast",
+      "category": "elections",
+      "country": "Zambia",
+      "resolve_time": "2026-08-14T12:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.23,
+          "confidence": "medium",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "metaculus-31071",
+      "source": "metaculus",
+      "question": "Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?",
+      "market_p": null,
+      "benchmark_type": "community_forecast",
+      "category": "security",
+      "country": "South Africa",
+      "resolve_time": "2027-01-01T14:46:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.02,
+          "confidence": "high",
+          "num_searches": 2
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.02,
+          "confidence": "high",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "metaculus-43590",
+      "source": "metaculus",
+      "question": "Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?",
+      "market_p": null,
+      "benchmark_type": "community_forecast",
+      "category": "security",
+      "country": "Sudan",
+      "resolve_time": "2027-01-02T21:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.65,
+          "confidence": "medium",
+          "num_searches": 2
+        }
+      }
+    },
+    {
+      "id": "metaculus-43315",
+      "source": "metaculus",
+      "question": "Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",
+      "market_p": null,
+      "benchmark_type": "community_forecast",
+      "category": "security",
+      "country": "Sudan",
+      "resolve_time": "2027-01-31T21:59:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.25,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.35,
+          "confidence": "medium",
+          "num_searches": 3
+        }
+      }
+    },
+    {
+      "id": "metaculus-43793",
+      "source": "metaculus",
+      "question": "Will Senegal formally restructure its external debt before 2028?",
+      "market_p": null,
+      "benchmark_type": "community_forecast",
+      "category": "economy",
+      "country": "Senegal",
+      "resolve_time": "2028-01-01T01:00:00Z",
+      "forecasts": {
+        "claude": {
+          "model": "unbekannt",
+          "probability": 0.62,
+          "confidence": "medium",
+          "num_searches": 3
+        },
+        "openai": {
+          "model": "unbekannt",
+          "probability": 0.52,
+          "confidence": "medium",
+          "num_searches": 1
+        }
+      }
+    }
+  ]
+}
