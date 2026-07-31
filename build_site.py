@@ -437,10 +437,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
 <p>Forecasts come from <<MODELL_LISTE>>. Both receive the same question, the same
 resolution criteria and the same web-search tool, with prediction-market sites
 blocked. The benchmark is never passed into the prompt.</p>
-<p>A Polymarket price reflects real money at stake; a Metaculus number is the
-median of volunteer forecasts with nothing at risk. The two are labelled
-differently for that reason. Where a benchmark is missing, the community median
-is not available at this account&#39;s access tier.</p>
+<<BENCHMARK_ERKLAERUNG>>
 <p>Benchmarks from <<QUELLEN_LISTE>> &middot; last updated <<ZEITSTEMPEL>> &middot;
 <a href="<<REPO_URL>>">source code and method</a></p>
 </footer>
@@ -541,6 +538,19 @@ LEGENDE_VORLAGE = """    <span><i class="strich" style="background: var(--<<FARB
 # die Faelle, bei denen das eine Rolle spielt.
 VOLUMEN_VORLAGE = """      <span class="trenner">/</span>
       <span class="<<KLASSE>>"><<VOLUMEN_TEXT>></span>"""
+
+# Erklaerung der Vergleichszahl in der Fusszeile. Sie haengt davon ab, welche
+# Arten von Benchmark tatsaechlich auf der Seite stehen - ein Text ueber den
+# Unterschied zwischen Geldmarkt und Community-Median ist falsch, wenn nur
+# eine der beiden Arten vorkommt. Genau das stand hier eine Zeit lang.
+ERKLAERUNG_NUR_MARKT = """<p>Every benchmark here is a Polymarket price: real money
+at stake, not a poll. The number next to each question is the volume traded on
+that market, and it is worth reading first. A price resting on a few hundred
+dollars moves on a single small trade and says little; those are marked.</p>"""
+
+ERKLAERUNG_GEMISCHT = """<p>A Polymarket price reflects real money at stake; a
+Metaculus number is the median of volunteer forecasts with nothing at risk. The
+two are labelled differently for that reason.</p>"""
 
 # Farbvariable je Prognostiker. Ein nicht eingetragener Schluessel bekommt die
 # neutrale Standardfarbe, statt die Legende unsichtbar zu machen.
@@ -883,6 +893,20 @@ def nenne_modelle():
     return ", ".join(teile[:-1]) + " and " + teile[-1]
 
 
+def benchmark_erklaerung(eintraege):
+    """Waehlt den Fusszeilen-Absatz nach den tatsaechlich gezeigten Benchmarks.
+
+    Solange NUR_MIT_BENCHMARK gilt und der Metaculus-Median gesperrt ist,
+    stehen ausschliesslich Geldmarkt-Preise auf der Seite. Der Absatz ueber den
+    Unterschied zwischen Markt und Community waere dann eine Erklaerung fuer
+    etwas, das man nirgends sieht.
+    """
+    arten = {e["benchmark_type"] for e in eintraege}
+    if arten == {"market_price"}:
+        return ERKLAERUNG_NUR_MARKT
+    return ERKLAERUNG_GEMISCHT
+
+
 def nenne_quellen(eintraege):
     """Zaehlt die tatsaechlich vertretenen Quellen auf, z. B. "Metaculus and Polymarket"."""
     # sorted() gibt eine stabile Reihenfolge, damit die Fusszeile nicht bei
@@ -932,6 +956,7 @@ def baue_seite(eintraege, zeitstempel):
         .replace("<<ANZAHL>>", str(len(sortiert)))
         .replace("<<TABS>>", baue_tabs(sortiert))
         .replace("<<KARTEN>>", eintraege_html)
+        .replace("<<BENCHMARK_ERKLAERUNG>>", benchmark_erklaerung(sortiert))
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
         .replace("<<REPO_URL>>", REPO_URL)
     )
