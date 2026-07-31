@@ -419,7 +419,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   restatement of the crowd.</p>
 
   <div class="legende">
-    <span><i class="strich" style="background: var(--bench)"></i> Market or community</span>
+    <span><i class="strich" style="background: var(--bench)"></i> <<LEGENDE_BENCH>></span>
 <<LEGENDE_MODELLE>>
   </div>
 </header>
@@ -893,6 +893,24 @@ def nenne_modelle():
     return ", ".join(teile[:-1]) + " and " + teile[-1]
 
 
+def benchmark_arten(eintraege):
+    """Die tatsaechlich auf der Seite vorkommenden Benchmark-Arten.
+
+    Eigene Funktion, weil zwei Stellen dieselbe Antwort brauchen: die Legende
+    und der Fusszeilen-Absatz. Sie duerfen nie auseinanderlaufen - genau das
+    war der Fehler, als die Legende noch fest "Market or community" sagte,
+    obwohl es laengst nur noch Marktpreise gab.
+    """
+    return {e["benchmark_type"] for e in eintraege}
+
+
+def legende_benchmark(eintraege):
+    """Beschriftung der Benchmark-Farbe in der Legende."""
+    if benchmark_arten(eintraege) == {"market_price"}:
+        return "Market price"
+    return "Market or community"
+
+
 def benchmark_erklaerung(eintraege):
     """Waehlt den Fusszeilen-Absatz nach den tatsaechlich gezeigten Benchmarks.
 
@@ -901,8 +919,7 @@ def benchmark_erklaerung(eintraege):
     Unterschied zwischen Markt und Community waere dann eine Erklaerung fuer
     etwas, das man nirgends sieht.
     """
-    arten = {e["benchmark_type"] for e in eintraege}
-    if arten == {"market_price"}:
+    if benchmark_arten(eintraege) == {"market_price"}:
         return ERKLAERUNG_NUR_MARKT
     return ERKLAERUNG_GEMISCHT
 
@@ -956,6 +973,7 @@ def baue_seite(eintraege, zeitstempel):
         .replace("<<ANZAHL>>", str(len(sortiert)))
         .replace("<<TABS>>", baue_tabs(sortiert))
         .replace("<<KARTEN>>", eintraege_html)
+        .replace("<<LEGENDE_BENCH>>", legende_benchmark(sortiert))
         .replace("<<BENCHMARK_ERKLAERUNG>>", benchmark_erklaerung(sortiert))
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
         .replace("<<REPO_URL>>", REPO_URL)
