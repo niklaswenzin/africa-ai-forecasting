@@ -181,15 +181,6 @@ h1 {
   margin-bottom: .55rem;
 }
 .meta .trenner { opacity: .45; }
-/* Duenn gehandelter Markt: der Preis daneben ruht auf wenig Umsatz. Bewusst
-   nicht in der Warnfarbe - es ist kein Fehler, sondern eine Eigenschaft, die
-   man beim Lesen kennen soll. cursor: help zeigt an, dass eine Erklaerung
-   dahinterliegt; ohne diesen Hinweis blieb die Farbe eine Frage. */
-.meta .duenn, .legende .duenn { color: #a8580a; }
-.meta .duenn { cursor: help; }
-@media (prefers-color-scheme: dark) {
-  .meta .duenn, .legende .duenn { color: #e0a163; }
-}
 .meta .kat { color: var(--tinte-weich); }
 .meta .datum { margin-left: auto; white-space: nowrap; }
 
@@ -315,7 +306,6 @@ footer code { font-family: var(--mono); font-size: .93em; }
     <span><i class="strich" style="background: var(--bench)"></i> Market price</span>
     <span><i class="strich" style="background: var(--claude)"></i> Claude</span>
     <span><i class="strich" style="background: var(--gpt)"></i> ChatGPT</span>
-    <span class="duenn">Thinly traded &mdash; price rests on little volume (6)</span>
   </div>
 </header>
 
@@ -340,7 +330,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Zambia</span>
       <span class="trenner">/</span>
-      <span class="duenn" title="Thinly traded: under USD 3,000 in total volume. A price like this moves on a single small trade.">USD 2,543 traded</span>
+      <span>USD 2,543 traded</span>
       <span class="datum">Resolves 13 Aug 2026</span>
     </div>
     <h2 class="frage">Will UPND win the most seats in the 2026 Zambia National Assembly Election?</h2>
@@ -382,7 +372,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Zambia</span>
       <span class="trenner">/</span>
-      <span class="duenn" title="Thinly traded: under USD 3,000 in total volume. A price like this moves on a single small trade.">USD 777 traded</span>
+      <span>USD 777 traded</span>
       <span class="datum">Resolves 13 Aug 2026</span>
     </div>
     <h2 class="frage">Will NRPUP win the second-most seats in the 2026 Zambia National Assembly Election?</h2>
@@ -424,7 +414,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Guinea-Bissau</span>
       <span class="trenner">/</span>
-      <span class="duenn" title="Thinly traded: under USD 3,000 in total volume. A price like this moves on a single small trade.">USD 773 traded</span>
+      <span>USD 773 traded</span>
       <span class="datum">Resolves 30 Aug 2026</span>
     </div>
     <h2 class="frage">Will the 2026 Guinea-Bissau constitutional referendum pass?</h2>
@@ -466,7 +456,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Egypt</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 54k traded</span>
+      <span>USD 54k traded</span>
       <span class="datum">Resolves 30 Sep 2026</span>
     </div>
     <h2 class="frage">Will the next diplomatic US-Iran meeting be in Egypt by September 30, 2026?</h2>
@@ -508,7 +498,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Somaliland</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 168k traded</span>
+      <span>USD 168k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Trump recognize Somaliland before 2027?</h2>
@@ -550,7 +540,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Morocco</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 167k traded</span>
+      <span>USD 167k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</h2>
@@ -592,7 +582,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Somaliland</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 105k traded</span>
+      <span>USD 105k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Somaliland join the Abraham Accords before 2027?</h2>
@@ -634,7 +624,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Somaliland</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 84k traded</span>
+      <span>USD 84k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will there be no Somaliland parliamentary election before 2027?</h2>
@@ -676,7 +666,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Congo</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 15k traded</span>
+      <span>USD 15k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Nguesso out as President of the Republic of the Congo by December 31, 2026?</h2>
@@ -718,7 +708,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Congo</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 11k traded</span>
+      <span>USD 11k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will the Republic of the Congo have an Ebola case in 2026?</h2>
@@ -760,7 +750,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Sudan</span>
       <span class="trenner">/</span>
-      <span class="duenn" title="Thinly traded: under USD 3,000 in total volume. A price like this moves on a single small trade.">USD 1,576 traded</span>
+      <span>USD 1,576 traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Sudan civil war ceasefire by December 31, 2026?</h2>
@@ -802,7 +792,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>South Africa</span>
       <span class="trenner">/</span>
-      <span class="duenn" title="Thinly traded: under USD 3,000 in total volume. A price like this moves on a single small trade.">USD 424 traded</span>
+      <span>USD 424 traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">U.S. agrees to a new trade deal with &quot;South Africa&quot; before 2027?</h2>
@@ -844,7 +834,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Tunisia</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 12k traded</span>
+      <span>USD 12k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Tunisia recognize Israel by December 31?</h2>
@@ -886,7 +876,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Mali</span>
       <span class="trenner">/</span>
-      <span class="duenn" title="Thinly traded: under USD 3,000 in total volume. A price like this moves on a single small trade.">USD 675 traded</span>
+      <span>USD 675 traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Assimi Goïta be out as President of Mali by December 31, 2026?</h2>
@@ -928,7 +918,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span class="trenner">/</span>
       <span>Nigeria</span>
       <span class="trenner">/</span>
-      <span class="" title="Total volume traded on this market.">USD 52k traded</span>
+      <span>USD 52k traded</span>
       <span class="datum">Resolves 16 Jan 2027</span>
     </div>
     <h2 class="frage">Will Bola Tinubu win the 2027 Nigerian Presidential Election?</h2>
@@ -967,10 +957,10 @@ footer code { font-family: var(--mono); font-size: .93em; }
 resolution criteria and the same web-search tool, with prediction-market sites
 blocked. The benchmark is never passed into the prompt.</p>
 <p>Every benchmark here is a Polymarket price: real money
-at stake, not a poll. The number next to each question is the volume traded on
-that market, and it is worth reading first. A price resting on a few hundred
-dollars moves on a single small trade and says little; those are marked.</p>
-<p>Benchmarks from Polymarket &middot; last updated 31 July 2026, 10:48 UTC &middot;
+at stake, not a poll. The volume traded on each market is shown next to the
+question and is worth reading first &mdash; a price resting on a few hundred
+dollars moves on a single small trade and says correspondingly little.</p>
+<p>Benchmarks from Polymarket &middot; last updated 31 July 2026, 10:50 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source code and method</a></p>
 </footer>
 

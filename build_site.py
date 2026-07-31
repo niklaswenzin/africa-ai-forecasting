@@ -292,15 +292,6 @@ h1 {
   margin-bottom: .55rem;
 }
 .meta .trenner { opacity: .45; }
-/* Duenn gehandelter Markt: der Preis daneben ruht auf wenig Umsatz. Bewusst
-   nicht in der Warnfarbe - es ist kein Fehler, sondern eine Eigenschaft, die
-   man beim Lesen kennen soll. cursor: help zeigt an, dass eine Erklaerung
-   dahinterliegt; ohne diesen Hinweis blieb die Farbe eine Frage. */
-.meta .duenn, .legende .duenn { color: #a8580a; }
-.meta .duenn { cursor: help; }
-@media (prefers-color-scheme: dark) {
-  .meta .duenn, .legende .duenn { color: #e0a163; }
-}
 .meta .kat { color: var(--tinte-weich); }
 .meta .datum { margin-left: auto; white-space: nowrap; }
 
@@ -425,7 +416,6 @@ footer code { font-family: var(--mono); font-size: .93em; }
   <div class="legende">
     <span><i class="strich" style="background: var(--bench)"></i> <<LEGENDE_BENCH>></span>
 <<LEGENDE_MODELLE>>
-<<LEGENDE_DUENN>>
   </div>
 </header>
 
@@ -542,16 +532,16 @@ LEGENDE_VORLAGE = """    <span><i class="strich" style="background: var(--<<FARB
 # aus 167'000, sagt aber etwas voellig anderes. Die Klasse "duenn" markiert
 # die Faelle, bei denen das eine Rolle spielt.
 VOLUMEN_VORLAGE = """      <span class="trenner">/</span>
-      <span class="<<KLASSE>>" title="<<HINWEIS>>"><<VOLUMEN_TEXT>></span>"""
+      <span><<VOLUMEN_TEXT>></span>"""
 
 # Erklaerung der Vergleichszahl in der Fusszeile. Sie haengt davon ab, welche
 # Arten von Benchmark tatsaechlich auf der Seite stehen - ein Text ueber den
 # Unterschied zwischen Geldmarkt und Community-Median ist falsch, wenn nur
 # eine der beiden Arten vorkommt. Genau das stand hier eine Zeit lang.
 ERKLAERUNG_NUR_MARKT = """<p>Every benchmark here is a Polymarket price: real money
-at stake, not a poll. The number next to each question is the volume traded on
-that market, and it is worth reading first. A price resting on a few hundred
-dollars moves on a single small trade and says little; those are marked.</p>"""
+at stake, not a poll. The volume traded on each market is shown next to the
+question and is worth reading first &mdash; a price resting on a few hundred
+dollars moves on a single small trade and says correspondingly little.</p>"""
 
 ERKLAERUNG_GEMISCHT = """<p>A Polymarket price reflects real money at stake; a
 Metaculus number is the median of volunteer forecasts with nothing at risk. The
@@ -784,22 +774,17 @@ def baue_skala(eintrag):
     return SKALA_VORLAGE.replace("<<PUNKTE>>", markierungen)
 
 
-# Ab welchem Umsatz ein Markt als belastbar gilt. Kein Ausschluss - nur die
-# Grenze, ab der die Zahl auf der Seite hervorgehoben wird. Der Wert liegt in
-# der Luecke der beobachteten Verteilung (vier Fragen um 1'400 bis 2'100,
-# darueber erst wieder ab 11'000).
-DUENN_AB = 3000
-
-
 def baue_volumen(eintrag):
     """Zeigt das Handelsvolumen eines Geldmarkts, sonst leeren Text.
 
     Nur fuer market_price: bei einem Community-Median waere "USD" schlicht
     falsch, dort zaehlen Prognostiker und keine Dollar.
 
-    Unter DUENN_AB bekommt die Angabe eine eigene Klasse. Ohne sie stuende
-    eine Quote aus 300 Dollar Umsatz optisch gleichwertig neben einer aus
-    167'000, und der Leser haette keine Moeglichkeit, das zu bemerken.
+    Die Zahl steht ohne Hervorhebung da. Eine farbige Markierung duenner
+    Maerkte gab es kurzzeitig; sie wurde entfernt, weil eine zweite Farbe
+    neben den drei Prognostiker-Farben mehr Fragen aufwarf als beantwortete.
+    Die Einordnung leistet die Zahl selbst: 424 neben 168'000 ist deutlich
+    genug.
     """
     if eintrag["benchmark_type"] != "market_price":
         return ""
@@ -817,19 +802,7 @@ def baue_volumen(eintrag):
     else:
         text = f"USD {round(volumen):,} traded"
 
-    duenn = volumen < DUENN_AB
-    if duenn:
-        hinweis = (f"Thinly traded: under USD {DUENN_AB:,} in total volume. "
-                   f"A price like this moves on a single small trade.")
-    else:
-        hinweis = "Total volume traded on this market."
-
-    return (
-        VOLUMEN_VORLAGE
-        .replace("<<KLASSE>>", "duenn" if duenn else "")
-        .replace("<<HINWEIS>>", html.escape(hinweis, quote=True))
-        .replace("<<VOLUMEN_TEXT>>", html.escape(text))
-    )
+    return VOLUMEN_VORLAGE.replace("<<VOLUMEN_TEXT>>", html.escape(text))
 
 
 def baue_karte(eintrag, nummer):
@@ -917,23 +890,6 @@ def benchmark_arten(eintraege):
     return {e["benchmark_type"] for e in eintraege}
 
 
-def legende_duenn(eintraege):
-    """Legendeneintrag fuer duenn gehandelte Maerkte, sonst leerer Text.
-
-    Erscheint nur, wenn tatsaechlich ein Eintrag markiert ist. Eine Legende
-    fuer eine Farbe, die auf der Seite nirgends vorkommt, wirft mehr Fragen
-    auf, als sie beantwortet.
-    """
-    anzahl = sum(1 for e in eintraege
-                 if e["benchmark_type"] == "market_price"
-                 and 0 < (e.get("volume") or 0) < DUENN_AB)
-    if not anzahl:
-        return ""
-
-    return (f'    <span class="duenn">Thinly traded &mdash; price rests on '
-            f'little volume ({anzahl})</span>')
-
-
 def legende_benchmark(eintraege):
     """Beschriftung der Benchmark-Farbe in der Legende."""
     if benchmark_arten(eintraege) == {"market_price"}:
@@ -1004,7 +960,6 @@ def baue_seite(eintraege, zeitstempel):
         .replace("<<TABS>>", baue_tabs(sortiert))
         .replace("<<KARTEN>>", eintraege_html)
         .replace("<<LEGENDE_BENCH>>", legende_benchmark(sortiert))
-        .replace("<<LEGENDE_DUENN>>", legende_duenn(sortiert))
         .replace("<<BENCHMARK_ERKLAERUNG>>", benchmark_erklaerung(sortiert))
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
         .replace("<<REPO_URL>>", REPO_URL)
