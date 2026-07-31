@@ -294,9 +294,13 @@ h1 {
 .meta .trenner { opacity: .45; }
 /* Duenn gehandelter Markt: der Preis daneben ruht auf wenig Umsatz. Bewusst
    nicht in der Warnfarbe - es ist kein Fehler, sondern eine Eigenschaft, die
-   man beim Lesen kennen soll. */
-.meta .duenn { color: #a8580a; }
-@media (prefers-color-scheme: dark) { .meta .duenn { color: #e0a163; } }
+   man beim Lesen kennen soll. cursor: help zeigt an, dass eine Erklaerung
+   dahinterliegt; ohne diesen Hinweis blieb die Farbe eine Frage. */
+.meta .duenn, .legende .duenn { color: #a8580a; }
+.meta .duenn { cursor: help; }
+@media (prefers-color-scheme: dark) {
+  .meta .duenn, .legende .duenn { color: #e0a163; }
+}
 .meta .kat { color: var(--tinte-weich); }
 .meta .datum { margin-left: auto; white-space: nowrap; }
 
@@ -421,6 +425,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   <div class="legende">
     <span><i class="strich" style="background: var(--bench)"></i> <<LEGENDE_BENCH>></span>
 <<LEGENDE_MODELLE>>
+<<LEGENDE_DUENN>>
   </div>
 </header>
 
@@ -537,7 +542,7 @@ LEGENDE_VORLAGE = """    <span><i class="strich" style="background: var(--<<FARB
 # aus 167'000, sagt aber etwas voellig anderes. Die Klasse "duenn" markiert
 # die Faelle, bei denen das eine Rolle spielt.
 VOLUMEN_VORLAGE = """      <span class="trenner">/</span>
-      <span class="<<KLASSE>>"><<VOLUMEN_TEXT>></span>"""
+      <span class="<<KLASSE>>" title="<<HINWEIS>>"><<VOLUMEN_TEXT>></span>"""
 
 # Erklaerung der Vergleichszahl in der Fusszeile. Sie haengt davon ab, welche
 # Arten von Benchmark tatsaechlich auf der Seite stehen - ein Text ueber den
@@ -812,9 +817,17 @@ def baue_volumen(eintrag):
     else:
         text = f"USD {round(volumen):,} traded"
 
+    duenn = volumen < DUENN_AB
+    if duenn:
+        hinweis = (f"Thinly traded: under USD {DUENN_AB:,} in total volume. "
+                   f"A price like this moves on a single small trade.")
+    else:
+        hinweis = "Total volume traded on this market."
+
     return (
         VOLUMEN_VORLAGE
-        .replace("<<KLASSE>>", "duenn" if volumen < DUENN_AB else "")
+        .replace("<<KLASSE>>", "duenn" if duenn else "")
+        .replace("<<HINWEIS>>", html.escape(hinweis, quote=True))
         .replace("<<VOLUMEN_TEXT>>", html.escape(text))
     )
 
@@ -904,6 +917,23 @@ def benchmark_arten(eintraege):
     return {e["benchmark_type"] for e in eintraege}
 
 
+def legende_duenn(eintraege):
+    """Legendeneintrag fuer duenn gehandelte Maerkte, sonst leerer Text.
+
+    Erscheint nur, wenn tatsaechlich ein Eintrag markiert ist. Eine Legende
+    fuer eine Farbe, die auf der Seite nirgends vorkommt, wirft mehr Fragen
+    auf, als sie beantwortet.
+    """
+    anzahl = sum(1 for e in eintraege
+                 if e["benchmark_type"] == "market_price"
+                 and 0 < (e.get("volume") or 0) < DUENN_AB)
+    if not anzahl:
+        return ""
+
+    return (f'    <span class="duenn">Thinly traded &mdash; price rests on '
+            f'little volume ({anzahl})</span>')
+
+
 def legende_benchmark(eintraege):
     """Beschriftung der Benchmark-Farbe in der Legende."""
     if benchmark_arten(eintraege) == {"market_price"}:
@@ -974,6 +1004,7 @@ def baue_seite(eintraege, zeitstempel):
         .replace("<<TABS>>", baue_tabs(sortiert))
         .replace("<<KARTEN>>", eintraege_html)
         .replace("<<LEGENDE_BENCH>>", legende_benchmark(sortiert))
+        .replace("<<LEGENDE_DUENN>>", legende_duenn(sortiert))
         .replace("<<BENCHMARK_ERKLAERUNG>>", benchmark_erklaerung(sortiert))
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
         .replace("<<REPO_URL>>", REPO_URL)
