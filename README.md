@@ -54,7 +54,14 @@ one-question-per-country rule then apply to it automatically.
 | Source | Benchmark | Status |
 |---|---|---|
 | Polymarket | `market_price`, via the public Gamma API | live, with prices |
-| Metaculus | `community_forecast` | live, but the median is not readable |
+| Metaculus | `community_forecast` | connected, but currently contributes nothing |
+
+Every question on the dashboard carries a benchmark (`NUR_MIT_BENCHMARK` in
+`fetch_markets.py`). A card without one shows two numbers instead of three and
+cannot answer the question the project exists to ask. Because this account's
+access tier hides the Metaculus median, that rule currently excludes Metaculus
+entirely — the questions are fetched and then dropped. Setting the flag to
+`False` brings them back without a benchmark.
 
 The two benchmark types are deliberately kept apart. A Polymarket price reflects
 real money at stake; a Metaculus number is the median of volunteer forecasts with
@@ -105,11 +112,19 @@ against its price shortly before resolution would make it unbeatable, because a
 market converges to 0 or 1 once the outcome is obvious. That is a measurement
 artefact, not a result.
 
-**Metaculus medians are not readable.** The community median is `null` for every
-question under this account's access tier, as is `resolution` for resolved
-questions. Those questions still appear — a model can forecast them — but with no
-benchmark to compare against. That is why only about half the cards show a
-benchmark number.
+**Metaculus medians are not readable, which costs the dashboard half its
+questions.** The community median is `null` for every question under this
+account's access tier, as is `resolution` for resolved questions. The account
+reports the cause itself: `GET /api/users/me/` returns
+`api_access_tier: "restricted"` with `hide_community_prediction: false`, so it
+is the tier and not a profile setting. Ten African Metaculus questions are
+fetched on every run and then dropped for lack of a benchmark. Each one links to
+its Metaculus page, where the median is visible and current.
+
+**Requiring a benchmark caps the dashboard at about 15 questions.** Polymarket
+holds 21 open African questions with a price, but they sit in only 15 distinct
+events — the rest are candidate variants of the same election. The
+one-question-per-event rule is what binds, not the liquidity threshold.
 
 **Most African markets on Polymarket are past their resolution date.** Of 46
 questions with an African subject, 36 had a resolution date in the past while

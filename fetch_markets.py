@@ -80,6 +80,17 @@ MIN_LIQUIDITAET = {
     "metaculus": 15,
 }
 
+# Nur Fragen aufnehmen, die eine Vergleichszahl haben. Jede Karte zeigt dann
+# drei Zahlen statt zwei, und der Vergleich Modell gegen Benchmark - der Zweck
+# des Projekts - gilt fuer jede einzelne Frage.
+#
+# Der Preis ist hoch und sollte bewusst getragen werden: Metaculus faellt
+# damit vollstaendig weg, weil unsere Zugriffsstufe den Community-Median
+# sperrt (siehe source_metaculus.py). Es bleiben nur Polymarket-Fragen, und
+# davon gibt es zu Afrika wenige. Auf False gesetzt kommen Fragen ohne
+# Vergleichszahl wieder dazu, begrenzt durch MAX_OHNE_BENCHMARK.
+NUR_MIT_BENCHMARK = True
+
 # Obergrenze fuer Fragen OHNE Vergleichszahl. Betrifft derzeit nur Metaculus:
 # der Community-Median ist fuer unser Konto gesperrt, die Fragen sind aber
 # trotzdem wertvoll, weil Claude sie prognostizieren kann. Eine Karte ohne
@@ -611,6 +622,17 @@ def waehle_fragen(nach_quelle):
     # Vergleichszahl fuellen danach auf.
     waehle_reihum(moderate, gewaehlt, gesehene_events)   # 1. bevorzugt
     waehle_reihum(extreme, gewaehlt, gesehene_events)    # 2. Notnagel
+
+    if NUR_MIT_BENCHMARK:
+        ohne_moeglich = sum(
+            1 for fragen in afrika_je_quelle.values()
+            for f in fragen if f.get("market_p") is None
+        )
+        if ohne_moeglich:
+            print(f"  {ohne_moeglich} Fragen ohne Vergleichszahl nicht "
+                  f"aufgenommen (NUR_MIT_BENCHMARK).")
+        return gewaehlt
+
     ohne = waehle_ohne_benchmark(afrika_je_quelle, gewaehlt, gesehene_events)
 
     if ohne:
@@ -658,7 +680,7 @@ def quellen_zaehlung(eintraege):
     return zaehler
 
 
-def quelle_verschwunden(neu, alt):
+def quelle_verschwunden(neu, alt, erwartet_leer=()):
     """Gibt die Quellen zurueck, die vorher Fragen hatten und jetzt keine mehr.
 
     Der Schutz "schreibe nichts, wenn gar keine Frage da ist" reichte nicht:
@@ -668,13 +690,20 @@ def quelle_verschwunden(neu, alt):
     Lauf der GitHub Action passiert (Metaculus lieferte nichts, die Seite fiel
     von 18 auf 12 Karten).
 
+    erwartet_leer nennt Quellen, deren Ausbleiben eine Folge unserer eigenen
+    Regeln ist und kein Ausfall. Ohne diese Unterscheidung haette das
+    Einschalten von NUR_MIT_BENCHMARK wie ein Metaculus-Ausfall ausgesehen und
+    den Lauf blockiert - die Warnung waere richtig gewesen und trotzdem falsch.
+
     Eine Quelle, die noch nie etwas geliefert hat, faellt hier nicht auf - das
     ist richtig so, sonst wuerde jeder noch nicht angebundene Platzhalter den
     Lauf blockieren.
     """
     neu_zaehler = quellen_zaehlung(neu)
     return [name for name, anzahl in quellen_zaehlung(alt).items()
-            if anzahl > 0 and neu_zaehler.get(name, 0) == 0]
+            if anzahl > 0
+            and neu_zaehler.get(name, 0) == 0
+            and name not in erwartet_leer]
 
 
 def lade_vorherige():
@@ -712,7 +741,15 @@ def main():
     # Ausfall (Token fehlt, API gesperrt, Rate Limit) und fast nie die
     # Wahrheit. Wir schreiben dann NICHT, damit die betroffenen Fragen nicht
     # stillschweigend von der Seite fallen, und melden es deutlich.
-    fehlend = quelle_verschwunden(eintraege, lade_vorherige())
+    # Quellen, die nur Fragen ohne Vergleichszahl liefern, fehlen bei
+    # NUR_MIT_BENCHMARK erwartungsgemaess und sind kein Ausfall.
+    if NUR_MIT_BENCHMARK:
+        erwartet_leer = {name for name, fragen in nach_quelle.items()
+                         if all(f.get("market_p") is None for f in fragen)}
+    else:
+        erwartet_leer = set()
+
+    fehlend = quelle_verschwunden(eintraege, lade_vorherige(), erwartet_leer)
     if fehlend:
         print(
             f"Fehler: {', '.join(fehlend)} lieferte(n) diesmal nichts, vorher "
