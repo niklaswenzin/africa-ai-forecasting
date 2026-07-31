@@ -30,16 +30,30 @@ Gemessen ueber 600 offene binaere Fragen: 0 mit sichtbarem Median. Kein
 Parameter schaltet ihn frei (with_cp, include_cp, aggregation_methods wurden
 geprueft), auch der Detail-Endpoint liefert latest = null.
 
-Ursache ist die Zugriffsstufe des Kontos, nicht der Code. Metaculus vergibt
-den Zugriff auf Community-Prediction-Aggregate gestuft; noetig ist der
-kostenlose "Bot Benchmarking Access Tier", zu beantragen ueber das
-Data-Needs-Formular auf https://www.metaculus.com/api/. Ein zweiter, davon
-unabhaengiger Mechanismus ist cp_reveal_time: einzelne Fragen halten den
-Median bis zu einem Stichtag zurueck.
+Ursache ist die Zugriffsstufe des Kontos, nicht der Code. Das Konto meldet
+sie selbst, am 31.07.2026 geprueft:
 
-Solange der Median fehlt, liefert diese Quelle bewusst nichts: eine Frage
-ohne Vergleichszahl waere fuer dieses Projekt wertlos, weil es nichts
-auszuwerten gibt und die Karte auf der Seite leer bliebe.
+    GET /api/users/me/  ->  api_access_tier: "restricted"
+                            hide_community_prediction: false
+
+Das zweite Feld schliesst die naheliegende Verwechslung aus: es gibt eine
+Profileinstellung, die den Median absichtlich verbirgt (damit man sich beim
+eigenen Prognostizieren nicht daran anlehnt), und sie ist hier nicht aktiv.
+Es bleibt die Stufe. Noetig ist der kostenlose "Bot Benchmarking Access
+Tier", zu beantragen ueber das Data-Needs-Formular auf
+https://www.metaculus.com/api/. Ein zweiter, davon unabhaengiger Mechanismus
+ist cp_reveal_time: einzelne Fragen halten den Median bis zu einem Stichtag
+zurueck.
+
+Belegt ist es an der Antwort selbst: unter recency_weighted stehen alle vier
+Schluessel (history, latest, movement, score_data), aber history ist leer und
+latest null - auch bei einer Frage mit 199 Prognostikern, die auf der Website
+offensichtlich einen Median hat. Eine beschnittene Antwort, kein fehlendes
+Feld. Auch der Detail-Endpoint /api/posts/{id}/ liefert dasselbe.
+
+Die Fragen kommen trotzdem mit: die Modelle koennen sie prognostizieren, die
+Karte zeigt dann eben nur die Modelle. Ein geratener Ersatzwert kaeme nie in
+Frage - er waere ein erfundener Benchmark.
 
 Sobald die Zugriffsstufe steht:
 
@@ -233,7 +247,33 @@ def lies_community_median(post):
     return zahl
 
 
-def melde_fehlenden_median(post):
+def lies_zugriffsstufe(headers):
+    """Fragt das eigene Konto nach seiner API-Zugriffsstufe.
+
+    Gibt (api_access_tier, hide_community_prediction) zurueck, bei jedem
+    Fehler (None, None) - die Auskunft ist eine Diagnosehilfe und darf einen
+    Lauf nie aufhalten.
+
+    Der Sinn: ohne diese Abfrage bleibt "Median ist leer" eine Vermutung ueber
+    die Ursache. Mit ihr steht im Protokoll, was das Konto selbst sagt, und
+    zwar beide Male - denn "restricted" und die Profileinstellung
+    hide_community_prediction fuehren zum selben leeren Feld, verlangen aber
+    voellig verschiedene Reaktionen (Antrag stellen gegen einen Haken
+    umlegen).
+    """
+    try:
+        antwort = requests.get(
+            BASE_URL + "/api/users/me/", headers=headers, timeout=TIMEOUT
+        )
+        if not antwort.ok:
+            return None, None
+        daten = antwort.json()
+        return daten.get("api_access_tier"), daten.get("hide_community_prediction")
+    except (requests.RequestException, ValueError):
+        return None, None
+
+
+def melde_fehlenden_median(post, headers=None):
     """Erklaert, WARUM kein Median gelesen werden konnte.
 
     Zwei sehr verschiedene Ursachen sehen im Ergebnis gleich aus, brauchen
@@ -255,9 +295,29 @@ def melde_fehlenden_median(post):
         reveal = frage.get("cp_reveal_time")
         print(f"  {QUELLE}: Struktur stimmt, aber der Community-Median ist leer "
               f"(latest = null).", file=sys.stderr)
-        print(f"    Das ist eine Frage der Zugriffsstufe, nicht des Codes. "
-              f"Bot-Benchmarking-Tier beantragen ueber das Data-Needs-Formular "
-              f"auf {BASE_URL}/api/.", file=sys.stderr)
+
+        stufe, verborgen = lies_zugriffsstufe(headers) if headers else (None, None)
+        if stufe is None:
+            print(f"    Das ist eine Frage der Zugriffsstufe, nicht des Codes. "
+                  f"Bot-Benchmarking-Tier beantragen ueber das "
+                  f"Data-Needs-Formular auf {BASE_URL}/api/.", file=sys.stderr)
+        elif verborgen:
+            # Selbstverschuldet und in einer Minute behoben - darum zuerst.
+            print(f"    Ursache liegt im Profil: hide_community_prediction ist "
+                  f"aktiv. Haken in den Metaculus-Einstellungen entfernen, "
+                  f"dann erscheint der Median.", file=sys.stderr)
+        elif stufe != "restricted":
+            # Stufe erhoeht, Median trotzdem leer: dann greift etwas anderes,
+            # und die alte Erklaerung waere ab hier falsch.
+            print(f"    api_access_tier ist \"{stufe}\", also nicht mehr "
+                  f"beschraenkt - der leere Median hat dann eine andere "
+                  f"Ursache. Struktur pruefen mit --probe.", file=sys.stderr)
+        else:
+            print(f"    api_access_tier: \"{stufe}\". Der Zugriff auf "
+                  f"Community-Aggregate haengt daran, nicht am Code. "
+                  f"Bot-Benchmarking-Tier beantragen ueber das "
+                  f"Data-Needs-Formular auf {BASE_URL}/api/.", file=sys.stderr)
+
         print(f"    cp_reveal_time dieser Frage: {reveal}", file=sys.stderr)
         return
 
@@ -434,7 +494,7 @@ def lade_fragen():
     # in melde_fehlenden_median.
     mit_median = len(fragen) - ohne_median
     if mit_median == 0 and erster_post is not None:
-        melde_fehlenden_median(erster_post)
+        melde_fehlenden_median(erster_post, headers)
 
     print(f"  {QUELLE}: {len(fragen)} Fragen geladen "
           f"({mit_median} mit Community-Median, {ohne_median} ohne).")
