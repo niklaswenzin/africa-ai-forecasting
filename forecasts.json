@@ -1,19 +1,44 @@
 [
   {
-    "id": "polymarket-620335",
-    "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+    "id": "polymarket-1029715",
+    "question": "Will Trump recognize Somaliland before 2027?",
     "forecasts": {
       "claude": {
-        "probability": 0.72,
-        "reasoning": "Akhannouch announced in January 2026 he will not seek re-election as party leader, which under Morocco's system means he cannot return as PM if his party wins September 2026 elections. A new party leader would be appointed PM after elections, removing Akhannouch from office before year-end. However, uncertainty remains about election timing, coalition outcomes, and whether the King might appoint him despite party leadership change.",
+        "model": "claude-sonnet-5",
+        "probability": 0.05,
+        "reasoning": "After Israel's recognition of Somaliland in December 2025, Trump explicitly declined to follow suit, and the State Department's June 2026 report to Congress reaffirmed Somalia's sovereignty and territorial integrity over Somaliland, which reporting described as effectively closing the door on US recognition. A congressional source also said they did not expect the Trump administration to recognize Somaliland. Formal recognition requires an explicit executive act, and current signals point strongly against this happening before end of 2026.",
         "confidence": "medium",
         "searched": true,
         "num_searches": 3,
         "flagged": null
       },
       "openai": {
-        "probability": 0.95,
-        "reasoning": "Aziz Akhannouch has announced he will not seek another term as leader of the governing RNI, which makes his return as head of government after the September 23, 2026 parliamentary election highly unlikely. Morocco’s official election timetable and current reporting point to a post-election government transition before December 31, though a delay or prolonged caretaker arrangement remains possible. ([bssnews.net](https://www.bssnews.net/international/358765?utm_source=openai))",
+        "model": "gpt-5.6-luna",
+        "probability": 0.12,
+        "reasoning": "As of July 31, 2026, there is no formal U.S. recognition, and Trump reportedly rejected recognition in December 2025 while the administration continues to treat Somaliland within Somalia’s territorial framework. Congressional lobbying and a proposed Somaliland recognition bill create some chance of a policy reversal before December 31, 2026, but formal recognition within five months appears unlikely. ([indianexpress.com](https://indianexpress.com/article/world/donald-trump-refuses-to-join-israel-in-recognising-somaliland-somalia-10442058/?utm_source=openai))",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 2
+      }
+    }
+  },
+  {
+    "id": "polymarket-620335",
+    "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.9,
+        "reasoning": "Morocco's next legislative elections are officially set for September 23, 2026, and Akhannouch has already announced he will not seek re-election as RNI party leader, which precludes his return as head of government after the vote. Historical precedent (e.g., 2021) shows a new government is typically formed within about a month of elections, meaning a successor PM would very likely be appointed well before December 31, 2026. There remains some residual uncertainty about possible delays in coalition-building or election postponement, but the scheduled electoral calendar makes a change of PM by year-end highly probable.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.91,
+        "reasoning": "Aziz Akhannouch remains Morocco’s Head of Government as of July 31, 2026, but he announced on January 11, 2026 that he would not seek another term as president of the RNI, the party that currently leads the government. ([maroc.ma](https://maroc.ma/en/morocco/government?utm_source=openai)) Parliamentary elections are officially scheduled for September 23, 2026, and reporting indicates that a post-election government led by a successor—potentially Fouzi Lekjaa—is increasingly expected, making Akhannouch’s departure before December 31 highly likely. ([maroc.ma](https://maroc.ma/ar/%D8%A7%D9%84%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1/%D8%A7%D9%84%D8%AD%D9%83%D9%88%D9%85%D8%A9-%D8%AA%D8%AD%D8%AF%D8%AF-%D9%8A%D9%88%D9%85-%D8%A7%D9%84%D8%A3%D8%B1%D8%A8%D8%B9%D8%A7%D8%A1-23-%D8%B4%D8%AA%D9%86%D8%A8%D8%B1-2026-%D9%85%D9%88%D8%B9%D8%AF%D8%A7%D9%8B-%D9%84%D8%A7%D9%86%D8%AA%D8%AE%D8%A7%D8%A8-%D8%A3%D8%B9%D8%B6%D8%A7%D8%A1-%D9%85%D8%AC%D9%84%D8%B3-%D8%A7%D9%84%D9%86%D9%88%D8%A7%D8%A8?utm_source=openai))",
         "confidence": "high",
         "searched": true,
         "num_searches": 2
@@ -25,19 +50,21 @@
     "question": "Will Somaliland join the Abraham Accords before 2027?",
     "forecasts": {
       "claude": {
-        "probability": 0.25,
-        "reasoning": "While Somaliland pledged to join the Abraham Accords in December 2025, it has not formally signed as of July 2026 despite ample time. The distinction between pledges and formal accession is critical per resolution criteria. International opposition and Somaliland's contested status create procedural obstacles, and the lack of progress over 7 months suggests formal signing may not occur by year-end.",
+        "model": "claude-sonnet-5",
+        "probability": 0.83,
+        "reasoning": "On December 26, 2025, Israel became the first country to formally recognize Somaliland, establishing full diplomatic ties including ambassadors and embassies, with Somaliland's President explicitly stating Somaliland would join the Abraham Accords as part of this move. Given this recognition and normalization process has already begun over a year before the December 2026 deadline, and analysts describe it as part of the Abraham Accords expansion framework, formal accession before end of 2026 appears highly likely, though the exact formal 'Abraham Accords' signing distinct from the bilateral recognition deal has not yet been confirmed as completed.",
         "confidence": "medium",
         "searched": true,
         "num_searches": 3,
         "flagged": null
       },
       "openai": {
-        "probability": 0.72,
-        "reasoning": "Somaliland and Israel signed a mutual declaration on December 26, 2025, explicitly described by Israel as being “in the spirit of the Abraham Accords,” while Somaliland publicly stated it would join; diplomatic ties, an embassy, and ambassadors are now in place. ([globalsecurity.org](https://www.globalsecurity.org/military/library/news/2025/12/mil-251226-israel-mfa02.htm?utm_source=openai)) However, the resolution requires a distinct formal normalization agreement clearly attributed to the Abraham Accords, and current evidence indicates that accession has been pledged but not separately completed. I assign a 72% chance that the parties formalize that accession before December 31, 2026, given their strong alignment but the remaining procedural and political uncertainty.",
+        "model": "gpt-5.6-luna",
+        "probability": 0.68,
+        "reasoning": "Somaliland and Israel already have full diplomatic relations, exchanged ambassadors, and Somaliland’s president publicly declared in June 2026 that Somaliland would join the Abraham Accords. However, the existing December 2025 declaration was described as being “in the spirit” of the Accords rather than clearly constituting a formal accession, so a qualifying signing still appears necessary before December 31, 2026. ([m.knesset.gov.il](https://m.knesset.gov.il/EN/News/PressReleases/Pages/press176261.aspx?utm_source=openai))",
         "confidence": "medium",
         "searched": true,
-        "num_searches": 3
+        "num_searches": 2
       }
     }
   },
@@ -46,19 +73,44 @@
     "question": "Will there be no Somaliland parliamentary election before 2027?",
     "forecasts": {
       "claude": {
-        "probability": 0.92,
-        "reasoning": "Parliamentary elections are officially scheduled for March 2027, having been postponed from May 2026. With only five months remaining until the December 31, 2026 deadline and no recent reports of elections being moved back to 2026, it is highly likely no election will occur before 2027, resolving the question affirmatively.",
-        "confidence": "high",
+        "model": "claude-sonnet-5",
+        "probability": 0.94,
+        "reasoning": "Multiple sources including Wikipedia's dedicated election page indicate that Somaliland's parliamentary election has been postponed from its earlier planned date (May 2026) to March 2027, well after the December 31, 2026 deadline. Election Guide similarly notes the postponement decision was made around March 2026. This strongly suggests no parliamentary election will occur before 2027, making the 'No election before 2027' resolution highly likely.",
+        "confidence": "medium",
         "searched": true,
         "num_searches": 3,
         "flagged": null
       },
       "openai": {
-        "probability": 0.995,
-        "reasoning": "As of July 29, 2026, the planned 2026 Somaliland parliamentary election has been postponed, and the House of Elders approved extending the House of Representatives’ mandate until October 7, 2028. Credible election trackers and reporting now place the next parliamentary election in 2027 or later, making an election before January 1, 2027 extremely unlikely. ([electionguide.org](https://www.electionguide.org/elections/id/5072/?%27report_type=upcoming&utm_source=openai))",
+        "model": "gpt-5.6-luna",
+        "probability": 0.95,
+        "reasoning": "The May 31, 2026 parliamentary election was postponed, and the House of Elders reportedly extended the House of Representatives’ mandate to October 7, 2028, making a parliamentary vote before December 31, 2026 unlikely. ([electionguide.org](https://electionguide.org/countries/id/261/?utm_source=openai)) A late-2026 election remains possible if the extension is revised, so this is not certain.",
         "confidence": "high",
         "searched": true,
         "num_searches": 2
+      }
+    }
+  },
+  {
+    "id": "polymarket-2420428",
+    "question": "Will Bola Tinubu win the 2027 Nigerian Presidential Election?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.68,
+        "reasoning": "Tinubu is the clear frontrunner due to incumbency advantages, APC consolidation, and numerous gubernatorial defections to his party. The opposition remains fragmented, with Peter Obi (NDC) and Atiku Abubakar (ADC) running on separate platforms rather than a unified coalition, which significantly weakens their combined chances. Prediction markets and independent commentators consistently place Tinubu well ahead, though the election is still months away and some uncertainty remains regarding possible late-stage opposition unification.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.58,
+        "reasoning": "Tinubu has a significant structural advantage: he is the incumbent and has secured the APC’s 2027 presidential nomination, while INEC lists the election for January 16, 2027. ([inecnigeria.org](https://inecnigeria.org/upcoming-elections/?utm_source=openai)) However, economic dissatisfaction creates vulnerability, and an opposition coalition involving Atiku Abubakar and Peter Obi could be competitive if it achieves genuine unity; current reporting indicates that unity is under strain. ([apnews.com](https://apnews.com/article/195d7b770e3b1219369d2ac616fbceb6?utm_source=openai))",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 1
       }
     }
   },
@@ -67,19 +119,44 @@
     "question": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
     "forecasts": {
       "claude": {
-        "probability": 0.02,
-        "reasoning": "Sassou Nguesso was just re-elected in March 2026 with 94.82% and inaugurated in April for a new five-year term. He controls all state institutions and faces no credible threats to his presidency by year-end 2026. A voluntary resignation or forced removal within 5 months is extremely unlikely.",
+        "model": "claude-sonnet-5",
+        "probability": 0.05,
+        "reasoning": "Sassou Nguesso won the March 2026 election decisively and was sworn in for a fifth term on 16 April 2026, with no credible reports of health crises, coup plots, or resignation intentions. Given his firm grip on power, security apparatus, and lack of any imminent threat, the main residual risk is sudden death or incapacitation of an 82-year-old, which is a low-probability event over the remaining months of 2026. No evidence from recent reporting suggests any change is imminent.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.06,
+        "reasoning": "Sassou Nguesso was constitutionally confirmed for a fifth term in March 2026 and inaugurated on April 16, while continuing to conduct presidential duties in July. ([apnews.com](https://apnews.com/article/c432bcb46fab80bdc8852f29f6b8bc6e?utm_source=openai)) Given his age and long tenure, death or incapacitation is a meaningful risk, but absent evidence of an impending crisis, cessation before December 31, 2026 appears unlikely.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 1
+      }
+    }
+  },
+  {
+    "id": "polymarket-2412368",
+    "question": "Will Tunisia recognize Israel by December 31?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.01,
+        "reasoning": "Tunisia has no formal relations with Israel, and its president has explicitly ruled out normalization; parliament even proposed criminalizing ties with Israel in 2023. There is no credible indication of a shift toward formal recognition by end of 2026.",
         "confidence": "high",
         "searched": true,
         "num_searches": 2,
         "flagged": null
       },
       "openai": {
-        "probability": 0.1,
-        "reasoning": "As of July 29, 2026, Sassou Nguesso has just been reelected to a fifth term and was sworn in on April 16, making voluntary departure or ordinary political removal by December 31 unlikely. The main risks are age-related death/incapacity, detention, or an unexpected coup, but there is no clear current precursor in the available reporting. ([apnews.com](https://apnews.com/article/c432bcb46fab80bdc8852f29f6b8bc6e?utm_source=openai))",
-        "confidence": "medium",
+        "model": "gpt-5.6-luna",
+        "probability": 0.02,
+        "reasoning": "Tunisia has no diplomatic relations with Israel, and President Kais Saied has repeatedly characterized normalization as treason; his government also blocked a 2023 bill that would have criminalized such ties. There is no credible current indication of a policy shift, making formal recognition by December 31, 2026 very unlikely despite the possibility of an unexpected regional or domestic shock. ([jewishstandard.timesofisrael.com](https://jewishstandard.timesofisrael.com/tunisian-president-elect-normal-ties-with-israel-are-high-treason/?utm_source=openai))",
+        "confidence": "high",
         "searched": true,
-        "num_searches": 1
+        "num_searches": 2
       }
     }
   },
@@ -88,37 +165,18 @@
     "question": "Will the Republic of the Congo have an Ebola case in 2026?",
     "forecasts": {
       "claude": {
-        "probability": 0.25,
-        "reasoning": "No confirmed Ebola cases have been reported in the Republic of the Congo as of late July 2026, despite the major outbreak in neighboring DRC. While the Republic of the Congo shares a border with the DRC and is considered at elevated risk, the outbreak remains concentrated in DRC's eastern provinces. With ~5 months remaining in 2026 and no cases yet detected in the Republic of the Congo despite proximity to the outbreak, the probability of a confirmed case is moderate but not high.",
-        "confidence": "medium",
+        "model": "claude-sonnet-5",
+        "probability": 0.08,
+        "reasoning": "As of late 2025/2026, no confirmed Ebola case has been reported in the Republic of the Congo (Congo-Brazzaville) itself; the large 2026 Ebola outbreak (Bundibugyo virus) is centered in Ituri province in northeastern DRC, far from the Republic of Congo's border, though the Republic of Congo has strengthened surveillance and entry-point measures as a precaution given regional risk. Historically the Republic of Congo has experienced sporadic Ebola outbreaks (e.g., early 2000s) but none in the recent decade, and the current outbreak's epicenter and virus strain differ from past spillover patterns into the country. Given the absence of any reported case and the geographic distance from the active outbreak zone, the probability of a confirmed case in the Republic of the Congo by end of 2026 is low but not negligible.",
+        "confidence": "low",
         "searched": true,
         "num_searches": 3,
         "flagged": null
       },
       "openai": {
-        "probability": 0.06,
-        "reasoning": "The active 2026 Ebola outbreak is concentrated in eastern Democratic Republic of the Congo, with confirmed cross-border spread to Uganda, not the Republic of the Congo; WHO has emphasized elevated risk mainly for countries sharing land borders with affected areas. The Republic of the Congo has experienced Ebola outbreaks historically, but the geographic distance from the current epicenters and the absence of a confirmed case so far make a case by December 31, 2026 unlikely, though not impossible given ongoing transmission and population movement. ([who.int](https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613?utm_source=openai))",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 3
-      }
-    }
-  },
-  {
-    "id": "metaculus-43844",
-    "question": "Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia's 2026 presidential election?",
-    "forecasts": {
-      "claude": {
-        "probability": 0.25,
-        "reasoning": "Current polls show Hichilema at 55-63%, with his 2021 result at 59%. Reaching 65% would require a significant increase from both historical performance and current polling. While he has incumbency advantages and a fragmented opposition, the gap to 65% is substantial.",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 3,
-        "flagged": null
-      },
-      "openai": {
-        "probability": 0.23,
-        "reasoning": "The August 13, 2026 election has 14 presidential candidates, and Hichilema benefits from a fragmented opposition; one reported poll put him near 60%, while his 2021 official result was about 59%. Reaching at least 65% would therefore require a meaningful improvement beyond current evidence, so it is possible but not the most likely outcome. ([zambianobserver.com](https://zambianobserver.com/14-presidential-candidates-validly-nominated-for-2026-poll/?utm_source=openai))",
+        "model": "gpt-5.6-luna",
+        "probability": 0.1,
+        "reasoning": "The Republic of the Congo had strengthened screening and preparedness at entry points as of July 1, 2026, but the documented outbreak remains concentrated in the DRC and Uganda, with no confirmed case reported in the Republic of the Congo. ([afro.who.int](https://www.afro.who.int/countries/congo/news/republic-congo-strengthens-ebola-preparedness-points-entry?utm_source=openai)) Cross-border mobility and WHO’s elevated regional-risk assessment make an introduction plausible during the remaining five months, but sustained transmission reaching this country appears unlikely.",
         "confidence": "medium",
         "searched": true,
         "num_searches": 2
@@ -126,86 +184,48 @@
     }
   },
   {
-    "id": "metaculus-31071",
-    "question": "Will Israel be found guilty in South Africa's genocide case by the ICJ before 2027?",
+    "id": "polymarket-994859",
+    "question": "Sudan civil war ceasefire by December 31, 2026?",
     "forecasts": {
       "claude": {
-        "probability": 0.02,
-        "reasoning": "The ICJ case remains in the written pleadings phase with South Africa's reply deadline set for November 22, 2027. Oral hearings and judgment typically follow, making a merits decision before January 1, 2027 virtually impossible given standard ICJ timelines.",
-        "confidence": "high",
+        "model": "claude-sonnet-5",
+        "probability": 0.13,
+        "reasoning": "As of late December 2025, no formal ceasefire exists: the RSF rejected the transitional government's peace plan as 'wishful thinking,' and UK Parliament reporting confirmed neither side accepts the US-led ceasefire proposals despite active mediation by the Quad (US, Saudi Arabia, Egypt, UAE) and UN envoy Lamamra. Fighting has intensified rather than de-escalated, with RSF making territorial gains (El Fasher, Heglig oilfield, North Darfur offensive) and over 100 civilians killed in Kordofan in early December alone, giving RSF little incentive to accept a binding ceasefire while advancing militarily. Given nearly three years of repeated failed truce attempts, deep external backing for both sides, and the strict resolution requirement of an explicit dated official ceasefire (not just humanitarian pauses or frameworks), the probability of such an agreement being reached by end of 2026 remains low, though sustained international pressure (US/Quad diplomacy, UNSC initiatives) provides some non-trivial chance.",
+        "confidence": "medium",
         "searched": true,
         "num_searches": 2,
         "flagged": null
       },
       "openai": {
-        "probability": 0.02,
-        "reasoning": "The ICJ’s May 21, 2026 order set South Africa’s Reply deadline for November 22, 2027 and Israel’s Rejoinder deadline for May 22, 2029, making a merits finding before January 1, 2027 extraordinarily unlikely. The earlier provisional-measures orders did not determine whether Israel violated the Genocide Convention, so they do not satisfy the stated resolution criterion. ([gov.za](https://www.gov.za/news/media-statements/presidency-notes-icj-order-south-africa-and-israel-case-02-jun-2026?utm_source=openai))",
-        "confidence": "high",
-        "searched": true,
-        "num_searches": 3
-      }
-    }
-  },
-  {
-    "id": "metaculus-43590",
-    "question": "Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?",
-    "forecasts": {
-      "claude": {
-        "probability": 0.25,
-        "reasoning": "The first two qualifying IPC Sudan products (published after May 14, 2026 with June-September 2026 projections) do not classify any areas in Famine Phase 5, only identify 14 areas at risk of Famine under worst-case scenarios. However, significant deterioration is projected for the lean season, and conditions remain extremely fragile with high uncertainty.",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 3,
-        "flagged": null
-      },
-      "openai": {
-        "probability": 0.65,
-        "reasoning": "The 14 May 2026 IPC product reported no area-level Famine but identified 14 areas at risk, while subsequent deterioration around North Kordofan and continued conflict, displacement, and access constraints make a formal Phase 5 classification plausible in a later analysis. However, IPC’s current projections emphasize Catastrophe and “risk of Famine,” and data limitations plus possible publication delays create substantial uncertainty about whether either of the first two qualifying post-14-May products will formally classify an area as Famine. ([ipcinfo.org](https://www.ipcinfo.org/ipc-country-analysis/details-map/en/c/1163315/?utm_source=openai))",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 2
-      }
-    }
-  },
-  {
-    "id": "metaculus-43315",
-    "question": "Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",
-    "forecasts": {
-      "claude": {
-        "probability": 0.25,
-        "reasoning": "While estimates ranging from 150,000 to 400,000 circulate informally, rigorous peer-reviewed publications and formal UN/NGO reports with stated methodology have produced estimates of 61,000-62,000 deaths. No major organization has yet published a formal estimate exceeding 200,000 with documented methodology. Though time remains in 2026, the trajectory of published research suggests this threshold is unlikely to be formally crossed.",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 3,
-        "flagged": null
-      },
-      "openai": {
-        "probability": 0.35,
-        "reasoning": "A nationwide LSHTM mortality study is actively collecting data using capture-recapture methods designed to estimate conflict-attributable and excess deaths, creating a plausible path to a qualifying 2026 release. However, the strongest published estimate so far is regional—61,202 all-cause deaths in Khartoum State through June 2024—while nationwide estimates remain uncertain, and publication within the remaining 2026 window is not assured. ([lshtm.ac.uk](https://www.lshtm.ac.uk/research/centres-projects-groups/sudan-research-group))",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 3
-      }
-    }
-  },
-  {
-    "id": "metaculus-43793",
-    "question": "Will Senegal formally restructure its external debt before 2028?",
-    "forecasts": {
-      "claude": {
-        "probability": 0.62,
-        "reasoning": "Senegal has initiated formal advisor selection (July 2026) and faces mounting pressure for restructuring, with most experts viewing it as inevitable. However, the government has repeatedly resisted restructuring, recent precedents show negotiations typically take 2-4 years, and political tensions plus 2027 elections may delay formal agreement. With 17 months remaining until January 2028, a formal agreement is possible but not highly probable.",
-        "confidence": "medium",
-        "searched": true,
-        "num_searches": 3,
-        "flagged": null
-      },
-      "openai": {
-        "probability": 0.52,
-        "reasoning": "Senegal faces severe debt vulnerabilities—public-sector debt was estimated at 132% of GDP at end-2024—but it has reportedly remained current on obligations and is pursuing active debt-management operations rather than a formal restructuring. The government has publicly resisted restructuring, yet ongoing IMF negotiations and the scale of financing needs make a creditor agreement materially plausible before January 1, 2028. ([imf.org](https://www.imf.org/en/news/articles/2026/06/26/tr-06252026-imf-press-briefing-transcript-june-25-2026?utm_source=openai))",
+        "model": "gpt-5.6-luna",
+        "probability": 0.42,
+        "reasoning": "As of July 31, 2026, no qualifying mutually agreed ceasefire has been reached: the RSF has accepted a U.S.-backed proposal, but the SAF is conditioning acceptance on RSF withdrawal from cities, while the proposal initially centers on a 90-day humanitarian truce that would not itself count under the criteria. ([investing.com](https://www.investing.com/news/world-news/sudan-army-says-us-peace-plan-must-call-for-full-rsf-withdrawal-from-cities-documents-show-4785128?utm_source=openai)) The remaining five months leave a meaningful chance for mediation to produce an explicit ceasefire, but continued fighting and the parties’ unresolved conditions make a qualifying agreement somewhat less likely than not. ([gov.uk](https://www.gov.uk/government/publications/sudan-country-policy-and-information-notes/country-policy-and-information-note-security-situation-sudan-july-2026-accessible?utm_source=openai))",
         "confidence": "medium",
         "searched": true,
         "num_searches": 1
+      }
+    }
+  },
+  {
+    "id": "polymarket-3081842",
+    "question": "Will NRPUP win the second-most seats in the 2026 Zambia National Assembly Election?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.68,
+        "reasoning": "NRPUP is the consolidated vehicle for the former Tonse Alliance/PF-aligned opposition under Brian Mundubile, and provincial polling shows it leading in Eastern, Luapula, Northern, Muchinga and competitive in Copperbelt/Lusaka, mirroring the historical PF-vs-UPND regional split where UPND won the most seats but PF finished second in 2021. The incumbent UPND still appears strongest overall (dominant in Southern, Western, North-Western), making a UPND-first/NRPUP-second outcome the most likely scenario, though there remains meaningful uncertainty about opposition fragmentation (Citizens First, Socialist Party, residual PF) or an NRPUP upset win.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.7,
+        "reasoning": "NRPUP appears to be the principal opposition challenger, with candidates in about 155 of the 226 constituencies and direct contests against UPND in many seats. UPND’s broader alliance and incumbency make it more likely to finish first, while NRPUP’s nationwide coverage makes it more likely than fragmented smaller parties to finish second, though the NRPUP/Resolute alignment and uncertainty over proportional seats add risk. ([elections.org.zm](https://www.elections.org.zm/?p=5598&utm_source=openai))",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3
       }
     }
   }
