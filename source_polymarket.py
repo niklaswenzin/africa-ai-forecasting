@@ -214,6 +214,22 @@ def hole_kategorie_hinweis(market):
     return "elections" if event.get("electionType") else None
 
 
+def hole_url(market):
+    """Baut die oeffentliche Seite des Markts, sonst leeren Text.
+
+    Verlinkt wird das EVENT, nicht der einzelne Markt: das ist die Seite, auf
+    der Polymarket den Kursverlauf und das Orderbuch zeigt. Fehlt der Slug,
+    geben wir lieber gar keinen Link aus als einen geratenen, der ins Leere
+    fuehrt.
+    """
+    ev = (market.get("events") or [{}])[0]
+    if ev.get("slug"):
+        return f"https://polymarket.com/event/{ev['slug']}"
+    if market.get("slug"):
+        return f"https://polymarket.com/market/{market['slug']}"
+    return ""
+
+
 def normalisiere(market):
     """Macht aus einem rohen Polymarket-Objekt einen Eintrag im gemeinsamen Format.
 
@@ -234,6 +250,7 @@ def normalisiere(market):
         "event_id": f"{QUELLE}-{event_id}",
         "event_title": event_titel,
         "category_hint": hole_kategorie_hinweis(market),
+        "url": hole_url(market),
         # Geplante Aufloesung als ISO-Text. Fuer Polymarket-Fragen entscheidet
         # das Volumen ueber die Auswahl; das Feld ist fuer Fragen ohne
         # Vergleichszahl gedacht und wird hier nur mitgefuehrt, damit alle

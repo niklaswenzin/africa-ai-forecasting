@@ -38,6 +38,21 @@ ANZAHL = 30
 MODERAT_MIN = 0.05         # bevorzugte Quote: nicht extremer als diese Grenzen
 MODERAT_MAX = 0.95
 
+# Einzelne Fragen, die alle Regeln erfuellen und trotzdem nicht auf die Seite
+# gehoeren. Bewusst eine namentliche Liste und keine neue Filterregel: der
+# Grund ist jeweils inhaltlich und laesst sich nicht verallgemeinern, ohne
+# nebenbei brauchbare Fragen mitzunehmen.
+#
+# Jeder Eintrag braucht eine Begruendung. Eine Ausschlussliste ohne Gruende
+# waere nach drei Monaten nicht mehr pruefbar und wuerde stillschweigend
+# weiterwirken.
+AUSGESCHLOSSEN = {
+    # Scherzmarkt ueber einen US-Politiker. Der Afrika-Bezug ist zufaellig,
+    # das Stichwort "Sudan" steht nur im Nebensatz. Neben Hungersnot- und
+    # Waffenstillstandsfragen wirkt die Frage deplatziert.
+    "polymarket-1986523": "Scherzfrage, Afrika-Bezug nur nominell",
+}
+
 # Mindestliquiditaet je Quelle. Gilt NUR fuer Fragen, die auch eine
 # Vergleichszahl haben: wo es keinen Benchmark gibt, kann er auch nicht
 # uninformativ sein. Eine Metaculus-Frage ohne Community-Median bleibt also
@@ -555,7 +570,8 @@ def waehle_fragen(nach_quelle):
     moderate = {}
     extreme = {}
     for name, fragen in nach_quelle.items():
-        alle_afrika = [f for f in fragen if hat_afrika_bezug(f)]
+        alle_afrika = [f for f in fragen
+                       if hat_afrika_bezug(f) and f["id"] not in AUSGESCHLOSSEN]
 
         # Zwei Ausschluesse vor jeder weiteren Auswahl. Sonst konkurrierten
         # unbrauchbare Fragen um Plaetze, die eine belastbare besser fuellt.
@@ -627,6 +643,7 @@ def baue_eintrag(frage):
         "event_title": frage.get("event_title", ""),
         "resolve_time": frage.get("resolve_time", ""),
         "description": frage.get("description", ""),
+        "url": frage.get("url", ""),
     }
 
 

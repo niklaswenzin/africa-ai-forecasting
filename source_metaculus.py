@@ -389,7 +389,27 @@ def normalisiere(post):
         # ist das die Sortiergroesse: was zuerst aufgeloest wird, ist zuerst
         # ueberpruefbar und damit am interessantesten.
         "resolve_time": post.get("scheduled_resolve_time") or "",
+        # Link auf die Frage bei Metaculus. Er ersetzt die Zahl, die uns die
+        # API nicht gibt: der Community-Median steht auf dieser Seite, und wer
+        # ihn sehen will, sieht ihn dort an der Quelle und tagesaktuell.
+        "url": baue_url(post),
     }
+
+
+def baue_url(post):
+    """Baut die oeffentliche Adresse der Frage, sonst leeren Text.
+
+    Der Slug ist nur Schmuck - Metaculus leitet /questions/<id>/ ohnehin
+    richtig weiter. Fehlt die id, geben wir gar keinen Link aus statt eines
+    geratenen.
+    """
+    if not post.get("id"):
+        return ""
+
+    slug = post.get("slug") or ""
+    if slug:
+        return f"{BASE_URL}/questions/{post['id']}/{slug}/"
+    return f"{BASE_URL}/questions/{post['id']}/"
 
 
 # --- Daten laden -----------------------------------------------------------
