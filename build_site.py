@@ -41,11 +41,6 @@ AUSGABE_DATEI = AUSGABE_ORDNER / "index.html"
 
 REPO_URL = "https://github.com/niklaswenzin/africa-ai-forecasting"
 
-# Ab welcher Abweichung gilt Modell != Benchmark als nennenswert. Darunter
-# zeigen wir die Differenz neutral grau, damit Rauschen nicht wie ein Signal
-# wirkt.
-NAH_SCHWELLE = 0.05
-
 QUELLEN_NAMEN = {
     "polymarket": "Polymarket",
     "metaculus": "Metaculus",
@@ -76,7 +71,7 @@ BENCHMARK_FEHLT = {
 # So kann der Text nicht mehr veralten.
 PROGNOSTIKER = [
     ("claude", "Claude", forecast.MODEL),
-    ("openai", "GPT", forecaster_openai.MODELL),
+    ("openai", "ChatGPT", forecaster_openai.MODELL),
 ]
 
 KATEGORIE_NAMEN = [
@@ -334,13 +329,11 @@ h1 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .95rem;
 }
-/* Die Details-Zeile sitzt dadurch am unteren Rand jeder Karte, auf gleicher
-   Hoehe wie die der Nachbarkarte. Der Mindestabstand nach oben haengt an den
-   Vorgaengern, nicht an details selbst: margin-top ist dort "auto" und
-   verschwaende, sobald eine Karte die Zeile ausfuellt. */
+/* Die Skala sitzt am unteren Rand jeder Karte (margin-top: auto weiter
+   unten), damit sie in einer Zeile auf gleicher Hoehe liegt - egal ob der
+   Fragetext zwei oder vier Zeilen braucht. Sie ist das Element, das man ueber
+   die Karten hinweg vergleicht; verspringt es, vergleicht man schlechter. */
 .card { display: flex; flex-direction: column; }
-.card details { margin-top: auto; }
-.metrics, .skala-achse { margin-bottom: .9rem; }
 @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
 
 /* --- Karte --- */
@@ -393,6 +386,9 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
   gap: .55rem;
+  /* Mindestabstand zur Skala. Der Rest des Platzes geht an margin-top: auto
+     der Skala, die dadurch nach unten wandert. */
+  margin-bottom: 1.1rem;
 }
 .m { min-width: 0; --farbe: var(--modell-standard); }
 .m-bench { --farbe: var(--bench); }
@@ -426,16 +422,6 @@ h1 {
   letter-spacing: -.03em;
   color: var(--farbe);
 }
-.diff {
-  display: block;
-  font-size: .755rem;
-  font-weight: 620;
-  font-variant-numeric: tabular-nums;
-  margin-top: .18rem;
-}
-.up { color: var(--up); }
-.down { color: var(--down); }
-.flat { color: var(--flat); }
 .leer {
   display: block;
   font-size: .85rem;
@@ -451,7 +437,7 @@ h1 {
 .skala {
   position: relative;
   height: 1.5rem;
-  margin: .1rem 0 .2rem;
+  margin: auto 0 .2rem;
 }
 .track {
   position: absolute;
@@ -505,65 +491,6 @@ h1 {
   cursor: help;
 }
 @media (prefers-color-scheme: dark) { .warnung { color: #f0a955; } }
-
-details {
-  margin-top: .9rem;
-  border-top: 1px solid var(--line-soft);
-  padding-top: .55rem;
-}
-summary {
-  cursor: pointer;
-  font-size: .765rem;
-  color: var(--muted);
-  font-weight: 600;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: .3rem;
-}
-summary::-webkit-details-marker { display: none; }
-summary::before {
-  content: "+";
-  font-size: .9rem;
-  line-height: 1;
-  color: var(--muted);
-}
-details[open] summary::before { content: "\\2013"; }
-summary:hover { color: var(--text); }
-.reason {
-  margin: .7rem 0 0;
-  padding-left: .7rem;
-  border-left: 2px solid var(--farbe, var(--line));
-  font-size: .85rem;
-  color: var(--text-soft);
-}
-.reason-claude { --farbe: var(--claude); }
-.reason-openai { --farbe: var(--gpt); }
-.reason-head {
-  display: block;
-  font-size: .655rem;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-weight: 650;
-  color: var(--farbe);
-  margin-bottom: .12rem;
-}
-.criteria {
-  margin: .9rem 0 0;
-  padding-top: .6rem;
-  border-top: 1px solid var(--line-soft);
-  font-size: .765rem;
-  color: var(--muted);
-  white-space: pre-wrap;
-}
-.criteria b {
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-size: .62rem;
-  margin-bottom: .2rem;
-  font-weight: 650;
-}
 
 footer {
   margin-top: 3rem;
@@ -668,11 +595,6 @@ KARTEN_VORLAGE = """<article class="card cat-<<KATEGORIE>>" data-category="<<KAT
 <<AI_BLOCK>>
   </div>
 <<SKALA>>
-  <details>
-    <summary>Reasoning and resolution criteria</summary>
-<<REASONING_BLOCK>>
-    <p class="criteria"><b>Resolution criteria</b><<KRITERIEN>></p>
-  </details>
 </article>"""
 
 BENCHMARK_VORLAGE = """    <div class="m m-bench">
@@ -688,15 +610,14 @@ BENCHMARK_FEHLT_VORLAGE = """    <div class="m m-bench">
       <span class="leer"><<HINWEIS>></span>
     </div>"""
 
-# Konfidenz und Suchanzahl stehen bewusst NICHT auf der Karte. Beides sind
-# Angaben ueber den Weg, nicht ueber das Ergebnis, und sie lenkten von den
-# Zahlen ab, um die es geht. Gespeichert bleiben sie in forecasts.json und in
-# jeder Aufnahme - fuer eine spaetere Auswertung, etwa ob hohe Konfidenz
-# tatsaechlich mit besseren Treffern einhergeht.
+# Auf der Karte steht nur die Zahl. Weder Konfidenz und Suchanzahl (Angaben
+# ueber den Weg, nicht ueber das Ergebnis) noch die Differenz zum Benchmark:
+# die Skala darunter zeigt den Abstand bereits als Bild, und dieselbe Aussage
+# zweimal nebeneinander laesst die Karte voller wirken, ohne mehr zu sagen.
+# Gespeichert bleibt alles in forecasts.json und in jeder Aufnahme.
 AI_VORLAGE = """    <div class="m m-<<SCHLUESSEL>>">
       <span class="lbl"><<MODELL_NAME>></span>
       <span class="val"><<MODELL_P>></span>
-<<DIFF_BLOCK>>
 <<WARNUNG>>
     </div>"""
 
@@ -704,8 +625,6 @@ OHNE_AI_VORLAGE = """    <div class="m m-<<SCHLUESSEL>>">
       <span class="lbl"><<MODELL_NAME>></span>
       <span class="leer">not forecast</span>
     </div>"""
-
-DIFF_VORLAGE = """      <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
 
 # Warnung, wenn die Zahl der eigenen Begruendung widerspricht. Bewusst
 # sichtbar auf der Karte: der Wert steht dann als grosse Abweichung weit oben,
@@ -722,8 +641,6 @@ SKALA_VORLAGE = """  <div class="skala">
   <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>"""
 
 PUNKT_VORLAGE = """    <div class="mk mk-<<SCHLUESSEL>>" style="left: <<POSITION>>%" title="<<TITEL>>"></div>"""
-
-REASONING_VORLAGE = """    <p class="reason reason-<<SCHLUESSEL>>"><span class="reason-head"><<MODELL_NAME>></span><<REASONING>></p>"""
 
 LEGENDE_VORLAGE = """    <span><i class="swatch" style="background: var(--<<FARBE>>)"></i> <<MODELL_NAME>></span>"""
 
@@ -774,7 +691,6 @@ def baue_karten_daten(markets, forecasts):
             "country": markt.get("country", ""),
             "market_p": market_p,
             "modelle": baue_modell_liste(prognose, market_p),
-            "criteria": markt.get("description", ""),
         })
 
     return eintraege
@@ -795,6 +711,9 @@ def baue_modell_liste(prognose, market_p):
         eintrag = vorhanden.get(schluessel)
         model_p = eintrag["probability"] if eintrag else None
 
+        # Die Differenz steht nicht mehr auf der Karte, wird aber weiter
+        # gebraucht: sie bestimmt die Reihenfolge der Karten und die
+        # Kennzahl im Seitenkopf.
         if model_p is None or market_p is None:
             diff = None
         else:
@@ -805,7 +724,6 @@ def baue_modell_liste(prognose, market_p):
             "name": anzeigename,
             "model_p": model_p,
             "diff": diff,
-            "reasoning": eintrag["reasoning"] if eintrag else "",
             # Gesetzt, wenn Zahl und Begruendung sich widersprechen und auch
             # der Neuversuch das nicht aufgeloest hat (siehe pruefung.py).
             "flagged": eintrag.get("flagged") if eintrag else None,
@@ -828,32 +746,6 @@ def position(p):
     ausserhalb der Achse und waere angeschnitten.
     """
     return f"{min(max(p * 100, 1.5), 98.5):.1f}"
-
-
-def formatiere_diff(diff):
-    """Formatiert die Differenz zum Benchmark, z. B. "+46 pts".
-
-    Rundet die Differenz auf 0 Punkte, waere "0 pts" irrefuehrend (der Wert
-    ist nicht exakt null), darum "<1 pt". Bei genau einem Punkt "pt".
-    """
-    punkte = round(diff * 100)
-    if punkte == 0:
-        return "&lt;1 pt"
-
-    einheit = "pt" if abs(punkte) == 1 else "pts"
-    vorzeichen = "+" if punkte > 0 else "&minus;"
-    return f"{vorzeichen}{abs(punkte)} {einheit}"
-
-
-def klasse_fuer_diff(diff):
-    """CSS-Klasse (Farbe) fuer die Differenz.
-
-    Abweichungen unterhalb von NAH_SCHWELLE zeigen wir neutral grau, damit
-    kleine Unterschiede optisch nicht wie eine echte Gegenposition wirken.
-    """
-    if abs(diff) < NAH_SCHWELLE:
-        return "flat"
-    return "up" if diff > 0 else "down"
 
 
 def quellen_name(quelle):
@@ -913,15 +805,6 @@ def baue_ai_block(modell):
             .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
         )
 
-    if modell["diff"] is None:
-        diff_block = ""
-    else:
-        diff_block = (
-            DIFF_VORLAGE
-            .replace("<<DIFF_KLASSE>>", klasse_fuer_diff(modell["diff"]))
-            .replace("<<DIFF>>", formatiere_diff(modell["diff"]))
-        )
-
     if modell.get("flagged"):
         warnung = WARNUNG_VORLAGE.replace(
             "<<GRUND>>",
@@ -935,7 +818,6 @@ def baue_ai_block(modell):
         .replace("<<SCHLUESSEL>>", html.escape(modell["key"]))
         .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
         .replace("<<MODELL_P>>", formatiere_prozent(modell["model_p"]))
-        .replace("<<DIFF_BLOCK>>", diff_block)
         .replace("<<WARNUNG>>", warnung)
     )
 
@@ -980,33 +862,12 @@ def baue_skala(eintrag):
     return SKALA_VORLAGE.replace("<<PUNKTE>>", markierungen)
 
 
-def baue_reasoning_block(eintrag):
-    """Baut die Begruendungen aller Modelle, die eine geliefert haben.
-
-    Beide stehen untereinander, damit man sie direkt vergleichen kann - dort
-    liegt der eigentliche Erkenntniswert, nicht in den zwei Prozentzahlen.
-    """
-    teile = []
-    for modell in eintrag["modelle"]:
-        if not modell["reasoning"]:
-            continue
-        teile.append(
-            REASONING_VORLAGE
-            .replace("<<SCHLUESSEL>>", html.escape(modell["key"]))
-            .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
-            .replace("<<REASONING>>", html.escape(modell["reasoning"]))
-        )
-    return "\n".join(teile)
-
-
 def baue_karte(eintrag):
     """Baut das HTML fuer eine einzelne Frage-Karte.
 
-    Alle Texte laufen durch html.escape. Frage, Begruendung und Kriterien
-    stammen aus fremden APIs bzw. vom Modell; ein "&" oder "<" darin wuerde
-    die Seite sonst zerlegen.
+    Alle Texte laufen durch html.escape. Der Fragetext stammt aus einer
+    fremden API; ein "&" oder "<" darin wuerde die Seite sonst zerlegen.
     """
-    kriterien = eintrag["criteria"].strip() or "None provided by the source."
     land = eintrag["country"] or "Africa"
 
     return (
@@ -1019,8 +880,6 @@ def baue_karte(eintrag):
         .replace("<<BENCHMARK_BLOCK>>", baue_benchmark_block(eintrag))
         .replace("<<AI_BLOCK>>", "\n".join(baue_ai_block(m) for m in eintrag["modelle"]))
         .replace("<<SKALA>>", baue_skala(eintrag))
-        .replace("<<REASONING_BLOCK>>", baue_reasoning_block(eintrag))
-        .replace("<<KRITERIEN>>", html.escape(kriterien))
     )
 
 
