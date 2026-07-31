@@ -1,7 +1,7 @@
 """fetch_markets.py
 
-Laedt offene Fragen aus allen angebundenen Quellen (Polymarket, Metaculus,
-Kalshi) und speichert eine Auswahl als markets.json.
+Laedt offene Fragen aus allen angebundenen Quellen (Polymarket, Metaculus)
+und speichert eine Auswahl als markets.json.
 
 Design: Fragen mit Afrika-Bezug, maximal eine pro Land, keine Sport-Fragen.
 Bevorzugt werden Fragen mit einer Quote zwischen 0.05 und 0.95; Extremwerte
@@ -22,7 +22,6 @@ import re
 import sys
 from datetime import datetime, timezone
 
-import source_kalshi
 import source_metaculus
 import source_polymarket
 
@@ -56,7 +55,6 @@ MODERAT_MAX = 0.95
 # Zugriffsstufe steht, gehoert er an echten Daten geprueft.
 MIN_LIQUIDITAET = {
     "polymarket": 5000,
-    "kalshi": 5000,
     "metaculus": 15,
 }
 
@@ -81,12 +79,12 @@ KATEGORIEN_OHNE_BENCHMARK = ("elections", "security", "diplomacy", "economy")
 # und verdraengt eine Frage, die naechsten Monat faellig ist.
 MAX_HORIZONT_TAGE = 1095   # rund drei Jahre
 
-# Alle angebundenen Quellen. Metaculus und Kalshi geben derzeit leere Listen
-# zurueck (siehe die jeweiligen Dateien), die Pipeline laeuft trotzdem durch.
+# Alle angebundenen Quellen. Metaculus liefert Fragen, aber keinen
+# Community-Median: der ist fuer unsere Zugriffsstufe gesperrt. Solche Fragen
+# kommen ohne Vergleichszahl auf die Seite, begrenzt durch MAX_OHNE_BENCHMARK.
 QUELLEN = [
     source_polymarket,
     source_metaculus,
-    source_kalshi,
 ]
 
 # Zuordnung Keyword -> Land, um Afrika-Bezug im Fragetext zu erkennen (alles

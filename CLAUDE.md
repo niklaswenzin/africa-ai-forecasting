@@ -4,8 +4,13 @@ Arbeitsanweisungen für Claude Code in diesem Repository.
 
 ## Projekt
 Forecasting-Pipeline für afrikanische Wirtschafts- und Politikfragen: offene
-Fragen von Polymarket laden, mit der Claude API strukturierte Prognosen
-erzeugen, das Modell gegen die Marktquote auswerten.
+Fragen von Polymarket und Metaculus laden, mit der Claude API und der OpenAI
+API strukturierte Prognosen erzeugen, beide Modelle neben der Vergleichszahl
+auf einer statischen Seite zeigen.
+
+Der Umfang ist bewusst klein: drei Skripte, ein Lauf, eine Seite. Was hier
+nicht steht, gehört nicht dazu — kein Zeitplan, keine Auswertung, kein Score.
+Vor jeder Erweiterung fragen, ob sie diesen Rahmen sprengt.
 
 ## Arbeitsweise
 - Änderungen in kleinen, abgeschlossenen Schritten, ein Skript pro Aufgabe.
@@ -24,30 +29,40 @@ erzeugen, das Modell gegen die Marktquote auswerten.
 - Polymarket Gamma API: Basis https://gamma-api.polymarket.com, Endpoint /markets, öffentlich ohne Key. Query-Parameter vor der Implementierung in der offiziellen Doku (docs.polymarket.com) verifizieren, nicht raten.
 
 ## Struktur
-- source_polymarket.py, source_metaculus.py, source_kalshi.py: je eine Quelle. Jede stellt genau eine Funktion `lade_fragen()` bereit und liefert Einträge im gemeinsamen Format: id, source, question, market_p, benchmark_type, description, volume. Metaculus und Kalshi sind noch nicht angebunden und geben eine leere Liste zurück.
+Drei Skripte in dieser Reihenfolge: `fetch_markets.py`, `forecast.py`, `build_site.py`.
+
+- source_polymarket.py, source_metaculus.py: je eine Quelle. Jede stellt genau eine Funktion `lade_fragen()` bereit und liefert Einträge im gemeinsamen Format: id, source, question, market_p, benchmark_type, description, volume.
 - fetch_markets.py: ruft alle Quellen in QUELLEN auf, filtert auf Afrika-Bezug, verwirft Sport-Fragen, wählt reihum über die Quellen maximal eine Frage pro Land, speichert markets.json.
-- forecast.py: fragt pro Frage BEIDE Prognostiker und speichert forecasts.json. Claude über einen Messages-Call mit optionaler serverseitiger Web-Suche, OpenAI über forecaster_openai.py. System Prompt erzwingt reines JSON mit probability (0 bis 1), reasoning (maximal 3 Sätze, auf Englisch), confidence (low, medium, high). Antwort validieren, bei ungültigem JSON genau einmal erneut anfordern.
-- forecaster_openai.py: zweiter Prognostiker über die OpenAI Responses API. Strukturierte Ausgabe liegt unter `text.format`, nicht unter `response_format`. Bekommt bewusst kein Web-Such-Tool — diese Verzerrung gegenüber Claude gehört dokumentiert, solange sie besteht.
-- evaluate.py: führt beide JSON-Dateien über die ID zusammen, schreibt results.csv mit question, source, benchmark_type, market_p und je Prognostiker zwei Spalten (`<name>_p`, `<name>_diff`).
+- forecast.py: fragt pro Frage BEIDE Prognostiker und speichert forecasts.json. Claude über einen Messages-Call mit serverseitiger Web-Suche, OpenAI über forecaster_openai.py. System Prompt erzwingt reines JSON mit probability (0 bis 1), reasoning (maximal 3 Sätze, auf Englisch), confidence (low, medium, high). Antwort validieren, bei ungültigem JSON genau einmal erneut anfordern.
+- forecaster_openai.py: zweiter Prognostiker über die OpenAI Responses API. Strukturierte Ausgabe liegt unter `text.format`, nicht unter `response_format`. Bekommt dasselbe Web-Such-Tool wie Claude, mit denselben gesperrten Domains — die frühere Verzerrung (nur Claude durfte suchen) war grösser als jeder gemessene Modellunterschied.
+- pruefung.py: prüft Extremwerte (unter 2 Prozent, über 98) gegen die eigene Begründung. Widerspricht sie, wird genau einmal neu angefragt, danach bleibt der Wert stehen und die Karte trägt eine Warnung.
+- build_site.py: baut aus markets.json und forecasts.json die Seite docs/index.html.
+- snapshot.py: optional, hängt den Lauf an data/history/ an. Nichts auf der Seite hängt davon ab; die Aufnahmen existieren, damit eine spätere Auswertung Modell und Benchmark aus DERSELBEN Aufnahme bewerten kann.
 
 ## Mehrere Prognostiker
 - forecasts.json führt die Schätzungen unter `forecasts` je Prognostiker-Schlüssel (`claude`, `openai`), nicht flach. Ein dritter kommt hinzu, ohne dass das Schema sich ändert.
-- Die Reihenfolge steht in evaluate.py (`PROGNOSTIKER`) und build_site.py (`PROGNOSTIKER`) — beide Listen müssen zusammenpassen.
-- Beide Modelle müssen dieselbe Aufgabe bekommen (gleiche Frage, gleiche Auflösungskriterien, keine Marktquote). Sonst vergleicht man Prompts statt Modelle.
-- build_site.py: baut aus beiden JSON-Dateien die statische Seite docs/index.html.
+- Die Reihenfolge steht in build_site.py (`PROGNOSTIKER`). Ein neuer Prognostiker braucht dort einen Eintrag und in `MODELL_FARBE` eine Farbe, sonst fehlt er in der Legende.
+- Beide Modelle müssen dieselbe Aufgabe bekommen (gleiche Frage, gleiche Auflösungskriterien, gleiche Werkzeuge, keine Marktquote). Sonst vergleicht man Prompts statt Modelle.
 
 ## Mehrere Quellen
 - Neue Quelle anbinden heisst: eine source_*.py schreiben und sie in QUELLEN eintragen. Filter, Länderregel und Auswahl gelten dann automatisch.
 - IDs sind mit dem Quellennamen kombiniert (z. B. `polymarket-620335`), damit sie über Quellen hinweg eindeutig bleiben.
-- benchmark_type unterscheidet `market_price` (echter Geldmarkt: Polymarket, Kalshi) von `community_forecast` (Metaculus-Median ohne Geldeinsatz). Die beiden dürfen in der Auswertung und auf der Seite nicht als dasselbe dargestellt werden.
-- Endpoints und Query-Parameter jeder neuen Quelle vorher in deren offizieller Doku verifizieren, nicht raten. Die offenen Punkte stehen jeweils oben in der Platzhalter-Datei.
-- Preise normalisieren: market_p ist immer 0 bis 1 (Kalshi liefert Cent, also durch 100 teilen).
+- benchmark_type unterscheidet `market_price` (echter Geldmarkt: Polymarket) von `community_forecast` (Metaculus-Median ohne Geldeinsatz). Die beiden dürfen auf der Seite nicht als dasselbe dargestellt werden.
+- Der Metaculus-Median ist für unsere Zugriffsstufe gesperrt und kommt als `None`. Solche Fragen bleiben trotzdem drin — die Karte zeigt dann nur die beiden Modelle. Nie einen Ersatzwert raten.
+- Endpoints und Query-Parameter jeder neuen Quelle vorher in deren offizieller Doku verifizieren, nicht raten.
+- Preise normalisieren: market_p ist immer 0 bis 1.
 
 ## Methodische Leitplanke
-Die Marktquote darf nie in den Prompt von forecast.py gelangen. Sie dient
-ausschliesslich der Auswertung in evaluate.py. Andernfalls repliziert das
+Die Vergleichszahl darf nie in den Prompt von forecast.py gelangen. Sie
+erscheint ausschliesslich auf der fertigen Seite. Andernfalls repliziert das
 Modell die Marktmeinung, statt eine unabhängige Schätzung abzugeben, und der
-Vergleich verliert seine Aussagekraft.
+Vergleich verliert seine Aussagekraft. Aus demselben Grund sind die
+Prognosemarkt-Domains im Web-Such-Tool BEIDER Modelle gesperrt.
+
+## Seite
+- Farbe bedeutet WER, nicht WAS: Benchmark, Claude und GPT haben je eine feste Farbe, die in Zahl, Skalenpunkt und Begründung wiederkehrt. Kategorien tragen darum nur eine getönte Pille.
+- Keine Flaggen-Emoji: Windows zeigt dafür das nackte Buchstabenpaar des Ländercodes.
+- Fehlt eine Zahl, steht ein ruhiger Hinweis statt einer Null — nie eine Abweichung ohne Gegenwert, nie ein Balken auf 0 Prozent.
 
 ## Konventionen
 - HTTP-Status prüfen, bei Fehlern klare Meldung und Abbruch, kein stilles Weiterlaufen.

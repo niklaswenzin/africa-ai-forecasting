@@ -4,130 +4,192 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Forecasting: African Economic and Political Development</title>
+<meta name="description" content="Two AI models forecast open questions on African
+politics and economics, shown next to prediction-market prices.">
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #fbfbfa;
+  --bg-akzent: #f4f4f2;
   --card: #ffffff;
-  --text: #101418;
-  --text-soft: #4a545e;
-  --muted: #79838d;
-  --line: #e4e7eb;
-  --line-soft: #eef0f3;
-  --accent: #1f6feb;
+  --text: #14171a;
+  --text-soft: #4b535b;
+  --muted: #7b848d;
+  --line: #e3e5e8;
+  --line-soft: #eeeff1;
+  --link: #1a5fd0;
+
+  /* Farbe bedeutet WER. Diese drei sind ueber die ganze Seite reserviert und
+     tauchen nirgends in anderer Bedeutung auf. */
+  --bench: #1d2530;      /* Benchmark: Tinte, er ist der Bezugspunkt */
+  --claude: #b8552f;
+  --gpt: #0e8f70;
+  --modell-standard: #6b7280;   /* faengt einen dritten Prognostiker ohne Regel ab */
+
   --up: #12805c;
   --down: #c0392b;
-  --flat: #79838d;
-  --bar: #e4e7eb;
-  --bar-fill: #1f6feb;
-  --schatten: 0 1px 2px rgba(16, 20, 24, .05), 0 1px 3px rgba(16, 20, 24, .04);
-  --schatten-hover: 0 3px 10px rgba(16, 20, 24, .09);
-  /* Standard-Kategorienfarbe. Faengt eine Kategorie ab, fuer die es unten
-     keine Regel gibt - ohne diesen Wert waere var(--kat) ungueltig und die
-     Akzentlinie der Karte verschwaende oder erbte eine zufaellige Farbe. */
+  --flat: #8b949d;
+
+  --schatten: 0 1px 2px rgba(16, 20, 24, .04), 0 2px 8px rgba(16, 20, 24, .04);
+  --schatten-hover: 0 2px 4px rgba(16, 20, 24, .05), 0 8px 24px rgba(16, 20, 24, .09);
+
   --kat: #64748b;
   --kat-bg: #eef1f4;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0c0f13;
-    --card: #151a20;
-    --text: #e9eef4;
-    --text-soft: #b3bdc7;
-    --muted: #8592a0;
-    --line: #262d36;
-    --line-soft: #1d232b;
-    --accent: #5aa2ff;
+    --bg: #0b0d10;
+    --bg-akzent: #12151a;
+    --card: #14181e;
+    --text: #eceff3;
+    --text-soft: #b0b9c3;
+    --muted: #828d99;
+    --line: #242a33;
+    --line-soft: #1b2028;
+    --link: #6ba6ff;
+
+    --bench: #dbe2ea;
+    --claude: #e08a5f;
+    --gpt: #35c9a2;
+    --modell-standard: #9aa4b0;
+
     --up: #3ecf8e;
-    --down: #ff6b5e;
-    --flat: #8592a0;
-    --bar: #262d36;
-    --bar-fill: #5aa2ff;
-    --schatten: 0 1px 2px rgba(0, 0, 0, .4);
-    --schatten-hover: 0 3px 12px rgba(0, 0, 0, .55);
+    --down: #ff6f61;
+    --flat: #7d8792;
+
+    --schatten: 0 1px 2px rgba(0, 0, 0, .5);
+    --schatten-hover: 0 8px 28px rgba(0, 0, 0, .6);
+
     --kat: #94a3b8;
     --kat-bg: #1c232c;
   }
 }
-/* Kategorienfarben. Jede Kategorie setzt --kat (kraeftig, fuer Text, Rahmen
-   und Akzentlinie) und --kat-bg (getoent, fuer Flaechen). Beides wird von
-   Karte und Tab geerbt, die Regeln weiter unten greifen dadurch auf
-   dieselben zwei Variablen zu.
 
-   Bewusst KEIN Rot fuer Security und KEIN Gruen fuer Economy: diese beiden
-   Farben bedeuten auf der Seite bereits "Modell ueber bzw. unter dem
-   Benchmark". Eine Farbe mit zwei Bedeutungen macht beide unlesbar, darum
-   Orange und Teal. */
-.cat-elections { --kat: #1f6feb; --kat-bg: #e8f0fe; }
-.cat-security  { --kat: #c2410c; --kat-bg: #fcebdf; }
-.cat-diplomacy { --kat: #6d28d9; --kat-bg: #efe8fd; }
-.cat-economy   { --kat: #0f766e; --kat-bg: #e0f2f0; }
-.cat-other     { --kat: #64748b; --kat-bg: #eef1f4; }
+/* Kategorien: nur eine getoente Pille, keine Kartenfarbe. Sie ordnen ein,
+   sie sind nicht die Aussage der Karte. */
+.cat-elections { --kat: #1f5fd0; --kat-bg: #e9f0fd; }
+.cat-security  { --kat: #b8460c; --kat-bg: #fbeade; }
+.cat-diplomacy { --kat: #6b28c9; --kat-bg: #f0e9fd; }
+.cat-economy   { --kat: #0d6f66; --kat-bg: #e2f2f0; }
+.cat-other     { --kat: #5a6672; --kat-bg: #eef1f4; }
 @media (prefers-color-scheme: dark) {
-  .cat-elections { --kat: #6cabff; --kat-bg: #14243a; }
-  .cat-security  { --kat: #fb923c; --kat-bg: #33200f; }
-  .cat-diplomacy { --kat: #a78bfa; --kat-bg: #241a3d; }
-  .cat-economy   { --kat: #2dd4bf; --kat-bg: #0c2b28; }
-  .cat-other     { --kat: #94a3b8; --kat-bg: #1c232c; }
+  .cat-elections { --kat: #7fb2ff; --kat-bg: #15243a; }
+  .cat-security  { --kat: #fb9a4c; --kat-bg: #331f10; }
+  .cat-diplomacy { --kat: #b195fb; --kat-bg: #241b3d; }
+  .cat-economy   { --kat: #3ad4bd; --kat-bg: #0b2b28; }
+  .cat-other     { --kat: #97a3b0; --kat-bg: #1c232c; }
 }
 
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  padding: 2.25rem 1.15rem 3rem;
+  padding: 0 1.15rem 4rem;
   background: var(--bg);
   color: var(--text);
-  /* Inter zuerst, aber ohne Web-Font-Download: wer sie installiert hat,
-     bekommt sie, alle anderen den System-Stack. Kein externer Request. */
   font-family: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont,
                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-.wrap { max-width: 1020px; margin: 0 auto; }
+.wrap { max-width: 1120px; margin: 0 auto; }
 
-/* Kopf */
-header { margin-bottom: 1.5rem; }
+/* --- Kopf --- */
+header.top {
+  padding: 3.25rem 0 2rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.75rem;
+}
+.kicker {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 .85rem;
+}
 h1 {
-  font-size: 1.55rem;
-  line-height: 1.2;
-  letter-spacing: -.021em;
-  font-weight: 700;
-  margin: 0 0 .35rem;
+  /* Serife nur fuer Ueberschrift und Fragetext. Sie trennt den Inhalt
+     sichtbar von der Bedienoberflaeche, die serifenlos bleibt. */
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: clamp(1.85rem, 4.2vw, 2.7rem);
+  line-height: 1.12;
+  letter-spacing: -.018em;
+  font-weight: 600;
+  margin: 0 0 .7rem;
+  max-width: 20ch;
 }
 .sub {
   color: var(--text-soft);
-  margin: 0 0 1rem;
-  max-width: 62ch;
-  font-size: .93rem;
-}
-.stats { display: flex; flex-wrap: wrap; gap: .5rem; }
-.stat {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: .45rem .75rem;
-  box-shadow: var(--schatten);
-  display: flex;
-  align-items: baseline;
-  gap: .4rem;
-}
-.stat-value { font-size: 1.02rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.stat-label {
-  font-size: .69rem;
-  text-transform: uppercase;
-  letter-spacing: .065em;
-  color: var(--muted);
-  font-weight: 600;
+  margin: 0;
+  max-width: 60ch;
+  font-size: 1rem;
+  line-height: 1.55;
 }
 
-/* Tabs als Pills */
-.tabs {
+/* Kennzahlenband */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  margin-top: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--schatten);
+  overflow: hidden;
+}
+.stat { padding: .95rem 1.15rem; }
+.stat + .stat { border-left: 1px solid var(--line); }
+@media (max-width: 620px) {
+  .stat + .stat { border-left: none; border-top: 1px solid var(--line); }
+}
+.stat-value {
+  display: block;
+  font-size: 1.55rem;
+  font-weight: 680;
+  line-height: 1.1;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  display: block;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .085em;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: .3rem;
+}
+
+/* Legende: erklaert das Farbsystem genau einmal */
+.legende {
   display: flex;
   flex-wrap: wrap;
-  gap: .38rem;
-  margin: 1.35rem 0 1.15rem;
+  gap: 1.1rem;
+  margin: 1.4rem 0 0;
+  font-size: .8rem;
+  color: var(--text-soft);
 }
+.legende span { display: inline-flex; align-items: center; gap: .42rem; }
+.swatch {
+  width: .68rem;
+  height: .68rem;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* --- Steuerleiste --- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: 0 0 1.15rem;
+}
+.tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
 .tab {
   font: inherit;
   font-size: .845rem;
@@ -136,317 +198,366 @@ h1 {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: .34rem .8rem;
+  padding: .34rem .82rem;
   cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
+  transition: background .13s, color .13s, border-color .13s;
 }
-.tab:hover { border-color: var(--kat, var(--muted)); color: var(--text); }
-/* Aktiver Kategorie-Tab: getoente Flaeche, Text und Rahmen in der Kategorien-
-   farbe. Bewusst nicht die kraeftige Farbe als Hintergrund mit weisser
-   Schrift - das haette im Dunkelmodus zu wenig Kontrast, weil --kat dort
-   selbst hell ist. */
-.tab.active {
-  background: var(--kat-bg);
-  border-color: var(--kat);
-  color: var(--kat);
-}
-/* Der All-Tab gehoert zu keiner Kategorie und bleibt darum neutral invertiert. */
+.tab:hover { border-color: var(--kat); color: var(--text); }
+.tab.active { background: var(--kat-bg); border-color: var(--kat); color: var(--kat); }
 .tab[data-filter="all"].active {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
 }
 .punkt {
-  width: .45rem;
-  height: .45rem;
+  width: .44rem;
+  height: .44rem;
   border-radius: 50%;
   background: var(--kat);
   display: inline-block;
-  margin-right: .4rem;
+  margin-right: .42rem;
   vertical-align: middle;
 }
-.tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
+.tab .count { opacity: .55; margin-left: .34rem; font-variant-numeric: tabular-nums; }
+.hinweis-sortierung { font-size: .76rem; color: var(--muted); }
 
-/* Grid: zwei breite Spalten statt drei schmaler. Die Fragetexte sind lang
-   ("Will Platforma Reupblicana No Kumpu Guine win the most seats in the 2025
-   Guinea-Bissau National People's Assembly election?") und brachen in drei
-   Spalten auf fuenf Zeilen um. */
+/* --- Raster --- */
+/* align-items bleibt auf dem Standard "stretch": Karten einer Zeile werden
+   gleich hoch. Bei "start" endeten nebeneinanderliegende Karten je nach
+   Laenge des Fragetexts auf unterschiedlicher Hoehe, was das Raster unruhig
+   wirken liess. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .85rem;
-  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .95rem;
 }
-@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+/* Die Details-Zeile sitzt dadurch am unteren Rand jeder Karte, auf gleicher
+   Hoehe wie die der Nachbarkarte. Der Mindestabstand nach oben haengt an den
+   Vorgaengern, nicht an details selbst: margin-top ist dort "auto" und
+   verschwaende, sobald eine Karte die Zeile ausfuellt. */
+.card { display: flex; flex-direction: column; }
+.card details { margin-top: auto; }
+.metrics, .skala-achse { margin-bottom: .9rem; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
 
-/* Karte */
+/* --- Karte --- */
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  /* Akzentlinie oben in der Kategorienfarbe. Sie traegt dieselbe Information
-     wie die Pille im Kartenkopf, aber ueber die ganze Breite - dadurch sind
-     Bloecke gleicher Kategorie im Grid auf einen Blick als Gruppe erkennbar. */
-  border-top: 3px solid var(--kat);
-  border-radius: 11px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 1.15rem 1.2rem 1.05rem;
   box-shadow: var(--schatten);
-  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+  transition: box-shadow .16s ease, transform .16s ease;
 }
-.card:hover {
-  box-shadow: var(--schatten-hover);
-  border-color: var(--line);
-  border-top-color: var(--kat);
-  transform: translateY(-1px);
+.card:hover { box-shadow: var(--schatten-hover); transform: translateY(-2px); }
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .7rem;
 }
-.card-head { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .6rem; }
-.badge, .tag {
+.pill {
   font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: .075em;
   font-weight: 650;
-  color: var(--muted);
-  border: 1px solid var(--line);
   border-radius: 999px;
-  padding: .12rem .48rem;
+  padding: .16rem .52rem;
   white-space: nowrap;
-}
-.tag { text-transform: none; letter-spacing: .01em; font-size: .7rem; }
-/* Kategorienpille: die Farbe allein waere kryptisch, hier steht der Name dazu. */
-.cat-pill {
   color: var(--kat);
   background: var(--kat-bg);
-  border-color: transparent;
 }
-.question {
-  font-weight: 600;
-  font-size: .94rem;
+.src {
+  font-size: .7rem;
+  font-weight: 550;
+  color: var(--muted);
+}
+.geo { font-size: .74rem; color: var(--text-soft); margin-left: auto; white-space: nowrap; }
+
+.q {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 1.03rem;
+  font-weight: 500;
   line-height: 1.38;
-  margin: 0 0 .85rem;
-  letter-spacing: -.005em;
+  margin: 0 0 1rem;
+  letter-spacing: -.004em;
 }
 
-/* Zahlenblock: Benchmark und Claude nebeneinander statt untereinander. Die
-   breiteren Karten machen den direkten Vergleich moeglich - beide Zahlen auf
-   einer Hoehe, das Auge muss nicht mehr springen. */
-/* auto-fit statt fester Spaltenzahl: kommt ein dritter Prognostiker dazu,
-   ordnet sich das Raster selbst neu, ohne dass das CSS angefasst wird. */
+/* Zahlenreihe. Jede Spalte traegt ihre Modellfarbe ueber --farbe. */
 .metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
-  gap: .8rem;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: .55rem;
 }
-.metric-col { min-width: 0; }
-.metric-col + .metric-col {
-  border-left: 1px solid var(--line-soft);
-  padding-left: .8rem;
-}
-.metric-label {
-  display: block;
-  font-size: .665rem;
+.m { min-width: 0; --farbe: var(--modell-standard); }
+.m-bench { --farbe: var(--bench); }
+.m-claude { --farbe: var(--claude); }
+.m-openai { --farbe: var(--gpt); }
+.lbl {
+  display: flex;
+  align-items: center;
+  gap: .32rem;
+  font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .07em;
+  letter-spacing: .08em;
   color: var(--muted);
   font-weight: 650;
-  margin-bottom: .18rem;
+  margin-bottom: .2rem;
 }
-.metric-value {
-  font-size: 1.95rem;
-  font-weight: 700;
+.lbl::before {
+  content: "";
+  width: .42rem;
+  height: .42rem;
+  border-radius: 50%;
+  background: var(--farbe);
+  flex: none;
+}
+.val {
+  display: block;
+  font-size: 1.72rem;
+  font-weight: 680;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.025em;
-  display: block;
+  letter-spacing: -.03em;
+  color: var(--farbe);
 }
-.bar {
-  height: 5px;
-  background: var(--bar);
-  border-radius: 999px;
-  overflow: hidden;
-  margin: .5rem 0 0;
-}
-.bar-fill { height: 100%; background: var(--bar-fill); border-radius: 999px; }
-
 .diff {
   display: block;
-  font-size: .84rem;
-  font-weight: 650;
+  font-size: .755rem;
+  font-weight: 620;
   font-variant-numeric: tabular-nums;
-  margin-top: .28rem;
+  margin-top: .18rem;
 }
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--flat); }
-
-/* Leere Zustaende: ruhig, aber nie eine Luecke */
 .leer {
   display: block;
-  font-size: .82rem;
+  font-size: .85rem;
   color: var(--muted);
   font-style: italic;
-  /* Gleiche Hoehe wie eine Zahl, damit die beiden Spalten nicht verspringen,
-     wenn nur eine von beiden belegt ist. */
-  padding: .5rem 0 .35rem;
+  /* Gleiche Hoehe wie eine Zahl, damit die Spalten nicht verspringen, wenn
+     nur ein Teil von ihnen belegt ist. */
+  padding: .42rem 0 .5rem;
 }
-.meta { margin: .4rem 0 0; font-size: .755rem; color: var(--muted); }
+
+/* Gemeinsame Skala. Das eigentliche Bild der Karte: drei Punkte auf einer
+   Achse, Abstand gleich Uneinigkeit. */
+.skala {
+  position: relative;
+  height: 1.5rem;
+  margin: .1rem 0 .2rem;
+}
+.track {
+  position: absolute;
+  top: .58rem;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+}
+.tick {
+  position: absolute;
+  top: .24rem;
+  width: 1px;
+  height: .72rem;
+  background: var(--line);
+  transform: translateX(-50%);
+}
+.tick-mitte { background: var(--line); opacity: 1; height: 1rem; top: .1rem; }
+.mk {
+  position: absolute;
+  top: .22rem;
+  width: .78rem;
+  height: .78rem;
+  border-radius: 50%;
+  background: var(--farbe);
+  /* Ring in der Kartenfarbe: liegen zwei Punkte fast uebereinander, bleiben
+     sie trotzdem als zwei erkennbar. */
+  box-shadow: 0 0 0 2.5px var(--card);
+  transform: translateX(-50%);
+}
+.mk-bench { --farbe: var(--bench); z-index: 3; }
+.mk-claude { --farbe: var(--claude); z-index: 2; }
+.mk-openai { --farbe: var(--gpt); z-index: 1; }
+.skala-achse {
+  display: flex;
+  justify-content: space-between;
+  font-size: .62rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+}
+
 /* Widerspruch zwischen Zahl und Begruendung. Deutlich, aber nicht in der
-   Farbe der Differenz-Pfeile - sonst liest man es als Richtungsangabe. */
+   Farbe der Differenz - sonst liest man es als Richtungsangabe. */
 .warnung {
-  margin: .35rem 0 0;
-  font-size: .72rem;
+  margin: .3rem 0 0;
+  font-size: .7rem;
   font-weight: 600;
-  color: #b45309;
+  color: #a8580a;
   cursor: help;
 }
 @media (prefers-color-scheme: dark) { .warnung { color: #f0a955; } }
 
-details { margin-top: .85rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
+details {
+  margin-top: .9rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: .55rem;
+}
 summary {
   cursor: pointer;
-  font-size: .78rem;
-  color: var(--accent);
-  font-weight: 550;
+  font-size: .765rem;
+  color: var(--muted);
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
 }
-details p { margin: .55rem 0 0; font-size: .85rem; color: var(--text-soft); }
-/* Modellname ueber der jeweiligen Begruendung - ohne ihn waeren die beiden
-   Absaetze nicht auseinanderzuhalten. */
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: "+";
+  font-size: .9rem;
+  line-height: 1;
+  color: var(--muted);
+}
+details[open] summary::before { content: "\2013"; }
+summary:hover { color: var(--text); }
+.reason {
+  margin: .7rem 0 0;
+  padding-left: .7rem;
+  border-left: 2px solid var(--farbe, var(--line));
+  font-size: .85rem;
+  color: var(--text-soft);
+}
+.reason-claude { --farbe: var(--claude); }
+.reason-openai { --farbe: var(--gpt); }
 .reason-head {
-  font-size: .68rem !important;
+  display: block;
+  font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .07em;
+  letter-spacing: .08em;
   font-weight: 650;
-  color: var(--muted) !important;
-  margin-top: .8rem !important;
+  color: var(--farbe);
+  margin-bottom: .12rem;
 }
-details .criteria {
-  margin: .55rem 0 0;
-  font-size: .78rem;
+.criteria {
+  margin: .9rem 0 0;
+  padding-top: .6rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: .765rem;
   color: var(--muted);
   white-space: pre-wrap;
 }
-
-/* Aufgeloeste Fragen: bewusst als Tabelle, nicht als Karten. Hier zaehlt der
-   Vergleich Zeile fuer Zeile, nicht die einzelne Frage. */
-.resolved { margin-top: 2.5rem; }
-.resolved h2 {
-  font-size: 1.1rem;
-  margin: 0 0 .3rem;
-  letter-spacing: -.01em;
-}
-.resolved h2 .count {
-  font-size: .8rem;
-  color: var(--muted);
-  font-weight: 500;
-  margin-left: .3rem;
-}
-.resolved .sub { font-size: .82rem; margin-bottom: .8rem; }
-/* Auf schmalen Schirmen scrollt die Tabelle in ihrem eigenen Kasten,
-   damit die Seite selbst nie seitlich wandert. */
-.resolved table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: .84rem;
+.criteria b {
   display: block;
-  overflow-x: auto;
-}
-.resolved th {
-  text-align: left;
-  font-size: .67rem;
   text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--muted);
+  letter-spacing: .08em;
+  font-size: .62rem;
+  margin-bottom: .2rem;
   font-weight: 650;
-  padding: 0 .7rem .4rem 0;
-  white-space: nowrap;
 }
-.resolved td {
-  padding: .5rem .7rem .5rem 0;
-  border-top: 1px solid var(--line);
-  vertical-align: top;
-}
-.resolved .frage { min-width: 20rem; }
-.resolved .zahl { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.resolved .datum { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.resolved .brier { color: var(--muted); font-size: .76rem; margin-left: .3rem; }
-.outcome {
-  font-size: .68rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-weight: 650;
-  border-radius: 999px;
-  padding: .12rem .5rem;
-  white-space: nowrap;
-}
-.outcome.ja { color: var(--up); border: 1px solid var(--up); }
-.outcome.nein { color: var(--down); border: 1px solid var(--down); }
 
 footer {
-  margin-top: 2.25rem;
-  padding-top: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.35rem;
   border-top: 1px solid var(--line);
-  font-size: .8rem;
+  font-size: .81rem;
   color: var(--muted);
-  max-width: 80ch;
+  max-width: 78ch;
+  line-height: 1.6;
 }
-footer a { color: var(--accent); }
-footer p { margin: 0 0 .35rem; }
+footer a { color: var(--link); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer p { margin: 0 0 .5rem; }
+footer code {
+  font-size: .93em;
+  background: var(--bg-akzent);
+  padding: .06em .32em;
+  border-radius: 4px;
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-  <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Two AI models forecast open questions on African politics and
-  economics, side by side with prediction-market prices and community forecasts.
-  Neither model ever sees the benchmark it is measured against; once a question
-  resolves, both are scored against what actually happened.</p>
+
+<header class="top">
+  <p class="kicker">Prediction markets &middot; Large language models</p>
+  <h1>Can AI forecast African politics?</h1>
+  <p class="sub">Two language models estimate the probability of open questions
+  on African politics and economics. Neither ever sees the market price it is
+  placed next to, so each estimate is an independent claim rather than a
+  restatement of the crowd.</p>
+
   <div class="stats">
     <div class="stat"><span class="stat-value">10</span><span class="stat-label">Questions</span></div>
-    <div class="stat"><span class="stat-value">2</span><span class="stat-label">Sources</span></div>
-    <div class="stat"><span class="stat-value">12 pts</span><span class="stat-label">Avg. gap</span></div>
+    <div class="stat"><span class="stat-value">5</span><span class="stat-label">With a benchmark</span></div>
+    <div class="stat"><span class="stat-value">12 pts</span><span class="stat-label">Avg. model &ndash; market gap</span></div>
+    <div class="stat"><span class="stat-value">17 pts</span><span class="stat-label">Avg. gap between models</span></div>
+  </div>
+
+  <div class="legende">
+    <span><i class="swatch" style="background: var(--bench)"></i> Market or community benchmark</span>
+    <span><i class="swatch" style="background: var(--claude)"></i> Claude</span>
+    <span><i class="swatch" style="background: var(--gpt)"></i> GPT</span>
   </div>
 </header>
 
-<nav class="tabs"><button class="tab active" data-filter="all">All<span class="count">10</span></button>
+<div class="controls">
+  <nav class="tabs"><button class="tab active" data-filter="all">All<span class="count">10</span></button>
 <button class="tab cat-elections" data-filter="elections"><span class="punkt"></span>Elections<span class="count">4</span></button>
 <button class="tab cat-security" data-filter="security"><span class="punkt"></span>Security<span class="count">3</span></button>
 <button class="tab cat-diplomacy" data-filter="diplomacy"><span class="punkt"></span>Diplomacy<span class="count">1</span></button>
 <button class="tab cat-economy" data-filter="economy"><span class="punkt"></span>Economy<span class="count">1</span></button>
 <button class="tab cat-other" data-filter="other"><span class="punkt"></span>Other<span class="count">1</span></button></nav>
+  <span class="hinweis-sortierung">Sorted by disagreement with the benchmark</span>
+</div>
 
 <div class="grid">
 <article class="card cat-diplomacy" data-category="diplomacy">
   <div class="card-head">
-    <span class="badge cat-pill">Diplomacy</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🌍 Somaliland</span>
+    <span class="pill">Diplomacy</span>
+    <span class="src">Polymarket</span>
+    <span class="geo">Somaliland</span>
   </div>
-  <p class="question">Will Somaliland join the Abraham Accords before 2027?</p>
+  <h3 class="q">Will Somaliland join the Abraham Accords before 2027?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">22%</span>
-      <div class="bar"><div class="bar-fill" style="width: 22%"></div></div>
+    <div class="m m-bench">
+      <span class="lbl">Market</span>
+      <span class="val">22%</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">25%</span>
-      <span class="diff flat">&#9650; 4 pts</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">25%</span>
+      <span class="diff flat">+4 pts</span>
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">72%</span>
-      <span class="diff up">&#9650; 50 pts</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">72%</span>
+      <span class="diff up">+50 pts</span>
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-bench" style="left: 21.5%" title="Market 22%"></div>
+    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+    <div class="mk mk-openai" style="left: 72.0%" title="GPT 72%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>While Somaliland pledged to join the Abraham Accords in December 2025, it has not formally signed as of July 2026 despite ample time. The distinction between pledges and formal accession is critical per resolution criteria. International opposition and Somaliland&#x27;s contested status create procedural obstacles, and the lack of progress over 7 months suggests formal signing may not occur by year-end.</p>
-    <p class="reason-head">GPT</p>
-    <p>Somaliland and Israel signed a mutual declaration on December 26, 2025, explicitly described by Israel as being “in the spirit of the Abraham Accords,” while Somaliland publicly stated it would join; diplomatic ties, an embassy, and ambassadors are now in place. ([globalsecurity.org](https://www.globalsecurity.org/military/library/news/2025/12/mil-251226-israel-mfa02.htm?utm_source=openai)) However, the resolution requires a distinct formal normalization agreement clearly attributed to the Abraham Accords, and current evidence indicates that accession has been pledged but not separately completed. I assign a 72% chance that the parties formalize that accession before December 31, 2026, given their strong alignment but the remaining procedural and political uncertainty.</p>
-    <p class="criteria">This market will resolve to &quot;Yes&quot; if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>While Somaliland pledged to join the Abraham Accords in December 2025, it has not formally signed as of July 2026 despite ample time. The distinction between pledges and formal accession is critical per resolution criteria. International opposition and Somaliland&#x27;s contested status create procedural obstacles, and the lack of progress over 7 months suggests formal signing may not occur by year-end.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>Somaliland and Israel signed a mutual declaration on December 26, 2025, explicitly described by Israel as being “in the spirit of the Abraham Accords,” while Somaliland publicly stated it would join; diplomatic ties, an embassy, and ambassadors are now in place. ([globalsecurity.org](https://www.globalsecurity.org/military/library/news/2025/12/mil-251226-israel-mfa02.htm?utm_source=openai)) However, the resolution requires a distinct formal normalization agreement clearly attributed to the Abraham Accords, and current evidence indicates that accession has been pledged but not separately completed. I assign a 72% chance that the parties formalize that accession before December 31, 2026, given their strong alignment but the remaining procedural and political uncertainty.</p>
+    <p class="criteria"><b>Resolution criteria</b>This market will resolve to &quot;Yes&quot; if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
 
 A formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.
 
@@ -455,37 +566,44 @@ The resolution source will be official government statements, however a consensu
 </article>
 <article class="card cat-elections" data-category="elections">
   <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇲🇦 Morocco</span>
+    <span class="pill">Elections</span>
+    <span class="src">Polymarket</span>
+    <span class="geo">Morocco</span>
   </div>
-  <p class="question">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</p>
+  <h3 class="q">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">90%</span>
-      <div class="bar"><div class="bar-fill" style="width: 90%"></div></div>
+    <div class="m m-bench">
+      <span class="lbl">Market</span>
+      <span class="val">90%</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">72%</span>
-      <span class="diff down">&#9660; 18 pts</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">72%</span>
+      <span class="diff down">&minus;18 pts</span>
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">95%</span>
-      <span class="diff up">&#9650; 5 pts</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">95%</span>
+      <span class="diff up">+5 pts</span>
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-bench" style="left: 89.8%" title="Market 90%"></div>
+    <div class="mk mk-claude" style="left: 72.0%" title="Claude 72%"></div>
+    <div class="mk mk-openai" style="left: 95.0%" title="GPT 95%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>Akhannouch announced in January 2026 he will not seek re-election as party leader, which under Morocco&#x27;s system means he cannot return as PM if his party wins September 2026 elections. A new party leader would be appointed PM after elections, removing Akhannouch from office before year-end. However, uncertainty remains about election timing, coalition outcomes, and whether the King might appoint him despite party leadership change.</p>
-    <p class="reason-head">GPT</p>
-    <p>Aziz Akhannouch has announced he will not seek another term as leader of the governing RNI, which makes his return as head of government after the September 23, 2026 parliamentary election highly unlikely. Morocco’s official election timetable and current reporting point to a post-election government transition before December 31, though a delay or prolonged caretaker arrangement remains possible. ([bssnews.net](https://www.bssnews.net/international/358765?utm_source=openai))</p>
-    <p class="criteria">This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>Akhannouch announced in January 2026 he will not seek re-election as party leader, which under Morocco&#x27;s system means he cannot return as PM if his party wins September 2026 elections. A new party leader would be appointed PM after elections, removing Akhannouch from office before year-end. However, uncertainty remains about election timing, coalition outcomes, and whether the King might appoint him despite party leadership change.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>Aziz Akhannouch has announced he will not seek another term as leader of the governing RNI, which makes his return as head of government after the September 23, 2026 parliamentary election highly unlikely. Morocco’s official election timetable and current reporting point to a post-election government transition before December 31, though a delay or prolonged caretaker arrangement remains possible. ([bssnews.net](https://www.bssnews.net/international/358765?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
 
 An announcement of Aziz Akhannouch&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
 
@@ -496,37 +614,44 @@ The resolution source for this market will be official information from Aziz Akh
 </article>
 <article class="card cat-elections" data-category="elections">
   <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇨🇬 Congo</span>
+    <span class="pill">Elections</span>
+    <span class="src">Polymarket</span>
+    <span class="geo">Congo</span>
   </div>
-  <p class="question">Nguesso out as President of the Republic of the Congo by December 31, 2026?</p>
+  <h3 class="q">Nguesso out as President of the Republic of the Congo by December 31, 2026?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">14%</span>
-      <div class="bar"><div class="bar-fill" style="width: 14%"></div></div>
+    <div class="m m-bench">
+      <span class="lbl">Market</span>
+      <span class="val">14%</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">2%</span>
-      <span class="diff down">&#9660; 12 pts</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">2%</span>
+      <span class="diff down">&minus;12 pts</span>
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">10%</span>
-      <span class="diff flat">&#9660; 4 pts</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">10%</span>
+      <span class="diff flat">&minus;4 pts</span>
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-bench" style="left: 13.5%" title="Market 14%"></div>
+    <div class="mk mk-claude" style="left: 2.0%" title="Claude 2%"></div>
+    <div class="mk mk-openai" style="left: 10.0%" title="GPT 10%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>Sassou Nguesso was just re-elected in March 2026 with 94.82% and inaugurated in April for a new five-year term. He controls all state institutions and faces no credible threats to his presidency by year-end 2026. A voluntary resignation or forced removal within 5 months is extremely unlikely.</p>
-    <p class="reason-head">GPT</p>
-    <p>As of July 29, 2026, Sassou Nguesso has just been reelected to a fifth term and was sworn in on April 16, making voluntary departure or ordinary political removal by December 31 unlikely. The main risks are age-related death/incapacity, detention, or an unexpected coup, but there is no clear current precursor in the available reporting. ([apnews.com](https://apnews.com/article/c432bcb46fab80bdc8852f29f6b8bc6e?utm_source=openai))</p>
-    <p class="criteria">This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>Sassou Nguesso was just re-elected in March 2026 with 94.82% and inaugurated in April for a new five-year term. He controls all state institutions and faces no credible threats to his presidency by year-end 2026. A voluntary resignation or forced removal within 5 months is extremely unlikely.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>As of July 29, 2026, Sassou Nguesso has just been reelected to a fifth term and was sworn in on April 16, making voluntary departure or ordinary political removal by December 31 unlikely. The main risks are age-related death/incapacity, detention, or an unexpected coup, but there is no clear current precursor in the available reporting. ([apnews.com](https://apnews.com/article/c432bcb46fab80bdc8852f29f6b8bc6e?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.
 
 An announcement of Denis Sassou Nguesso&#x27;s resignation/removal before this market&#x27;s end date will immediately resolve this market to &quot;Yes&quot;, regardless of when the announced resignation/removal goes into effect.
 
@@ -537,37 +662,44 @@ The resolution source for this market will be official information from Denis Sa
 </article>
 <article class="card cat-other" data-category="other">
   <div class="card-head">
-    <span class="badge cat-pill">Other</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🇨🇬 Congo</span>
+    <span class="pill">Other</span>
+    <span class="src">Polymarket</span>
+    <span class="geo">Congo</span>
   </div>
-  <p class="question">Will the Republic of the Congo have an Ebola case in 2026?</p>
+  <h3 class="q">Will the Republic of the Congo have an Ebola case in 2026?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">16%</span>
-      <div class="bar"><div class="bar-fill" style="width: 16%"></div></div>
+    <div class="m m-bench">
+      <span class="lbl">Market</span>
+      <span class="val">16%</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">25%</span>
-      <span class="diff up">&#9650; 10 pts</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">25%</span>
+      <span class="diff up">+10 pts</span>
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">6%</span>
-      <span class="diff down">&#9660; 10 pts</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">6%</span>
+      <span class="diff down">&minus;10 pts</span>
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-bench" style="left: 15.5%" title="Market 16%"></div>
+    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+    <div class="mk mk-openai" style="left: 6.0%" title="GPT 6%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>No confirmed Ebola cases have been reported in the Republic of the Congo as of late July 2026, despite the major outbreak in neighboring DRC. While the Republic of the Congo shares a border with the DRC and is considered at elevated risk, the outbreak remains concentrated in DRC&#x27;s eastern provinces. With ~5 months remaining in 2026 and no cases yet detected in the Republic of the Congo despite proximity to the outbreak, the probability of a confirmed case is moderate but not high.</p>
-    <p class="reason-head">GPT</p>
-    <p>The active 2026 Ebola outbreak is concentrated in eastern Democratic Republic of the Congo, with confirmed cross-border spread to Uganda, not the Republic of the Congo; WHO has emphasized elevated risk mainly for countries sharing land borders with affected areas. The Republic of the Congo has experienced Ebola outbreaks historically, but the geographic distance from the current epicenters and the absence of a confirmed case so far make a case by December 31, 2026 unlikely, though not impossible given ongoing transmission and population movement. ([who.int](https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613?utm_source=openai))</p>
-    <p class="criteria">This market will resolve to &quot;Yes&quot; if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>No confirmed Ebola cases have been reported in the Republic of the Congo as of late July 2026, despite the major outbreak in neighboring DRC. While the Republic of the Congo shares a border with the DRC and is considered at elevated risk, the outbreak remains concentrated in DRC&#x27;s eastern provinces. With ~5 months remaining in 2026 and no cases yet detected in the Republic of the Congo despite proximity to the outbreak, the probability of a confirmed case is moderate but not high.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>The active 2026 Ebola outbreak is concentrated in eastern Democratic Republic of the Congo, with confirmed cross-border spread to Uganda, not the Republic of the Congo; WHO has emphasized elevated risk mainly for countries sharing land borders with affected areas. The Republic of the Congo has experienced Ebola outbreaks historically, but the geographic distance from the current epicenters and the absence of a confirmed case so far make a case by December 31, 2026 unlikely, though not impossible given ongoing transmission and population movement. ([who.int](https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON613?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This market will resolve to &quot;Yes&quot; if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to &quot;No&quot;.
 
 Any active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.
 
@@ -576,37 +708,44 @@ The primary resolution sources for this market will be official information from
 </article>
 <article class="card cat-elections" data-category="elections">
   <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Polymarket</span>
-    <span class="tag">🌍 Somaliland</span>
+    <span class="pill">Elections</span>
+    <span class="src">Polymarket</span>
+    <span class="geo">Somaliland</span>
   </div>
-  <p class="question">Will there be no Somaliland parliamentary election before 2027?</p>
+  <h3 class="q">Will there be no Somaliland parliamentary election before 2027?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Market</span>
-      <span class="metric-value">94%</span>
-      <div class="bar"><div class="bar-fill" style="width: 94%"></div></div>
+    <div class="m m-bench">
+      <span class="lbl">Market</span>
+      <span class="val">94%</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">92%</span>
-      <span class="diff flat">&#9660; 2 pts</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">92%</span>
+      <span class="diff flat">&minus;2 pts</span>
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">100%</span>
-      <span class="diff up">&#9650; 5 pts</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">100%</span>
+      <span class="diff up">+5 pts</span>
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-bench" style="left: 94.5%" title="Market 94%"></div>
+    <div class="mk mk-claude" style="left: 92.0%" title="Claude 92%"></div>
+    <div class="mk mk-openai" style="left: 98.5%" title="GPT 100%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>Parliamentary elections are officially scheduled for March 2027, having been postponed from May 2026. With only five months remaining until the December 31, 2026 deadline and no recent reports of elections being moved back to 2026, it is highly likely no election will occur before 2027, resolving the question affirmatively.</p>
-    <p class="reason-head">GPT</p>
-    <p>As of July 29, 2026, the planned 2026 Somaliland parliamentary election has been postponed, and the House of Elders approved extending the House of Representatives’ mandate until October 7, 2028. Credible election trackers and reporting now place the next parliamentary election in 2027 or later, making an election before January 1, 2027 extremely unlikely. ([electionguide.org](https://www.electionguide.org/elections/id/5072/?%27report_type=upcoming&amp;utm_source=openai))</p>
-    <p class="criteria">Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>Parliamentary elections are officially scheduled for March 2027, having been postponed from May 2026. With only five months remaining until the December 31, 2026 deadline and no recent reports of elections being moved back to 2026, it is highly likely no election will occur before 2027, resolving the question affirmatively.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>As of July 29, 2026, the planned 2026 Somaliland parliamentary election has been postponed, and the House of Elders approved extending the House of Representatives’ mandate until October 7, 2028. Credible election trackers and reporting now place the next parliamentary election in 2027 or later, making an election before January 1, 2027 extremely unlikely. ([electionguide.org](https://www.electionguide.org/elections/id/5072/?%27report_type=upcoming&amp;utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.
 
 This market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. 
 
@@ -623,104 +762,125 @@ This market will resolve based on the results of this election as indicated by a
 </article>
 <article class="card cat-elections" data-category="elections">
   <div class="card-head">
-    <span class="badge cat-pill">Elections</span>
-    <span class="badge">Metaculus</span>
-    <span class="tag">🇿🇲 Zambia</span>
+    <span class="pill">Elections</span>
+    <span class="src">Metaculus</span>
+    <span class="geo">Zambia</span>
   </div>
-  <p class="question">Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia&#x27;s 2026 presidential election?</p>
+  <h3 class="q">Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia&#x27;s 2026 presidential election?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Community</span>
-      <span class="leer">Community forecast pending</span>
+    <div class="m m-bench">
+      <span class="lbl">Community</span>
+      <span class="leer">median locked</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">25%</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">25%</span>
 
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">23%</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">23%</span>
 
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+    <div class="mk mk-openai" style="left: 23.0%" title="GPT 23%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>Current polls show Hichilema at 55-63%, with his 2021 result at 59%. Reaching 65% would require a significant increase from both historical performance and current polling. While he has incumbency advantages and a fragmented opposition, the gap to 65% is substantial.</p>
-    <p class="reason-head">GPT</p>
-    <p>The August 13, 2026 election has 14 presidential candidates, and Hichilema benefits from a fragmented opposition; one reported poll put him near 60%, while his 2021 official result was about 59%. Reaching at least 65% would therefore require a meaningful improvement beyond current evidence, so it is possible but not the most likely outcome. ([zambianobserver.com](https://zambianobserver.com/14-presidential-candidates-validly-nominated-for-2026-poll/?utm_source=openai))</p>
-    <p class="criteria">This question resolves as **Yes** if President Hakainde Hichilema receives 65% or more of the first round votes in the [2026 Zambian presidential election](https://en.wikipedia.org/wiki/2026_Zambian_general_election). The question resolves based on [official results](https://www.elections.org.zm/) or [credible sources](https://www.metaculus.com/faq/#definitions).&amp;#x20;</p>
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>Current polls show Hichilema at 55-63%, with his 2021 result at 59%. Reaching 65% would require a significant increase from both historical performance and current polling. While he has incumbency advantages and a fragmented opposition, the gap to 65% is substantial.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>The August 13, 2026 election has 14 presidential candidates, and Hichilema benefits from a fragmented opposition; one reported poll put him near 60%, while his 2021 official result was about 59%. Reaching at least 65% would therefore require a meaningful improvement beyond current evidence, so it is possible but not the most likely outcome. ([zambianobserver.com](https://zambianobserver.com/14-presidential-candidates-validly-nominated-for-2026-poll/?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This question resolves as **Yes** if President Hakainde Hichilema receives 65% or more of the first round votes in the [2026 Zambian presidential election](https://en.wikipedia.org/wiki/2026_Zambian_general_election). The question resolves based on [official results](https://www.elections.org.zm/) or [credible sources](https://www.metaculus.com/faq/#definitions).&amp;#x20;</p>
   </details>
 </article>
 <article class="card cat-security" data-category="security">
   <div class="card-head">
-    <span class="badge cat-pill">Security</span>
-    <span class="badge">Metaculus</span>
-    <span class="tag">🇿🇦 South Africa</span>
+    <span class="pill">Security</span>
+    <span class="src">Metaculus</span>
+    <span class="geo">South Africa</span>
   </div>
-  <p class="question">Will Israel be found guilty in South Africa&#x27;s genocide case by the ICJ before 2027?</p>
+  <h3 class="q">Will Israel be found guilty in South Africa&#x27;s genocide case by the ICJ before 2027?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Community</span>
-      <span class="leer">Community forecast pending</span>
+    <div class="m m-bench">
+      <span class="lbl">Community</span>
+      <span class="leer">median locked</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">2%</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">2%</span>
 
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">2%</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">2%</span>
 
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-claude" style="left: 2.0%" title="Claude 2%"></div>
+    <div class="mk mk-openai" style="left: 2.0%" title="GPT 2%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>The ICJ case remains in the written pleadings phase with South Africa&#x27;s reply deadline set for November 22, 2027. Oral hearings and judgment typically follow, making a merits decision before January 1, 2027 virtually impossible given standard ICJ timelines.</p>
-    <p class="reason-head">GPT</p>
-    <p>The ICJ’s May 21, 2026 order set South Africa’s Reply deadline for November 22, 2027 and Israel’s Rejoinder deadline for May 22, 2029, making a merits finding before January 1, 2027 extraordinarily unlikely. The earlier provisional-measures orders did not determine whether Israel violated the Genocide Convention, so they do not satisfy the stated resolution criterion. ([gov.za](https://www.gov.za/news/media-statements/presidency-notes-icj-order-south-africa-and-israel-case-02-jun-2026?utm_source=openai))</p>
-    <p class="criteria">This question will resolve as **Yes** if, before January 1, 2027, the International Court of Justice finds that Israel has violated international law in South Africa&#x27;s genocide case. If this does not happen before January 1, 2027, this question will resolve as **No**.</p>
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>The ICJ case remains in the written pleadings phase with South Africa&#x27;s reply deadline set for November 22, 2027. Oral hearings and judgment typically follow, making a merits decision before January 1, 2027 virtually impossible given standard ICJ timelines.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>The ICJ’s May 21, 2026 order set South Africa’s Reply deadline for November 22, 2027 and Israel’s Rejoinder deadline for May 22, 2029, making a merits finding before January 1, 2027 extraordinarily unlikely. The earlier provisional-measures orders did not determine whether Israel violated the Genocide Convention, so they do not satisfy the stated resolution criterion. ([gov.za](https://www.gov.za/news/media-statements/presidency-notes-icj-order-south-africa-and-israel-case-02-jun-2026?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This question will resolve as **Yes** if, before January 1, 2027, the International Court of Justice finds that Israel has violated international law in South Africa&#x27;s genocide case. If this does not happen before January 1, 2027, this question will resolve as **No**.</p>
   </details>
 </article>
 <article class="card cat-security" data-category="security">
   <div class="card-head">
-    <span class="badge cat-pill">Security</span>
-    <span class="badge">Metaculus</span>
-    <span class="tag">🇸🇩 Sudan</span>
+    <span class="pill">Security</span>
+    <span class="src">Metaculus</span>
+    <span class="geo">Sudan</span>
   </div>
-  <p class="question">Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?</p>
+  <h3 class="q">Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Community</span>
-      <span class="leer">Community forecast pending</span>
+    <div class="m m-bench">
+      <span class="lbl">Community</span>
+      <span class="leer">median locked</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">25%</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">25%</span>
 
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">65%</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">65%</span>
 
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+    <div class="mk mk-openai" style="left: 65.0%" title="GPT 65%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>The first two qualifying IPC Sudan products (published after May 14, 2026 with June-September 2026 projections) do not classify any areas in Famine Phase 5, only identify 14 areas at risk of Famine under worst-case scenarios. However, significant deterioration is projected for the lean season, and conditions remain extremely fragile with high uncertainty.</p>
-    <p class="reason-head">GPT</p>
-    <p>The 14 May 2026 IPC product reported no area-level Famine but identified 14 areas at risk, while subsequent deterioration around North Kordofan and continued conflict, displacement, and access constraints make a formal Phase 5 classification plausible in a later analysis. However, IPC’s current projections emphasize Catastrophe and “risk of Famine,” and data limitations plus possible publication delays create substantial uncertainty about whether either of the first two qualifying post-14-May products will formally classify an area as Famine. ([ipcinfo.org](https://www.ipcinfo.org/ipc-country-analysis/details-map/en/c/1163315/?utm_source=openai))</p>
-    <p class="criteria">This question resolves **YES** if **either of the first two qualifying IPC Sudan acute food insecurity products** classifies **at least one area in Famine (IPC Phase 5)** at the area level, for any analysis or projection period falling on or after 1 June 2026. It resolves **NO** if the first two qualifying products both make the relevant area-level classifications but neither classifies any area in Famine (IPC Phase 5) — or if only one qualifying product has been published by 31 December 2026 and it classifies no area in Famine.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>The first two qualifying IPC Sudan products (published after May 14, 2026 with June-September 2026 projections) do not classify any areas in Famine Phase 5, only identify 14 areas at risk of Famine under worst-case scenarios. However, significant deterioration is projected for the lean season, and conditions remain extremely fragile with high uncertainty.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>The 14 May 2026 IPC product reported no area-level Famine but identified 14 areas at risk, while subsequent deterioration around North Kordofan and continued conflict, displacement, and access constraints make a formal Phase 5 classification plausible in a later analysis. However, IPC’s current projections emphasize Catastrophe and “risk of Famine,” and data limitations plus possible publication delays create substantial uncertainty about whether either of the first two qualifying post-14-May products will formally classify an area as Famine. ([ipcinfo.org](https://www.ipcinfo.org/ipc-country-analysis/details-map/en/c/1163315/?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This question resolves **YES** if **either of the first two qualifying IPC Sudan acute food insecurity products** classifies **at least one area in Famine (IPC Phase 5)** at the area level, for any analysis or projection period falling on or after 1 June 2026. It resolves **NO** if the first two qualifying products both make the relevant area-level classifications but neither classifies any area in Famine (IPC Phase 5) — or if only one qualifying product has been published by 31 December 2026 and it classifies no area in Famine.
 
 A &quot;qualifying IPC Sudan acute food insecurity product&quot; is an IPC-produced Sudan product (a full IPC analysis, an IPC Global Initiative Special Snapshot, or an IPC Alert), published on the IPC website (ipcinfo.org) **after 14 May 2026**, that (a) makes area-level IPC phase classifications for Sudan and (b) whose current period or a formally classified projection period covers any time on or after 1 June 2026 (the June–September 2026 lean season or later). The &quot;first two qualifying products&quot; are the first two such products in publication order. A YES resolves as soon as either of them classifies an area in Famine.
 
@@ -729,36 +889,43 @@ A Famine determination counts if it is made **either** by the IPC analysis team 
 </article>
 <article class="card cat-security" data-category="security">
   <div class="card-head">
-    <span class="badge cat-pill">Security</span>
-    <span class="badge">Metaculus</span>
-    <span class="tag">🇸🇩 Sudan</span>
+    <span class="pill">Security</span>
+    <span class="src">Metaculus</span>
+    <span class="geo">Sudan</span>
   </div>
-  <p class="question">Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?</p>
+  <h3 class="q">Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Community</span>
-      <span class="leer">Community forecast pending</span>
+    <div class="m m-bench">
+      <span class="lbl">Community</span>
+      <span class="leer">median locked</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">25%</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">25%</span>
 
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">35%</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">35%</span>
 
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+    <div class="mk mk-openai" style="left: 35.0%" title="GPT 35%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>While estimates ranging from 150,000 to 400,000 circulate informally, rigorous peer-reviewed publications and formal UN/NGO reports with stated methodology have produced estimates of 61,000-62,000 deaths. No major organization has yet published a formal estimate exceeding 200,000 with documented methodology. Though time remains in 2026, the trajectory of published research suggests this threshold is unlikely to be formally crossed.</p>
-    <p class="reason-head">GPT</p>
-    <p>A nationwide LSHTM mortality study is actively collecting data using capture-recapture methods designed to estimate conflict-attributable and excess deaths, creating a plausible path to a qualifying 2026 release. However, the strongest published estimate so far is regional—61,202 all-cause deaths in Khartoum State through June 2024—while nationwide estimates remain uncertain, and publication within the remaining 2026 window is not assured. ([lshtm.ac.uk](https://www.lshtm.ac.uk/research/centres-projects-groups/sudan-research-group))</p>
-    <p class="criteria">This question resolves **YES** if, between 1 January 2026 and 31 December 2026 (UTC), any of the following entities publishes a Sudan-war total **excess-mortality estimate (direct + indirect)** with a **central / point estimate exceeding 200,000 deaths**, applied at **nationwide** scope (i.e., covering &quot;Sudan&quot;, &quot;the Sudan war&quot;, or &quot;the conflict&quot; - not a single state, single city, or single event):
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>While estimates ranging from 150,000 to 400,000 circulate informally, rigorous peer-reviewed publications and formal UN/NGO reports with stated methodology have produced estimates of 61,000-62,000 deaths. No major organization has yet published a formal estimate exceeding 200,000 with documented methodology. Though time remains in 2026, the trajectory of published research suggests this threshold is unlikely to be formally crossed.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>A nationwide LSHTM mortality study is actively collecting data using capture-recapture methods designed to estimate conflict-attributable and excess deaths, creating a plausible path to a qualifying 2026 release. However, the strongest published estimate so far is regional—61,202 all-cause deaths in Khartoum State through June 2024—while nationwide estimates remain uncertain, and publication within the remaining 2026 window is not assured. ([lshtm.ac.uk](https://www.lshtm.ac.uk/research/centres-projects-groups/sudan-research-group))</p>
+    <p class="criteria"><b>Resolution criteria</b>This question resolves **YES** if, between 1 January 2026 and 31 December 2026 (UTC), any of the following entities publishes a Sudan-war total **excess-mortality estimate (direct + indirect)** with a **central / point estimate exceeding 200,000 deaths**, applied at **nationwide** scope (i.e., covering &quot;Sudan&quot;, &quot;the Sudan war&quot;, or &quot;the conflict&quot; - not a single state, single city, or single event):
 
 1. A peer-reviewed article in a PubMed-indexed medical or epidemiological journal (the *Lancet* family, *BMJ* family, *NEJM*, *JAMA*, *PLOS*, *Nature*, *Science*, *Conflict and Health*, or similar);
 2. A working paper or preprint by a named academic research group with a university affiliation, hosted on SSRN, medRxiv, ResearchGate, or an institutional site (e.g., LSHTM Sudan Research Group, Yale Humanitarian Research Lab, UCLouvain CRED);
@@ -772,52 +939,61 @@ This question resolves **NO** if no such publication appears by 31 December 2026
 </article>
 <article class="card cat-economy" data-category="economy">
   <div class="card-head">
-    <span class="badge cat-pill">Economy</span>
-    <span class="badge">Metaculus</span>
-    <span class="tag">🇸🇳 Senegal</span>
+    <span class="pill">Economy</span>
+    <span class="src">Metaculus</span>
+    <span class="geo">Senegal</span>
   </div>
-  <p class="question">Will Senegal formally restructure its external debt before 2028?</p>
+  <h3 class="q">Will Senegal formally restructure its external debt before 2028?</h3>
   <div class="metrics">
-    <div class="metric-col">
-      <span class="metric-label">Community</span>
-      <span class="leer">Community forecast pending</span>
+    <div class="m m-bench">
+      <span class="lbl">Community</span>
+      <span class="leer">median locked</span>
     </div>
-    <div class="metric-col">
-      <span class="metric-label">Claude</span>
-      <span class="metric-value">62%</span>
+    <div class="m m-claude">
+      <span class="lbl">Claude</span>
+      <span class="val">62%</span>
 
 
     </div>
-    <div class="metric-col">
-      <span class="metric-label">GPT</span>
-      <span class="metric-value">52%</span>
+    <div class="m m-openai">
+      <span class="lbl">GPT</span>
+      <span class="val">52%</span>
 
 
     </div>
   </div>
+  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+    <div class="mk mk-claude" style="left: 62.0%" title="Claude 62%"></div>
+    <div class="mk mk-openai" style="left: 52.0%" title="GPT 52%"></div>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
   <details>
-    <summary>Details</summary>
-    <p class="reason-head">Claude</p>
-    <p>Senegal has initiated formal advisor selection (July 2026) and faces mounting pressure for restructuring, with most experts viewing it as inevitable. However, the government has repeatedly resisted restructuring, recent precedents show negotiations typically take 2-4 years, and political tensions plus 2027 elections may delay formal agreement. With 17 months remaining until January 2028, a formal agreement is possible but not highly probable.</p>
-    <p class="reason-head">GPT</p>
-    <p>Senegal faces severe debt vulnerabilities—public-sector debt was estimated at 132% of GDP at end-2024—but it has reportedly remained current on obligations and is pursuing active debt-management operations rather than a formal restructuring. The government has publicly resisted restructuring, yet ongoing IMF negotiations and the scale of financing needs make a creditor agreement materially plausible before January 1, 2028. ([imf.org](https://www.imf.org/en/news/articles/2026/06/26/tr-06252026-imf-press-briefing-transcript-june-25-2026?utm_source=openai))</p>
-    <p class="criteria">This question will resolve as Yes if, before January 1, 2028, Senegal announces a formal debt restructuring agreement.
+    <summary>Reasoning and resolution criteria</summary>
+    <p class="reason reason-claude"><span class="reason-head">Claude</span>Senegal has initiated formal advisor selection (July 2026) and faces mounting pressure for restructuring, with most experts viewing it as inevitable. However, the government has repeatedly resisted restructuring, recent precedents show negotiations typically take 2-4 years, and political tensions plus 2027 elections may delay formal agreement. With 17 months remaining until January 2028, a formal agreement is possible but not highly probable.</p>
+    <p class="reason reason-openai"><span class="reason-head">GPT</span>Senegal faces severe debt vulnerabilities—public-sector debt was estimated at 132% of GDP at end-2024—but it has reportedly remained current on obligations and is pursuing active debt-management operations rather than a formal restructuring. The government has publicly resisted restructuring, yet ongoing IMF negotiations and the scale of financing needs make a creditor agreement materially plausible before January 1, 2028. ([imf.org](https://www.imf.org/en/news/articles/2026/06/26/tr-06252026-imf-press-briefing-transcript-june-25-2026?utm_source=openai))</p>
+    <p class="criteria"><b>Resolution criteria</b>This question will resolve as Yes if, before January 1, 2028, Senegal announces a formal debt restructuring agreement.
 
 The question may resolve according to official announcements by the Senegalese government or consensus reporting in reputable financial journals like the Wall Street Journal or Financial Times.</p>
   </details>
 </article>
 </div>
 
-
-
 <footer>
 <p>Forecasts come from Claude (<code>claude-sonnet-5</code>) and GPT (<code>gpt-5.6-luna</code>). Both receive the same question, the same
 resolution criteria and the same web-search tool, with prediction-market sites
-blocked. The benchmark is never passed into the prompt, so each estimate is
-independent rather than a restatement of the market.</p>
-<p>Benchmarks from Metaculus and Polymarket &middot; last updated 31 July 2026, 02:09 UTC &middot;
-<a href="https://github.com/niklaswenzin/africa-ai-forecasting">source and method</a></p>
+blocked. The benchmark is never passed into the prompt.</p>
+<p>A Polymarket price reflects real money at stake; a Metaculus number is the
+median of volunteer forecasts with nothing at risk. The two are labelled
+differently for that reason. Where a benchmark is missing, the community median
+is not available at this account&#39;s access tier.</p>
+<p>Benchmarks from Metaculus and Polymarket &middot; last updated 31 July 2026, 07:04 UTC &middot;
+<a href="https://github.com/niklaswenzin/africa-ai-forecasting">source code and method</a></p>
 </footer>
+
 </div>
 
 <script>

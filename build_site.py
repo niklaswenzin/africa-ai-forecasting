@@ -9,9 +9,15 @@ ausgewaehlte Frage bekommt eine Karte mit der Vergleichszahl und beiden
 Modellen. Jede dieser Zahlen kann fehlen, und jeder Fall hat eine eigene,
 ruhige Darstellung - nie ein Pfeil ohne Zahl, nie eine leere Stelle.
 
-Auf der Karte stehen nur die drei Zahlen und die Abweichung. Konfidenz und
-Suchanzahl sind Angaben ueber den Weg, nicht ueber das Ergebnis; sie bleiben
-in forecasts.json und in den Aufnahmen erhalten, erscheinen aber nicht.
+Farbe bedeutet auf dieser Seite WER, nicht WAS: Benchmark, Claude und GPT
+haben je eine feste Farbe, die in der Zahl, im Punkt auf der Skala und an der
+Begruendung wiederkehrt. Die Kategorie traegt darum nur eine getoente Pille
+und keine Kartenfarbe - zwei konkurrierende Farbsysteme auf einer Karte machen
+beide unlesbar.
+
+Das Kernstueck jeder Karte ist die gemeinsame Skala von 0 bis 100 Prozent, auf
+der alle drei Schaetzungen als Punkte liegen. Drei getrennte grosse Zahlen
+zwingen zum Kopfrechnen; auf einer Achse sieht man Uneinigkeit sofort.
 
 Die Seite selbst ist auf Englisch, weil sie oeffentlich ist. Kommentare und
 Funktionsnamen bleiben deutsch wie im Rest des Projekts.
@@ -23,12 +29,6 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Die Prognosen aufgeloester Fragen stehen nicht mehr in forecasts.json - sie
-# kommen aus der Historie. brier.py hat die noetige Logik bereits (fruehester
-# Snapshot mit Prognose je Frage), darum wird sie hier wiederverwendet statt
-# ein zweites Mal geschrieben. So kann die Seite nie einen anderen
-# Messzeitpunkt anzeigen, als der Brier Score verwendet.
-import brier
 import forecast
 import forecaster_openai
 
@@ -36,36 +36,35 @@ import forecaster_openai
 
 MARKETS_DATEI = "markets.json"
 FORECASTS_DATEI = "forecasts.json"
-RESOLVED_DATEI = Path("data") / "resolved.json"
 AUSGABE_ORDNER = Path("docs")
 AUSGABE_DATEI = AUSGABE_ORDNER / "index.html"
 
 REPO_URL = "https://github.com/niklaswenzin/africa-ai-forecasting"
 
-# Ab welcher Abweichung gilt Modell != Markt als nennenswert. Darunter zeigen
-# wir die Differenz neutral grau an, damit Rauschen nicht wie ein Signal wirkt.
+# Ab welcher Abweichung gilt Modell != Benchmark als nennenswert. Darunter
+# zeigen wir die Differenz neutral grau, damit Rauschen nicht wie ein Signal
+# wirkt.
 NAH_SCHWELLE = 0.05
 
 QUELLEN_NAMEN = {
     "polymarket": "Polymarket",
     "metaculus": "Metaculus",
-    "kalshi": "Kalshi",
 }
 
-# Beschriftung der Vergleichszahl. Ein Polymarket- oder Kalshi-Preis entsteht
-# durch echten Geldeinsatz, der Metaculus-Wert ist der Median freiwilliger
-# Community-Prognosen. Beides "Market" zu nennen waere irrefuehrend.
+# Beschriftung der Vergleichszahl. Ein Polymarket-Preis entsteht durch echten
+# Geldeinsatz, der Metaculus-Wert ist der Median freiwilliger Community-
+# Prognosen. Beides "Market" zu nennen waere irrefuehrend.
 BENCHMARK_LABEL = {
     "market_price": "Market",
     "community_forecast": "Community",
 }
 
 # Text, wenn die Vergleichszahl fehlt. Haengt am benchmark_type, weil die
-# Ursache unterschiedlich ist: bei Metaculus ist der Median gesperrt oder noch
-# nicht freigegeben, bei einem Geldmarkt fehlt schlicht ein handelbarer Preis.
+# Ursache unterschiedlich ist: bei Metaculus ist der Median fuer unsere
+# Zugriffsstufe gesperrt, bei einem Geldmarkt fehlt schlicht ein Preis.
 BENCHMARK_FEHLT = {
-    "market_price": "No market price",
-    "community_forecast": "Community forecast pending",
+    "market_price": "no price",
+    "community_forecast": "median locked",
 }
 
 # Prognostiker in fester Reihenfolge: Schluessel in forecasts.json,
@@ -73,7 +72,7 @@ BENCHMARK_FEHLT = {
 #
 # Die Modell-IDs werden aus den Prognostiker-Modulen gelesen, nicht hier
 # abgeschrieben. Die Fusszeile nannte sonst weiter claude-sonnet-4-6, obwohl
-# laengst claude-haiku-4-5 lief - genau das ist auf der Live-Seite passiert.
+# laengst ein anderes Modell lief - genau das ist auf der Live-Seite passiert.
 # So kann der Text nicht mehr veralten.
 PROGNOSTIKER = [
     ("claude", "Claude", forecast.MODEL),
@@ -88,56 +87,12 @@ KATEGORIE_NAMEN = [
     ("other", "Other"),
 ]
 
-# Flaggen-Emoji zum Laender-Tag. Die Schluessel sind exakt die Werte aus
-# AFRIKA_LAND in fetch_markets.py. Somaliland und Sahel fehlen bewusst: fuer
-# Somaliland gibt es kein Emoji (kein ISO-Laendercode), Sahel ist eine Region.
-# Beide bekommen ueber den Standardwert die Weltkugel.
-LAND_FLAGGE = {
-    "South Sudan": "\U0001F1F8\U0001F1F8",
-    "Guinea-Bissau": "\U0001F1EC\U0001F1FC",
-    "Central African Republic": "\U0001F1E8\U0001F1EB",
-    "South Africa": "\U0001F1FF\U0001F1E6",
-    "Burkina Faso": "\U0001F1E7\U0001F1EB",
-    "Sierra Leone": "\U0001F1F8\U0001F1F1",
-    "Ivory Coast": "\U0001F1E8\U0001F1EE",
-    "Nigeria": "\U0001F1F3\U0001F1EC",
-    "Kenya": "\U0001F1F0\U0001F1EA",
-    "Ethiopia": "\U0001F1EA\U0001F1F9",
-    "Egypt": "\U0001F1EA\U0001F1EC",
-    "Ghana": "\U0001F1EC\U0001F1ED",
-    "Sudan": "\U0001F1F8\U0001F1E9",
-    "Somalia": "\U0001F1F8\U0001F1F4",
-    "Zimbabwe": "\U0001F1FF\U0001F1FC",
-    "Uganda": "\U0001F1FA\U0001F1EC",
-    "Tanzania": "\U0001F1F9\U0001F1FF",
-    "Morocco": "\U0001F1F2\U0001F1E6",
-    "Algeria": "\U0001F1E9\U0001F1FF",
-    "Angola": "\U0001F1E6\U0001F1F4",
-    "Senegal": "\U0001F1F8\U0001F1F3",
-    "Rwanda": "\U0001F1F7\U0001F1FC",
-    "Zambia": "\U0001F1FF\U0001F1F2",
-    "Tunisia": "\U0001F1F9\U0001F1F3",
-    "Libya": "\U0001F1F1\U0001F1FE",
-    "Cameroon": "\U0001F1E8\U0001F1F2",
-    "Gabon": "\U0001F1EC\U0001F1E6",
-    "Mozambique": "\U0001F1F2\U0001F1FF",
-    "Malawi": "\U0001F1F2\U0001F1FC",
-    "Botswana": "\U0001F1E7\U0001F1FC",
-    "Namibia": "\U0001F1F3\U0001F1E6",
-    "Mauritania": "\U0001F1F2\U0001F1F7",
-    "Liberia": "\U0001F1F1\U0001F1F7",
-    "Congo": "\U0001F1E8\U0001F1EC",
-    "Mali": "\U0001F1F2\U0001F1F1",
-    "Niger": "\U0001F1F3\U0001F1EA",
-    "Togo": "\U0001F1F9\U0001F1EC",
-    "Benin": "\U0001F1E7\U0001F1EF",
-    "Eritrea": "\U0001F1EA\U0001F1F7",
-    "Djibouti": "\U0001F1E9\U0001F1EF",
-    "Madagascar": "\U0001F1F2\U0001F1EC",
-    "Lesotho": "\U0001F1F1\U0001F1F8",
-    "Eswatini": "\U0001F1F8\U0001F1FF",
-}
-FLAGGE_STANDARD = "\U0001F30D"   # Weltkugel Afrika/Europa
+# Bewusst KEINE Flaggen-Emoji am Laender-Tag: Windows liefert dafuer keine
+# Glyphe und zeigt stattdessen das nackte Buchstabenpaar des Laendercodes
+# ("ZA South Africa"). Das sah auf der Haelfte der Karten nach einem Fehler
+# aus, waehrend Somaliland - ohne ISO-Code und damit ohne Emoji - als
+# einziges eine Weltkugel trug. Der Landesname allein ist auf jedem System
+# gleich lesbar.
 
 
 # --- Vorlagen --------------------------------------------------------------
@@ -152,130 +107,192 @@ SEITEN_VORLAGE = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Forecasting: African Economic and Political Development</title>
+<meta name="description" content="Two AI models forecast open questions on African
+politics and economics, shown next to prediction-market prices.">
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #fbfbfa;
+  --bg-akzent: #f4f4f2;
   --card: #ffffff;
-  --text: #101418;
-  --text-soft: #4a545e;
-  --muted: #79838d;
-  --line: #e4e7eb;
-  --line-soft: #eef0f3;
-  --accent: #1f6feb;
+  --text: #14171a;
+  --text-soft: #4b535b;
+  --muted: #7b848d;
+  --line: #e3e5e8;
+  --line-soft: #eeeff1;
+  --link: #1a5fd0;
+
+  /* Farbe bedeutet WER. Diese drei sind ueber die ganze Seite reserviert und
+     tauchen nirgends in anderer Bedeutung auf. */
+  --bench: #1d2530;      /* Benchmark: Tinte, er ist der Bezugspunkt */
+  --claude: #b8552f;
+  --gpt: #0e8f70;
+  --modell-standard: #6b7280;   /* faengt einen dritten Prognostiker ohne Regel ab */
+
   --up: #12805c;
   --down: #c0392b;
-  --flat: #79838d;
-  --bar: #e4e7eb;
-  --bar-fill: #1f6feb;
-  --schatten: 0 1px 2px rgba(16, 20, 24, .05), 0 1px 3px rgba(16, 20, 24, .04);
-  --schatten-hover: 0 3px 10px rgba(16, 20, 24, .09);
-  /* Standard-Kategorienfarbe. Faengt eine Kategorie ab, fuer die es unten
-     keine Regel gibt - ohne diesen Wert waere var(--kat) ungueltig und die
-     Akzentlinie der Karte verschwaende oder erbte eine zufaellige Farbe. */
+  --flat: #8b949d;
+
+  --schatten: 0 1px 2px rgba(16, 20, 24, .04), 0 2px 8px rgba(16, 20, 24, .04);
+  --schatten-hover: 0 2px 4px rgba(16, 20, 24, .05), 0 8px 24px rgba(16, 20, 24, .09);
+
   --kat: #64748b;
   --kat-bg: #eef1f4;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0c0f13;
-    --card: #151a20;
-    --text: #e9eef4;
-    --text-soft: #b3bdc7;
-    --muted: #8592a0;
-    --line: #262d36;
-    --line-soft: #1d232b;
-    --accent: #5aa2ff;
+    --bg: #0b0d10;
+    --bg-akzent: #12151a;
+    --card: #14181e;
+    --text: #eceff3;
+    --text-soft: #b0b9c3;
+    --muted: #828d99;
+    --line: #242a33;
+    --line-soft: #1b2028;
+    --link: #6ba6ff;
+
+    --bench: #dbe2ea;
+    --claude: #e08a5f;
+    --gpt: #35c9a2;
+    --modell-standard: #9aa4b0;
+
     --up: #3ecf8e;
-    --down: #ff6b5e;
-    --flat: #8592a0;
-    --bar: #262d36;
-    --bar-fill: #5aa2ff;
-    --schatten: 0 1px 2px rgba(0, 0, 0, .4);
-    --schatten-hover: 0 3px 12px rgba(0, 0, 0, .55);
+    --down: #ff6f61;
+    --flat: #7d8792;
+
+    --schatten: 0 1px 2px rgba(0, 0, 0, .5);
+    --schatten-hover: 0 8px 28px rgba(0, 0, 0, .6);
+
     --kat: #94a3b8;
     --kat-bg: #1c232c;
   }
 }
-/* Kategorienfarben. Jede Kategorie setzt --kat (kraeftig, fuer Text, Rahmen
-   und Akzentlinie) und --kat-bg (getoent, fuer Flaechen). Beides wird von
-   Karte und Tab geerbt, die Regeln weiter unten greifen dadurch auf
-   dieselben zwei Variablen zu.
 
-   Bewusst KEIN Rot fuer Security und KEIN Gruen fuer Economy: diese beiden
-   Farben bedeuten auf der Seite bereits "Modell ueber bzw. unter dem
-   Benchmark". Eine Farbe mit zwei Bedeutungen macht beide unlesbar, darum
-   Orange und Teal. */
-.cat-elections { --kat: #1f6feb; --kat-bg: #e8f0fe; }
-.cat-security  { --kat: #c2410c; --kat-bg: #fcebdf; }
-.cat-diplomacy { --kat: #6d28d9; --kat-bg: #efe8fd; }
-.cat-economy   { --kat: #0f766e; --kat-bg: #e0f2f0; }
-.cat-other     { --kat: #64748b; --kat-bg: #eef1f4; }
+/* Kategorien: nur eine getoente Pille, keine Kartenfarbe. Sie ordnen ein,
+   sie sind nicht die Aussage der Karte. */
+.cat-elections { --kat: #1f5fd0; --kat-bg: #e9f0fd; }
+.cat-security  { --kat: #b8460c; --kat-bg: #fbeade; }
+.cat-diplomacy { --kat: #6b28c9; --kat-bg: #f0e9fd; }
+.cat-economy   { --kat: #0d6f66; --kat-bg: #e2f2f0; }
+.cat-other     { --kat: #5a6672; --kat-bg: #eef1f4; }
 @media (prefers-color-scheme: dark) {
-  .cat-elections { --kat: #6cabff; --kat-bg: #14243a; }
-  .cat-security  { --kat: #fb923c; --kat-bg: #33200f; }
-  .cat-diplomacy { --kat: #a78bfa; --kat-bg: #241a3d; }
-  .cat-economy   { --kat: #2dd4bf; --kat-bg: #0c2b28; }
-  .cat-other     { --kat: #94a3b8; --kat-bg: #1c232c; }
+  .cat-elections { --kat: #7fb2ff; --kat-bg: #15243a; }
+  .cat-security  { --kat: #fb9a4c; --kat-bg: #331f10; }
+  .cat-diplomacy { --kat: #b195fb; --kat-bg: #241b3d; }
+  .cat-economy   { --kat: #3ad4bd; --kat-bg: #0b2b28; }
+  .cat-other     { --kat: #97a3b0; --kat-bg: #1c232c; }
 }
 
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  padding: 2.25rem 1.15rem 3rem;
+  padding: 0 1.15rem 4rem;
   background: var(--bg);
   color: var(--text);
-  /* Inter zuerst, aber ohne Web-Font-Download: wer sie installiert hat,
-     bekommt sie, alle anderen den System-Stack. Kein externer Request. */
   font-family: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont,
                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-.wrap { max-width: 1020px; margin: 0 auto; }
+.wrap { max-width: 1120px; margin: 0 auto; }
 
-/* Kopf */
-header { margin-bottom: 1.5rem; }
+/* --- Kopf --- */
+header.top {
+  padding: 3.25rem 0 2rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.75rem;
+}
+.kicker {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 .85rem;
+}
 h1 {
-  font-size: 1.55rem;
-  line-height: 1.2;
-  letter-spacing: -.021em;
-  font-weight: 700;
-  margin: 0 0 .35rem;
+  /* Serife nur fuer Ueberschrift und Fragetext. Sie trennt den Inhalt
+     sichtbar von der Bedienoberflaeche, die serifenlos bleibt. */
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: clamp(1.85rem, 4.2vw, 2.7rem);
+  line-height: 1.12;
+  letter-spacing: -.018em;
+  font-weight: 600;
+  margin: 0 0 .7rem;
+  max-width: 20ch;
 }
 .sub {
   color: var(--text-soft);
-  margin: 0 0 1rem;
-  max-width: 62ch;
-  font-size: .93rem;
-}
-.stats { display: flex; flex-wrap: wrap; gap: .5rem; }
-.stat {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: .45rem .75rem;
-  box-shadow: var(--schatten);
-  display: flex;
-  align-items: baseline;
-  gap: .4rem;
-}
-.stat-value { font-size: 1.02rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.stat-label {
-  font-size: .69rem;
-  text-transform: uppercase;
-  letter-spacing: .065em;
-  color: var(--muted);
-  font-weight: 600;
+  margin: 0;
+  max-width: 60ch;
+  font-size: 1rem;
+  line-height: 1.55;
 }
 
-/* Tabs als Pills */
-.tabs {
+/* Kennzahlenband */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  margin-top: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--schatten);
+  overflow: hidden;
+}
+.stat { padding: .95rem 1.15rem; }
+.stat + .stat { border-left: 1px solid var(--line); }
+@media (max-width: 620px) {
+  .stat + .stat { border-left: none; border-top: 1px solid var(--line); }
+}
+.stat-value {
+  display: block;
+  font-size: 1.55rem;
+  font-weight: 680;
+  line-height: 1.1;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  display: block;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .085em;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: .3rem;
+}
+
+/* Legende: erklaert das Farbsystem genau einmal */
+.legende {
   display: flex;
   flex-wrap: wrap;
-  gap: .38rem;
-  margin: 1.35rem 0 1.15rem;
+  gap: 1.1rem;
+  margin: 1.4rem 0 0;
+  font-size: .8rem;
+  color: var(--text-soft);
 }
+.legende span { display: inline-flex; align-items: center; gap: .42rem; }
+.swatch {
+  width: .68rem;
+  height: .68rem;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* --- Steuerleiste --- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: 0 0 1.15rem;
+}
+.tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
 .tab {
   font: inherit;
   font-size: .845rem;
@@ -284,292 +301,335 @@ h1 {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: .34rem .8rem;
+  padding: .34rem .82rem;
   cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
+  transition: background .13s, color .13s, border-color .13s;
 }
-.tab:hover { border-color: var(--kat, var(--muted)); color: var(--text); }
-/* Aktiver Kategorie-Tab: getoente Flaeche, Text und Rahmen in der Kategorien-
-   farbe. Bewusst nicht die kraeftige Farbe als Hintergrund mit weisser
-   Schrift - das haette im Dunkelmodus zu wenig Kontrast, weil --kat dort
-   selbst hell ist. */
-.tab.active {
-  background: var(--kat-bg);
-  border-color: var(--kat);
-  color: var(--kat);
-}
-/* Der All-Tab gehoert zu keiner Kategorie und bleibt darum neutral invertiert. */
+.tab:hover { border-color: var(--kat); color: var(--text); }
+.tab.active { background: var(--kat-bg); border-color: var(--kat); color: var(--kat); }
 .tab[data-filter="all"].active {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
 }
 .punkt {
-  width: .45rem;
-  height: .45rem;
+  width: .44rem;
+  height: .44rem;
   border-radius: 50%;
   background: var(--kat);
   display: inline-block;
-  margin-right: .4rem;
+  margin-right: .42rem;
   vertical-align: middle;
 }
-.tab .count { opacity: .6; margin-left: .32rem; font-variant-numeric: tabular-nums; }
+.tab .count { opacity: .55; margin-left: .34rem; font-variant-numeric: tabular-nums; }
+.hinweis-sortierung { font-size: .76rem; color: var(--muted); }
 
-/* Grid: zwei breite Spalten statt drei schmaler. Die Fragetexte sind lang
-   ("Will Platforma Reupblicana No Kumpu Guine win the most seats in the 2025
-   Guinea-Bissau National People's Assembly election?") und brachen in drei
-   Spalten auf fuenf Zeilen um. */
+/* --- Raster --- */
+/* align-items bleibt auf dem Standard "stretch": Karten einer Zeile werden
+   gleich hoch. Bei "start" endeten nebeneinanderliegende Karten je nach
+   Laenge des Fragetexts auf unterschiedlicher Hoehe, was das Raster unruhig
+   wirken liess. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .85rem;
-  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .95rem;
 }
-@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+/* Die Details-Zeile sitzt dadurch am unteren Rand jeder Karte, auf gleicher
+   Hoehe wie die der Nachbarkarte. Der Mindestabstand nach oben haengt an den
+   Vorgaengern, nicht an details selbst: margin-top ist dort "auto" und
+   verschwaende, sobald eine Karte die Zeile ausfuellt. */
+.card { display: flex; flex-direction: column; }
+.card details { margin-top: auto; }
+.metrics, .skala-achse { margin-bottom: .9rem; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
 
-/* Karte */
+/* --- Karte --- */
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  /* Akzentlinie oben in der Kategorienfarbe. Sie traegt dieselbe Information
-     wie die Pille im Kartenkopf, aber ueber die ganze Breite - dadurch sind
-     Bloecke gleicher Kategorie im Grid auf einen Blick als Gruppe erkennbar. */
-  border-top: 3px solid var(--kat);
-  border-radius: 11px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 1.15rem 1.2rem 1.05rem;
   box-shadow: var(--schatten);
-  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+  transition: box-shadow .16s ease, transform .16s ease;
 }
-.card:hover {
-  box-shadow: var(--schatten-hover);
-  border-color: var(--line);
-  border-top-color: var(--kat);
-  transform: translateY(-1px);
+.card:hover { box-shadow: var(--schatten-hover); transform: translateY(-2px); }
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .7rem;
 }
-.card-head { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .6rem; }
-.badge, .tag {
+.pill {
   font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: .075em;
   font-weight: 650;
-  color: var(--muted);
-  border: 1px solid var(--line);
   border-radius: 999px;
-  padding: .12rem .48rem;
+  padding: .16rem .52rem;
   white-space: nowrap;
-}
-.tag { text-transform: none; letter-spacing: .01em; font-size: .7rem; }
-/* Kategorienpille: die Farbe allein waere kryptisch, hier steht der Name dazu. */
-.cat-pill {
   color: var(--kat);
   background: var(--kat-bg);
-  border-color: transparent;
 }
-.question {
-  font-weight: 600;
-  font-size: .94rem;
+.src {
+  font-size: .7rem;
+  font-weight: 550;
+  color: var(--muted);
+}
+.geo { font-size: .74rem; color: var(--text-soft); margin-left: auto; white-space: nowrap; }
+
+.q {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 1.03rem;
+  font-weight: 500;
   line-height: 1.38;
-  margin: 0 0 .85rem;
-  letter-spacing: -.005em;
+  margin: 0 0 1rem;
+  letter-spacing: -.004em;
 }
 
-/* Zahlenblock: Benchmark und Claude nebeneinander statt untereinander. Die
-   breiteren Karten machen den direkten Vergleich moeglich - beide Zahlen auf
-   einer Hoehe, das Auge muss nicht mehr springen. */
-/* auto-fit statt fester Spaltenzahl: kommt ein dritter Prognostiker dazu,
-   ordnet sich das Raster selbst neu, ohne dass das CSS angefasst wird. */
+/* Zahlenreihe. Jede Spalte traegt ihre Modellfarbe ueber --farbe. */
 .metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
-  gap: .8rem;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: .55rem;
 }
-.metric-col { min-width: 0; }
-.metric-col + .metric-col {
-  border-left: 1px solid var(--line-soft);
-  padding-left: .8rem;
-}
-.metric-label {
-  display: block;
-  font-size: .665rem;
+.m { min-width: 0; --farbe: var(--modell-standard); }
+.m-bench { --farbe: var(--bench); }
+.m-claude { --farbe: var(--claude); }
+.m-openai { --farbe: var(--gpt); }
+.lbl {
+  display: flex;
+  align-items: center;
+  gap: .32rem;
+  font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .07em;
+  letter-spacing: .08em;
   color: var(--muted);
   font-weight: 650;
-  margin-bottom: .18rem;
+  margin-bottom: .2rem;
 }
-.metric-value {
-  font-size: 1.95rem;
-  font-weight: 700;
+.lbl::before {
+  content: "";
+  width: .42rem;
+  height: .42rem;
+  border-radius: 50%;
+  background: var(--farbe);
+  flex: none;
+}
+.val {
+  display: block;
+  font-size: 1.72rem;
+  font-weight: 680;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.025em;
-  display: block;
+  letter-spacing: -.03em;
+  color: var(--farbe);
 }
-.bar {
-  height: 5px;
-  background: var(--bar);
-  border-radius: 999px;
-  overflow: hidden;
-  margin: .5rem 0 0;
-}
-.bar-fill { height: 100%; background: var(--bar-fill); border-radius: 999px; }
-
 .diff {
   display: block;
-  font-size: .84rem;
-  font-weight: 650;
+  font-size: .755rem;
+  font-weight: 620;
   font-variant-numeric: tabular-nums;
-  margin-top: .28rem;
+  margin-top: .18rem;
 }
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--flat); }
-
-/* Leere Zustaende: ruhig, aber nie eine Luecke */
 .leer {
   display: block;
-  font-size: .82rem;
+  font-size: .85rem;
   color: var(--muted);
   font-style: italic;
-  /* Gleiche Hoehe wie eine Zahl, damit die beiden Spalten nicht verspringen,
-     wenn nur eine von beiden belegt ist. */
-  padding: .5rem 0 .35rem;
+  /* Gleiche Hoehe wie eine Zahl, damit die Spalten nicht verspringen, wenn
+     nur ein Teil von ihnen belegt ist. */
+  padding: .42rem 0 .5rem;
 }
-.meta { margin: .4rem 0 0; font-size: .755rem; color: var(--muted); }
+
+/* Gemeinsame Skala. Das eigentliche Bild der Karte: drei Punkte auf einer
+   Achse, Abstand gleich Uneinigkeit. */
+.skala {
+  position: relative;
+  height: 1.5rem;
+  margin: .1rem 0 .2rem;
+}
+.track {
+  position: absolute;
+  top: .58rem;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+}
+.tick {
+  position: absolute;
+  top: .24rem;
+  width: 1px;
+  height: .72rem;
+  background: var(--line);
+  transform: translateX(-50%);
+}
+.tick-mitte { background: var(--line); opacity: 1; height: 1rem; top: .1rem; }
+.mk {
+  position: absolute;
+  top: .22rem;
+  width: .78rem;
+  height: .78rem;
+  border-radius: 50%;
+  background: var(--farbe);
+  /* Ring in der Kartenfarbe: liegen zwei Punkte fast uebereinander, bleiben
+     sie trotzdem als zwei erkennbar. */
+  box-shadow: 0 0 0 2.5px var(--card);
+  transform: translateX(-50%);
+}
+.mk-bench { --farbe: var(--bench); z-index: 3; }
+.mk-claude { --farbe: var(--claude); z-index: 2; }
+.mk-openai { --farbe: var(--gpt); z-index: 1; }
+.skala-achse {
+  display: flex;
+  justify-content: space-between;
+  font-size: .62rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+}
+
 /* Widerspruch zwischen Zahl und Begruendung. Deutlich, aber nicht in der
-   Farbe der Differenz-Pfeile - sonst liest man es als Richtungsangabe. */
+   Farbe der Differenz - sonst liest man es als Richtungsangabe. */
 .warnung {
-  margin: .35rem 0 0;
-  font-size: .72rem;
+  margin: .3rem 0 0;
+  font-size: .7rem;
   font-weight: 600;
-  color: #b45309;
+  color: #a8580a;
   cursor: help;
 }
 @media (prefers-color-scheme: dark) { .warnung { color: #f0a955; } }
 
-details { margin-top: .85rem; border-top: 1px solid var(--line-soft); padding-top: .6rem; }
+details {
+  margin-top: .9rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: .55rem;
+}
 summary {
   cursor: pointer;
-  font-size: .78rem;
-  color: var(--accent);
-  font-weight: 550;
+  font-size: .765rem;
+  color: var(--muted);
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
 }
-details p { margin: .55rem 0 0; font-size: .85rem; color: var(--text-soft); }
-/* Modellname ueber der jeweiligen Begruendung - ohne ihn waeren die beiden
-   Absaetze nicht auseinanderzuhalten. */
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: "+";
+  font-size: .9rem;
+  line-height: 1;
+  color: var(--muted);
+}
+details[open] summary::before { content: "\\2013"; }
+summary:hover { color: var(--text); }
+.reason {
+  margin: .7rem 0 0;
+  padding-left: .7rem;
+  border-left: 2px solid var(--farbe, var(--line));
+  font-size: .85rem;
+  color: var(--text-soft);
+}
+.reason-claude { --farbe: var(--claude); }
+.reason-openai { --farbe: var(--gpt); }
 .reason-head {
-  font-size: .68rem !important;
+  display: block;
+  font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .07em;
+  letter-spacing: .08em;
   font-weight: 650;
-  color: var(--muted) !important;
-  margin-top: .8rem !important;
+  color: var(--farbe);
+  margin-bottom: .12rem;
 }
-details .criteria {
-  margin: .55rem 0 0;
-  font-size: .78rem;
+.criteria {
+  margin: .9rem 0 0;
+  padding-top: .6rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: .765rem;
   color: var(--muted);
   white-space: pre-wrap;
 }
-
-/* Aufgeloeste Fragen: bewusst als Tabelle, nicht als Karten. Hier zaehlt der
-   Vergleich Zeile fuer Zeile, nicht die einzelne Frage. */
-.resolved { margin-top: 2.5rem; }
-.resolved h2 {
-  font-size: 1.1rem;
-  margin: 0 0 .3rem;
-  letter-spacing: -.01em;
-}
-.resolved h2 .count {
-  font-size: .8rem;
-  color: var(--muted);
-  font-weight: 500;
-  margin-left: .3rem;
-}
-.resolved .sub { font-size: .82rem; margin-bottom: .8rem; }
-/* Auf schmalen Schirmen scrollt die Tabelle in ihrem eigenen Kasten,
-   damit die Seite selbst nie seitlich wandert. */
-.resolved table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: .84rem;
+.criteria b {
   display: block;
-  overflow-x: auto;
-}
-.resolved th {
-  text-align: left;
-  font-size: .67rem;
   text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--muted);
+  letter-spacing: .08em;
+  font-size: .62rem;
+  margin-bottom: .2rem;
   font-weight: 650;
-  padding: 0 .7rem .4rem 0;
-  white-space: nowrap;
 }
-.resolved td {
-  padding: .5rem .7rem .5rem 0;
-  border-top: 1px solid var(--line);
-  vertical-align: top;
-}
-.resolved .frage { min-width: 20rem; }
-.resolved .zahl { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.resolved .datum { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.resolved .brier { color: var(--muted); font-size: .76rem; margin-left: .3rem; }
-.outcome {
-  font-size: .68rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-weight: 650;
-  border-radius: 999px;
-  padding: .12rem .5rem;
-  white-space: nowrap;
-}
-.outcome.ja { color: var(--up); border: 1px solid var(--up); }
-.outcome.nein { color: var(--down); border: 1px solid var(--down); }
 
 footer {
-  margin-top: 2.25rem;
-  padding-top: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.35rem;
   border-top: 1px solid var(--line);
-  font-size: .8rem;
+  font-size: .81rem;
   color: var(--muted);
-  max-width: 80ch;
+  max-width: 78ch;
+  line-height: 1.6;
 }
-footer a { color: var(--accent); }
-footer p { margin: 0 0 .35rem; }
+footer a { color: var(--link); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer p { margin: 0 0 .5rem; }
+footer code {
+  font-size: .93em;
+  background: var(--bg-akzent);
+  padding: .06em .32em;
+  border-radius: 4px;
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-  <h1>AI Forecasting: African Economic and Political Development</h1>
-  <p class="sub">Two AI models forecast open questions on African politics and
-  economics, side by side with prediction-market prices and community forecasts.
-  Neither model ever sees the benchmark it is measured against; once a question
-  resolves, both are scored against what actually happened.</p>
+
+<header class="top">
+  <p class="kicker">Prediction markets &middot; Large language models</p>
+  <h1>Can AI forecast African politics?</h1>
+  <p class="sub">Two language models estimate the probability of open questions
+  on African politics and economics. Neither ever sees the market price it is
+  placed next to, so each estimate is an independent claim rather than a
+  restatement of the crowd.</p>
+
   <div class="stats">
     <div class="stat"><span class="stat-value"><<ANZAHL>></span><span class="stat-label">Questions</span></div>
-    <div class="stat"><span class="stat-value"><<ANZAHL_QUELLEN>></span><span class="stat-label">Sources</span></div>
-    <div class="stat"><span class="stat-value"><<DURCHSCHNITT>></span><span class="stat-label">Avg. gap</span></div>
+    <div class="stat"><span class="stat-value"><<ANZAHL_BENCHMARK>></span><span class="stat-label">With a benchmark</span></div>
+    <div class="stat"><span class="stat-value"><<DURCHSCHNITT>></span><span class="stat-label">Avg. model &ndash; market gap</span></div>
+    <div class="stat"><span class="stat-value"><<MODELL_DIFFERENZ>></span><span class="stat-label">Avg. gap between models</span></div>
+  </div>
+
+  <div class="legende">
+    <span><i class="swatch" style="background: var(--bench)"></i> Market or community benchmark</span>
+<<LEGENDE_MODELLE>>
   </div>
 </header>
 
-<nav class="tabs"><<TABS>></nav>
+<div class="controls">
+  <nav class="tabs"><<TABS>></nav>
+  <span class="hinweis-sortierung">Sorted by disagreement with the benchmark</span>
+</div>
 
 <div class="grid">
 <<KARTEN>>
 </div>
 
-<<AUFGELOEST>>
-
 <footer>
 <p>Forecasts come from <<MODELL_LISTE>>. Both receive the same question, the same
 resolution criteria and the same web-search tool, with prediction-market sites
-blocked. The benchmark is never passed into the prompt, so each estimate is
-independent rather than a restatement of the market.</p>
+blocked. The benchmark is never passed into the prompt.</p>
+<p>A Polymarket price reflects real money at stake; a Metaculus number is the
+median of volunteer forecasts with nothing at risk. The two are labelled
+differently for that reason. Where a benchmark is missing, the community median
+is not available at this account&#39;s access tier.</p>
 <p>Benchmarks from <<QUELLEN_LISTE>> &middot; last updated <<ZEITSTEMPEL>> &middot;
-<a href="<<REPO_URL>>">source and method</a></p>
+<a href="<<REPO_URL>>">source code and method</a></p>
 </footer>
+
 </div>
 
 <script>
@@ -598,94 +658,81 @@ document.querySelectorAll(".tab").forEach(function (tab) {
 
 KARTEN_VORLAGE = """<article class="card cat-<<KATEGORIE>>" data-category="<<KATEGORIE>>">
   <div class="card-head">
-    <span class="badge cat-pill"><<KATEGORIE_NAME>></span>
-    <span class="badge"><<QUELLE>></span>
-    <span class="tag"><<FLAGGE>> <<LAND>></span>
+    <span class="pill"><<KATEGORIE_NAME>></span>
+    <span class="src"><<QUELLE>></span>
+    <span class="geo"><<LAND>></span>
   </div>
-  <p class="question"><<FRAGE>></p>
+  <h3 class="q"><<FRAGE>></h3>
   <div class="metrics">
 <<BENCHMARK_BLOCK>>
 <<AI_BLOCK>>
   </div>
+<<SKALA>>
   <details>
-    <summary>Details</summary>
+    <summary>Reasoning and resolution criteria</summary>
 <<REASONING_BLOCK>>
-    <p class="criteria"><<KRITERIEN>></p>
+    <p class="criteria"><b>Resolution criteria</b><<KRITERIEN>></p>
   </details>
 </article>"""
 
-# Vergleichszahl vorhanden: grosse Zahl, darunter der Balken.
-BENCHMARK_VORLAGE = """    <div class="metric-col">
-      <span class="metric-label"><<BENCHMARK_LABEL>></span>
-      <span class="metric-value"><<MARKT_P>></span>
-      <div class="bar"><div class="bar-fill" style="width: <<BALKEN>>%"></div></div>
+BENCHMARK_VORLAGE = """    <div class="m m-bench">
+      <span class="lbl"><<BENCHMARK_LABEL>></span>
+      <span class="val"><<MARKT_P>></span>
     </div>"""
 
 # Vergleichszahl fehlt: dieselbe Beschriftung, aber ein ruhiger Hinweis statt
-# einer Zahl - und kein Balken, denn ein leerer Balken suggeriert 0 Prozent.
-BENCHMARK_FEHLT_VORLAGE = """    <div class="metric-col">
-      <span class="metric-label"><<BENCHMARK_LABEL>></span>
+# einer Zahl. Bewusst keine 0 und kein leerer Balken - beides waere eine
+# Behauptung ueber einen Wert, den wir nicht haben.
+BENCHMARK_FEHLT_VORLAGE = """    <div class="m m-bench">
+      <span class="lbl"><<BENCHMARK_LABEL>></span>
       <span class="leer"><<HINWEIS>></span>
     </div>"""
 
 # Konfidenz und Suchanzahl stehen bewusst NICHT auf der Karte. Beides sind
 # Angaben ueber den Weg, nicht ueber das Ergebnis, und sie lenkten von den
-# drei Zahlen ab, um die es geht. Gespeichert bleiben sie in forecasts.json
-# und in jeder Aufnahme - fuer eine spaetere Auswertung, etwa ob hohe
-# Konfidenz tatsaechlich mit besseren Treffern einhergeht.
-AI_VORLAGE = """    <div class="metric-col">
-      <span class="metric-label"><<MODELL_NAME>></span>
-      <span class="metric-value"><<MODELL_P>></span>
+# Zahlen ab, um die es geht. Gespeichert bleiben sie in forecasts.json und in
+# jeder Aufnahme - fuer eine spaetere Auswertung, etwa ob hohe Konfidenz
+# tatsaechlich mit besseren Treffern einhergeht.
+AI_VORLAGE = """    <div class="m m-<<SCHLUESSEL>>">
+      <span class="lbl"><<MODELL_NAME>></span>
+      <span class="val"><<MODELL_P>></span>
 <<DIFF_BLOCK>>
 <<WARNUNG>>
     </div>"""
 
-# Warnung, wenn die Zahl der eigenen Begruendung widerspricht. Bewusst
-# sichtbar auf der Karte: der Wert steht dann als grosse Abweichung weit oben,
-# und ohne Hinweis liest man ihn als starke Modellaussage statt als Fehler.
-WARNUNG_VORLAGE = """      <p class="warnung" title="<<GRUND>>">&#9888; number contradicts the reasoning</p>"""
+OHNE_AI_VORLAGE = """    <div class="m m-<<SCHLUESSEL>>">
+      <span class="lbl"><<MODELL_NAME>></span>
+      <span class="leer">not forecast</span>
+    </div>"""
 
 DIFF_VORLAGE = """      <span class="diff <<DIFF_KLASSE>>"><<DIFF>></span>"""
 
-OHNE_AI_VORLAGE = """    <div class="metric-col">
-      <span class="metric-label"><<MODELL_NAME>></span>
-      <span class="leer">Not yet</span>
-    </div>"""
+# Warnung, wenn die Zahl der eigenen Begruendung widerspricht. Bewusst
+# sichtbar auf der Karte: der Wert steht dann als grosse Abweichung weit oben,
+# und ohne Hinweis liest man ihn als starke Modellaussage statt als Fehler.
+WARNUNG_VORLAGE = """      <p class="warnung" title="<<GRUND>>">&#9888; contradicts its own reasoning</p>"""
 
-# Abschnitt fuer aufgeloeste Fragen. Wird nur eingesetzt, wenn es welche gibt -
-# eine leere Ueberschrift "Resolved" mit nichts darunter saehe nach einem
-# Fehler aus.
-AUFGELOEST_VORLAGE = """<section class="resolved">
-  <h2>Resolved <span class="count"><<ANZAHL>></span></h2>
-  <p class="sub">Scored against the earliest snapshot that held a forecast, so
-  model and benchmark are judged on the same information. Lower Brier is better;
-  0.25 is what a constant 50&#37; guess scores.</p>
-  <table>
-    <thead>
-      <tr><th>Question</th><th>Outcome</th><<KOEPFE>><th>Benchmark</th><th>Measured</th></tr>
-    </thead>
-    <tbody>
-<<ZEILEN>>
-    </tbody>
-  </table>
-</section>"""
+SKALA_VORLAGE = """  <div class="skala">
+    <div class="track"></div>
+    <div class="tick" style="left: 25%"></div>
+    <div class="tick tick-mitte" style="left: 50%"></div>
+    <div class="tick" style="left: 75%"></div>
+<<PUNKTE>>
+  </div>
+  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>"""
 
-AUFGELOEST_ZEILE = """      <tr>
-        <td class="frage"><<FRAGE>></td>
-        <td><span class="outcome <<OUTCOME_KLASSE>>"><<OUTCOME>></span></td>
-<<ZELLEN>>
-        <td class="zahl"><<BENCH>></td>
-        <td class="datum"><<DATUM>></td>
-      </tr>"""
+PUNKT_VORLAGE = """    <div class="mk mk-<<SCHLUESSEL>>" style="left: <<POSITION>>%" title="<<TITEL>>"></div>"""
 
-# Eine Zelle je Prognostiker: Schaetzung von damals und ihr Brier Score.
-AUFGELOEST_ZELLE = """        <td class="zahl"><<WERT>></td>"""
+REASONING_VORLAGE = """    <p class="reason reason-<<SCHLUESSEL>>"><span class="reason-head"><<MODELL_NAME>></span><<REASONING>></p>"""
 
-# Begruendung je Modell im aufklappbaren Teil. Beide stehen untereinander,
-# damit man sie direkt vergleichen kann - dort liegt der eigentliche
-# Erkenntniswert, nicht in den zwei Prozentzahlen.
-REASONING_VORLAGE = """    <p class="reason-head"><<MODELL_NAME>></p>
-    <p><<REASONING>></p>"""
+LEGENDE_VORLAGE = """    <span><i class="swatch" style="background: var(--<<FARBE>>)"></i> <<MODELL_NAME>></span>"""
+
+# Farbvariable je Prognostiker. Ein nicht eingetragener Schluessel bekommt die
+# neutrale Standardfarbe, statt die Legende unsichtbar zu machen.
+MODELL_FARBE = {
+    "claude": "claude",
+    "openai": "gpt",
+}
 
 
 # --- Daten laden -----------------------------------------------------------
@@ -704,20 +751,6 @@ def lade_json(pfad):
         sys.exit(1)
 
 
-def lade_json_optional(pfad, standard):
-    """Liest eine JSON-Datei, oder gibt den Standardwert zurueck.
-
-    Anders als lade_json ist eine fehlende Datei hier kein Abbruchgrund: eine
-    Seite ohne aufgeloeste Fragen ist der Normalfall, solange nichts
-    aufgeloest ist.
-    """
-    try:
-        with open(pfad, "r", encoding="utf-8") as datei:
-            return json.load(datei)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return standard
-
-
 def baue_karten_daten(markets, forecasts):
     """Baut pro ausgewaehlter Frage einen Karten-Eintrag.
 
@@ -732,7 +765,6 @@ def baue_karten_daten(markets, forecasts):
     for markt in markets:
         prognose = nach_id.get(markt["id"])
         market_p = markt.get("market_p")
-        modelle = baue_modell_liste(prognose, market_p)
 
         eintraege.append({
             "question": markt["question"],
@@ -741,7 +773,7 @@ def baue_karten_daten(markets, forecasts):
             "category": markt.get("category", "other"),
             "country": markt.get("country", ""),
             "market_p": market_p,
-            "modelle": modelle,
+            "modelle": baue_modell_liste(prognose, market_p),
             "criteria": markt.get("description", ""),
         })
 
@@ -773,77 +805,13 @@ def baue_modell_liste(prognose, market_p):
             "name": anzeigename,
             "model_p": model_p,
             "diff": diff,
-            "confidence": eintrag["confidence"] if eintrag else "",
             "reasoning": eintrag["reasoning"] if eintrag else "",
-            "searched": eintrag.get("searched", False) if eintrag else False,
-            "num_searches": eintrag.get("num_searches", 0) if eintrag else 0,
             # Gesetzt, wenn Zahl und Begruendung sich widersprechen und auch
             # der Neuversuch das nicht aufgeloest hat (siehe pruefung.py).
             "flagged": eintrag.get("flagged") if eintrag else None,
         })
 
     return modelle
-
-
-def baue_aufgeloeste_daten():
-    """Baut die Eintraege fuer aufgeloeste Fragen, aelteste Aufloesung zuletzt.
-
-    Gezeigt wird der Stand vom MESSZEITPUNKT, nicht der letzte bekannte: also
-    die frueheste Aufnahme mit einer Prognose zu dieser Frage, und die
-    Vergleichszahl aus derselben Aufnahme. Genau so rechnet brier.py, und
-    genau darum darf die Seite es nicht anders machen - sonst stuenden auf der
-    Karte andere Zahlen als im Score.
-
-    Nur Fragen mit tatsaechlich bekanntem Ausgang. "void" (annulliert) und
-    "unavailable" (Quelle gibt den Ausgang nicht her, siehe
-    resolve_questions.py) haben keinen Ausgang und gehoeren nicht in eine
-    Trefferliste.
-    """
-    aufgeloest = lade_json_optional(RESOLVED_DATEI, [])
-    if not aufgeloest:
-        return []
-
-    prognosen = brier.erste_prognosen(brier.lade_aufnahmen())
-
-    eintraege = []
-    for eintrag in aufgeloest:
-        if eintrag.get("status") != "resolved":
-            continue
-        ausgang = eintrag.get("outcome")
-        if ausgang not in (0, 1):
-            continue
-
-        gemessen = prognosen.get(eintrag["id"])
-        if gemessen is None:
-            # Aufgeloest, aber nie mit einer Prognose gesehen. Anzeigen waere
-            # irrefuehrend: es gaebe nichts zu bewerten.
-            continue
-
-        modelle = []
-        for schluessel, anzeigename, _modell_id in PROGNOSTIKER:
-            prognose = gemessen["forecasts"].get(schluessel)
-            p = prognose.get("probability") if prognose else None
-            modelle.append({
-                "name": anzeigename,
-                "model_p": p,
-                "brier": None if p is None else round(brier.brier_einzeln(p, ausgang), 4),
-            })
-
-        market_p = gemessen.get("market_p")
-        eintraege.append({
-            "question": eintrag.get("question", ""),
-            "source": eintrag.get("source", "unknown"),
-            "outcome": ausgang,
-            "measured_at": (gemessen.get("taken_at") or "")[:10],
-            "market_p": market_p,
-            "market_brier": (None if market_p is None
-                             else round(brier.brier_einzeln(market_p, ausgang), 4)),
-            "modelle": modelle,
-        })
-
-    # Zuletzt Gemessenes zuerst: die juengste Aufloesung ist die interessante.
-    eintraege.sort(key=lambda e: e["measured_at"], reverse=True)
-    return eintraege
 
 
 # --- Formatierung ----------------------------------------------------------
@@ -853,24 +821,28 @@ def formatiere_prozent(p):
     return f"{round(p * 100)}%"
 
 
-def balken_breite(p):
-    """Breite des Wahrscheinlichkeitsbalkens in Prozent, als Text fuer CSS."""
-    return str(round(p * 100))
+def position(p):
+    """Position eines Punktes auf der Skala, in Prozent, als Text fuer CSS.
+
+    Auf 1.5 bis 98.5 begrenzt: bei exakt 0 oder 100 haenge der halbe Punkt
+    ausserhalb der Achse und waere angeschnitten.
+    """
+    return f"{min(max(p * 100, 1.5), 98.5):.1f}"
 
 
 def formatiere_diff(diff):
-    """Formatiert die Differenz mit Pfeil, z. B. "&#9650; 46 pts".
+    """Formatiert die Differenz zum Benchmark, z. B. "+46 pts".
 
     Rundet die Differenz auf 0 Punkte, waere "0 pts" irrefuehrend (der Wert
     ist nicht exakt null), darum "<1 pt". Bei genau einem Punkt "pt".
     """
     punkte = round(diff * 100)
     if punkte == 0:
-        return "&#9679; &lt;1 pt"
+        return "&lt;1 pt"
 
-    pfeil = "&#9650;" if punkte > 0 else "&#9660;"
     einheit = "pt" if abs(punkte) == 1 else "pts"
-    return f"{pfeil} {abs(punkte)} {einheit}"
+    vorzeichen = "+" if punkte > 0 else "&minus;"
+    return f"{vorzeichen}{abs(punkte)} {einheit}"
 
 
 def klasse_fuer_diff(diff):
@@ -893,8 +865,8 @@ def kategorie_name(schluessel):
     """Anzeigename einer Kategorie, z. B. "elections" -> "Elections".
 
     Unbekannte Schluessel gehen unveraendert durch, statt zu verschwinden -
-    eine neue Kategorie faellt so auf der Seite auf und wird nicht stillschweigend
-    als "Other" ausgegeben.
+    eine neue Kategorie faellt so auf der Seite auf und wird nicht
+    stillschweigend als "Other" ausgegeben.
     """
     for eintrag, anzeigename in KATEGORIE_NAMEN:
         if eintrag == schluessel:
@@ -907,26 +879,14 @@ def benchmark_label(benchmark_type):
     return BENCHMARK_LABEL.get(benchmark_type, "Benchmark")
 
 
-def flagge_fuer_land(land):
-    """Flaggen-Emoji zum Land, sonst die Weltkugel.
-
-    Unbekannte oder regionale Angaben (Somaliland, Sahel) bekommen bewusst
-    einen neutralen Standardwert, statt gar kein Zeichen - so bleibt der Tag
-    optisch gleich breit aufgebaut.
-    """
-    return LAND_FLAGGE.get(land, FLAGGE_STANDARD)
-
-
-
-
 # --- HTML bauen ------------------------------------------------------------
 
 def baue_benchmark_block(eintrag):
-    """Baut den Benchmark-Teil: grosse Zahl mit Balken, oder ruhiger Hinweis."""
+    """Baut die Benchmark-Spalte: Zahl, oder ruhiger Hinweis auf ihr Fehlen."""
     label = benchmark_label(eintrag["benchmark_type"])
 
     if eintrag["market_p"] is None:
-        hinweis = BENCHMARK_FEHLT.get(eintrag["benchmark_type"], "Not available")
+        hinweis = BENCHMARK_FEHLT.get(eintrag["benchmark_type"], "not available")
         return (
             BENCHMARK_FEHLT_VORLAGE
             .replace("<<BENCHMARK_LABEL>>", label)
@@ -937,18 +897,21 @@ def baue_benchmark_block(eintrag):
         BENCHMARK_VORLAGE
         .replace("<<BENCHMARK_LABEL>>", label)
         .replace("<<MARKT_P>>", formatiere_prozent(eintrag["market_p"]))
-        .replace("<<BALKEN>>", balken_breite(eintrag["market_p"]))
     )
 
 
 def baue_ai_block(modell):
     """Baut die Spalte eines Prognostikers, oder den Hinweis, dass er fehlt.
 
-    Der Differenz-Pfeil erscheint NUR, wenn beide Zahlen vorliegen. Ein Pfeil
+    Die Differenz erscheint NUR, wenn beide Zahlen vorliegen. Eine Abweichung
     ohne Gegenwert waere eine Behauptung ohne Grundlage.
     """
     if modell["model_p"] is None:
-        return OHNE_AI_VORLAGE.replace("<<MODELL_NAME>>", html.escape(modell["name"]))
+        return (
+            OHNE_AI_VORLAGE
+            .replace("<<SCHLUESSEL>>", html.escape(modell["key"]))
+            .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
+        )
 
     if modell["diff"] is None:
         diff_block = ""
@@ -969,6 +932,7 @@ def baue_ai_block(modell):
 
     return (
         AI_VORLAGE
+        .replace("<<SCHLUESSEL>>", html.escape(modell["key"]))
         .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
         .replace("<<MODELL_P>>", formatiere_prozent(modell["model_p"]))
         .replace("<<DIFF_BLOCK>>", diff_block)
@@ -976,14 +940,59 @@ def baue_ai_block(modell):
     )
 
 
+def baue_skala(eintrag):
+    """Baut die gemeinsame Skala mit einem Punkt je vorhandener Schaetzung.
+
+    Bleibt leer, solange weniger als zwei Punkte darauf liegen: eine Achse mit
+    einem einzelnen Punkt zeigt keinen Vergleich, sondern nur eine Zahl, die
+    zwei Zeilen darueber schon steht.
+    """
+    punkte = []
+
+    if eintrag["market_p"] is not None:
+        punkte.append((
+            "bench",
+            eintrag["market_p"],
+            f'{benchmark_label(eintrag["benchmark_type"])} '
+            f'{formatiere_prozent(eintrag["market_p"])}',
+        ))
+
+    for modell in eintrag["modelle"]:
+        if modell["model_p"] is None:
+            continue
+        punkte.append((
+            modell["key"],
+            modell["model_p"],
+            f'{modell["name"]} {formatiere_prozent(modell["model_p"])}',
+        ))
+
+    if len(punkte) < 2:
+        return ""
+
+    markierungen = "\n".join(
+        PUNKT_VORLAGE
+        .replace("<<SCHLUESSEL>>", html.escape(schluessel))
+        .replace("<<POSITION>>", position(wert))
+        .replace("<<TITEL>>", html.escape(titel))
+        for schluessel, wert, titel in punkte
+    )
+
+    return SKALA_VORLAGE.replace("<<PUNKTE>>", markierungen)
+
+
 def baue_reasoning_block(eintrag):
-    """Baut die Begruendungen aller Modelle, die eine geliefert haben."""
+    """Baut die Begruendungen aller Modelle, die eine geliefert haben.
+
+    Beide stehen untereinander, damit man sie direkt vergleichen kann - dort
+    liegt der eigentliche Erkenntniswert, nicht in den zwei Prozentzahlen.
+    """
     teile = []
     for modell in eintrag["modelle"]:
         if not modell["reasoning"]:
             continue
         teile.append(
             REASONING_VORLAGE
+            .replace("<<SCHLUESSEL>>", html.escape(modell["key"]))
             .replace("<<MODELL_NAME>>", html.escape(modell["name"]))
             .replace("<<REASONING>>", html.escape(modell["reasoning"]))
         )
@@ -997,9 +1006,7 @@ def baue_karte(eintrag):
     stammen aus fremden APIs bzw. vom Modell; ein "&" oder "<" darin wuerde
     die Seite sonst zerlegen.
     """
-    kriterien = eintrag["criteria"].strip() or "No resolution criteria provided."
-    reasoning_block = baue_reasoning_block(eintrag)
-    ai_bloecke = "\n".join(baue_ai_block(m) for m in eintrag["modelle"])
+    kriterien = eintrag["criteria"].strip() or "None provided by the source."
     land = eintrag["country"] or "Africa"
 
     return (
@@ -1007,12 +1014,12 @@ def baue_karte(eintrag):
         .replace("<<KATEGORIE_NAME>>", html.escape(kategorie_name(eintrag["category"])))
         .replace("<<KATEGORIE>>", html.escape(eintrag["category"]))
         .replace("<<QUELLE>>", html.escape(quellen_name(eintrag["source"])))
-        .replace("<<FLAGGE>>", flagge_fuer_land(land))
         .replace("<<LAND>>", html.escape(land))
         .replace("<<FRAGE>>", html.escape(eintrag["question"]))
         .replace("<<BENCHMARK_BLOCK>>", baue_benchmark_block(eintrag))
-        .replace("<<AI_BLOCK>>", ai_bloecke)
-        .replace("<<REASONING_BLOCK>>", reasoning_block)
+        .replace("<<AI_BLOCK>>", "\n".join(baue_ai_block(m) for m in eintrag["modelle"]))
+        .replace("<<SKALA>>", baue_skala(eintrag))
+        .replace("<<REASONING_BLOCK>>", baue_reasoning_block(eintrag))
         .replace("<<KRITERIEN>>", html.escape(kriterien))
     )
 
@@ -1030,8 +1037,6 @@ def baue_tabs(eintraege):
         anzahl = sum(1 for e in eintraege if e["category"] == schluessel)
         if anzahl == 0:
             continue
-        # Der farbige Punkt stellt die Verbindung zur Akzentlinie der Karten
-        # her: gleiche Farbe, gleiche Kategorie.
         tabs.append(f'<button class="tab cat-{schluessel}" data-filter="{schluessel}">'
                     f'<span class="punkt"></span>{anzeigename}'
                     f'<span class="count">{anzahl}</span></button>')
@@ -1039,53 +1044,17 @@ def baue_tabs(eintraege):
     return "\n".join(tabs)
 
 
-def formatiere_treffer(p, brier_wert):
-    """Zeigt Schaetzung und Brier Score einer aufgeloesten Frage.
+def baue_legende():
+    """Baut die Farblegende der Prognostiker aus PROGNOSTIKER.
 
-    Fehlt die Schaetzung, steht ein Strich - dann hat dieses Modell die Frage
-    nie prognostiziert, und eine 0 waere eine Behauptung.
+    Aus derselben Liste wie die Karten, damit ein dritter Prognostiker nicht
+    auf den Karten auftaucht, in der Legende aber fehlt.
     """
-    if p is None:
-        return "&ndash;"
-    return f"{round(p * 100)}% <span class=\"brier\">{brier_wert:.3f}</span>"
-
-
-def baue_aufgeloest_abschnitt(eintraege):
-    """Baut den Abschnitt mit aufgeloesten Fragen, oder gibt leeren Text zurueck.
-
-    Leerer Text heisst: der Abschnitt erscheint gar nicht. Solange nichts
-    aufgeloest ist, waere eine Ueberschrift mit leerer Tabelle nur Rauschen -
-    und sie saehe aus wie ein Fehler statt wie ein erwarteter Zustand.
-    """
-    if not eintraege:
-        return ""
-
-    koepfe = "".join(f"<th>{html.escape(name)}</th>" for _, name, _m in PROGNOSTIKER)
-
-    zeilen = []
-    for eintrag in eintraege:
-        zellen = "\n".join(
-            AUFGELOEST_ZELLE.replace(
-                "<<WERT>>", formatiere_treffer(m["model_p"], m["brier"])
-            )
-            for m in eintrag["modelle"]
-        )
-        zeilen.append(
-            AUFGELOEST_ZEILE
-            .replace("<<FRAGE>>", html.escape(eintrag["question"]))
-            .replace("<<OUTCOME_KLASSE>>", "ja" if eintrag["outcome"] == 1 else "nein")
-            .replace("<<OUTCOME>>", "Yes" if eintrag["outcome"] == 1 else "No")
-            .replace("<<ZELLEN>>", zellen)
-            .replace("<<BENCH>>", formatiere_treffer(eintrag["market_p"],
-                                                     eintrag["market_brier"]))
-            .replace("<<DATUM>>", html.escape(eintrag["measured_at"]))
-        )
-
-    return (
-        AUFGELOEST_VORLAGE
-        .replace("<<ANZAHL>>", str(len(eintraege)))
-        .replace("<<KOEPFE>>", koepfe)
-        .replace("<<ZEILEN>>", "\n".join(zeilen))
+    return "\n".join(
+        LEGENDE_VORLAGE
+        .replace("<<FARBE>>", MODELL_FARBE.get(schluessel, "modell-standard"))
+        .replace("<<MODELL_NAME>>", html.escape(anzeigename))
+        for schluessel, anzeigename, _modell_id in PROGNOSTIKER
     )
 
 
@@ -1113,6 +1082,8 @@ def nenne_quellen(eintraege):
     return html.escape(", ".join(namen[:-1]) + " and " + namen[-1])
 
 
+# --- Kennzahlen ------------------------------------------------------------
+
 def alle_diffs(eintrag):
     """Alle vorhandenen Abweichungen einer Karte, ueber alle Modelle."""
     return [m["diff"] for m in eintrag["modelle"] if m["diff"] is not None]
@@ -1124,7 +1095,7 @@ def hat_prognose(eintrag):
 
 
 def mittlere_abweichung(eintraege):
-    """Durchschnittliche absolute Abweichung in Prozentpunkten, als Text.
+    """Durchschnittliche absolute Abweichung vom Benchmark, in Prozentpunkten.
 
     Gemittelt ueber alle Modell-Benchmark-Paare, nicht ueber Karten: bei zwei
     Modellen zaehlt jede Karte doppelt, wenn beide geschaetzt haben. Gibt es
@@ -1135,6 +1106,27 @@ def mittlere_abweichung(eintraege):
     if not diffs:
         return "&ndash;"
     return f"{round(sum(diffs) / len(diffs) * 100)} pts"
+
+
+def mittlerer_modellabstand(eintraege):
+    """Durchschnittlicher Abstand der Modelle untereinander, in Prozentpunkten.
+
+    Bewusst unabhaengig vom Benchmark: dieser Wert gibt es auch fuer Fragen
+    ohne Vergleichszahl, und er beantwortet eine eigene Frage - sind sich zwei
+    Modelle mit derselben Aufgabe ueberhaupt einig? Bei mehr als zwei
+    Prognostikern zaehlt die Spanne zwischen dem hoechsten und dem
+    niedrigsten Wert.
+    """
+    spannen = []
+    for eintrag in eintraege:
+        werte = [m["model_p"] for m in eintrag["modelle"] if m["model_p"] is not None]
+        if len(werte) < 2:
+            continue
+        spannen.append(max(werte) - min(werte))
+
+    if not spannen:
+        return "&ndash;"
+    return f"{round(sum(spannen) / len(spannen) * 100)} pts"
 
 
 def sortierschluessel(eintrag):
@@ -1153,22 +1145,22 @@ def sortierschluessel(eintrag):
     return (2, -(eintrag["market_p"] or 0))
 
 
-def baue_seite(eintraege, aufgeloest, zeitstempel):
-    """Setzt Kopf, Tab-Leiste, Karten, aufgeloeste Fragen und Fusszeile zusammen."""
+def baue_seite(eintraege, zeitstempel):
+    """Setzt Kopf, Kennzahlen, Tab-Leiste, Karten und Fusszeile zusammen."""
     sortiert = sorted(eintraege, key=sortierschluessel)
-    karten = "\n".join(baue_karte(e) for e in sortiert)
-    anzahl_quellen = len({e["source"] for e in sortiert})
+    mit_benchmark = sum(1 for e in sortiert if e["market_p"] is not None)
 
     return (
         SEITEN_VORLAGE
-        .replace("<<AUFGELOEST>>", baue_aufgeloest_abschnitt(aufgeloest))
+        .replace("<<LEGENDE_MODELLE>>", baue_legende())
         .replace("<<MODELL_LISTE>>", nenne_modelle())
+        .replace("<<MODELL_DIFFERENZ>>", mittlerer_modellabstand(sortiert))
         .replace("<<ZEITSTEMPEL>>", zeitstempel)
-        .replace("<<ANZAHL_QUELLEN>>", str(anzahl_quellen))
+        .replace("<<ANZAHL_BENCHMARK>>", str(mit_benchmark))
         .replace("<<ANZAHL>>", str(len(sortiert)))
         .replace("<<DURCHSCHNITT>>", mittlere_abweichung(sortiert))
         .replace("<<TABS>>", baue_tabs(sortiert))
-        .replace("<<KARTEN>>", karten)
+        .replace("<<KARTEN>>", "\n".join(baue_karte(e) for e in sortiert))
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
         .replace("<<REPO_URL>>", REPO_URL)
     )
@@ -1188,12 +1180,10 @@ def main():
         )
         sys.exit(1)
 
-    # Bauzeit in UTC. Die Action baut direkt nach dem Abruf, der Stempel steht
-    # also fuer den Datenstand.
+    # Bauzeit in UTC, direkt nach dem Abruf - der Stempel steht damit fuer den
+    # Datenstand, nicht nur fuer den Zeitpunkt des Seitenbaus.
     zeitstempel = datetime.now(timezone.utc).strftime("%d %B %Y, %H:%M UTC")
-
-    aufgeloest = baue_aufgeloeste_daten()
-    seite = baue_seite(eintraege, aufgeloest, zeitstempel)
+    seite = baue_seite(eintraege, zeitstempel)
 
     AUSGABE_ORDNER.mkdir(exist_ok=True)
     with open(AUSGABE_DATEI, "w", encoding="utf-8") as datei:

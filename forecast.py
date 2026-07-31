@@ -464,8 +464,9 @@ def main():
                   file=sys.stderr)
             continue
 
-        # Wir speichern die id mit, damit evaluate.py spaeter die Marktquote
-        # ueber die id wieder zuordnen kann. Die Quote selbst bleibt hier weg.
+        # Wir speichern die id mit, damit build_site.py spaeter die
+        # Vergleichszahl ueber die id wieder zuordnen kann. Die Zahl selbst
+        # bleibt hier weg - sie darf nie in die Naehe des Prompts geraten.
         # Beide Modelle liegen unter "forecasts", damit ein drittes spaeter
         # ohne Schema-Aenderung dazukommen kann.
         forecasts.append({
@@ -488,7 +489,7 @@ def main():
         print(f"{uebernommen} Prognose(n) aus dem letzten Lauf uebernommen.")
 
     # Nie eine leere Datei schreiben: das wuerde den letzten guten Stand
-    # zerstoeren und evaluate.py sowie build_site.py ins Leere laufen lassen.
+    # zerstoeren und build_site.py ins Leere laufen lassen.
     if not forecasts:
         print(f"Fehler: keine einzige Prognose vorhanden. {FORECASTS_DATEI} "
               f"wird NICHT ueberschrieben.", file=sys.stderr)
