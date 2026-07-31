@@ -281,13 +281,15 @@ h1 {
 }
 @media (prefers-color-scheme: dark) { .warnung { color: #e0a163; } }
 
+/* Ohne max-width: die Trennlinie soll wie die Linie unter der Kopfzeile ueber
+   die ganze Spalte laufen. Mit 68ch endete sie auf halber Strecke und sah aus,
+   als waere die Seite dort zu Ende. */
 footer {
   margin-top: 3rem;
   padding-top: 1.4rem;
   border-top: 1px solid var(--tinte);
-  font-size: .82rem;
+  font-size: .84rem;
   color: var(--matt);
-  max-width: 68ch;
   line-height: 1.65;
 }
 footer a { color: var(--link); text-decoration: none; }
@@ -961,7 +963,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
 <p>Forecasts come from Claude (<code>claude-sonnet-5</code>) and ChatGPT (<code>gpt-5.6-luna</code>). Both receive the same question, the same
 resolution criteria and the same web-search tool, with prediction-market sites
 blocked. The benchmark is never passed into the prompt.</p>
-<p>Benchmarks from Polymarket &middot; last updated 31 July 2026, 17:16 UTC &middot;
+<p>Benchmarks from Polymarket &middot; last updated 31 July 2026, 17:20 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source code and method</a></p>
 </footer>
 

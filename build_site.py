@@ -392,13 +392,15 @@ h1 {
 }
 @media (prefers-color-scheme: dark) { .warnung { color: #e0a163; } }
 
+/* Ohne max-width: die Trennlinie soll wie die Linie unter der Kopfzeile ueber
+   die ganze Spalte laufen. Mit 68ch endete sie auf halber Strecke und sah aus,
+   als waere die Seite dort zu Ende. */
 footer {
   margin-top: 3rem;
   padding-top: 1.4rem;
   border-top: 1px solid var(--tinte);
-  font-size: .82rem;
+  font-size: .84rem;
   color: var(--matt);
-  max-width: 68ch;
   line-height: 1.65;
 }
 footer a { color: var(--link); text-decoration: none; }
