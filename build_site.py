@@ -292,21 +292,13 @@ h1 {
   margin-bottom: .55rem;
 }
 .meta .trenner { opacity: .45; }
+/* Duenn gehandelter Markt: der Preis daneben ruht auf wenig Umsatz. Bewusst
+   nicht in der Warnfarbe - es ist kein Fehler, sondern eine Eigenschaft, die
+   man beim Lesen kennen soll. */
+.meta .duenn { color: #a8580a; }
+@media (prefers-color-scheme: dark) { .meta .duenn { color: #e0a163; } }
 .meta .kat { color: var(--tinte-weich); }
 .meta .datum { margin-left: auto; white-space: nowrap; }
-
-.quelle { margin: -.75rem 0 1.1rem; }
-.quelle a {
-  font-family: var(--mono);
-  font-size: .66rem;
-  text-transform: uppercase;
-  letter-spacing: .09em;
-  color: var(--matt);
-  text-decoration: none;
-  border-bottom: 1px solid var(--linie);
-  padding-bottom: .1rem;
-}
-.quelle a:hover { color: var(--tinte); border-bottom-color: var(--tinte); }
 
 .frage {
   font-size: 1.17rem;
@@ -488,10 +480,10 @@ KARTEN_VORLAGE = """<li class="eintrag" data-category="<<KATEGORIE>>">
       <span><<QUELLE>></span>
       <span class="trenner">/</span>
       <span><<LAND>></span>
+<<VOLUMEN>>
       <span class="datum">Resolves <<DATUM>></span>
     </div>
     <h2 class="frage"><<FRAGE>></h2>
-<<QUELLLINK>>
     <div class="zahlen">
 <<BENCHMARK_BLOCK>>
 <<AI_BLOCK>>
@@ -543,12 +535,12 @@ PUNKT_VORLAGE = """      <div class="mk mk-<<SCHLUESSEL>>" style="left: <<POSITI
 
 LEGENDE_VORLAGE = """    <span><i class="strich" style="background: var(--<<FARBE>>)"></i> <<MODELL_NAME>></span>"""
 
-# Link auf die Frage bei der Quelle. Er steht besonders bei Metaculus fuer
-# etwas Konkretes: der Community-Median ist ueber die API gesperrt, auf der
-# verlinkten Seite steht er. Statt eine Zahl abzuschreiben - die sofort
-# veralten wuerde und fremder Inhalt auf unserer Seite waere - fuehrt der Link
-# zum tagesaktuellen Wert an der Quelle.
-QUELLLINK_VORLAGE = """    <p class="quelle"><a href="<<URL>>" target="_blank" rel="noopener noreferrer"><<TEXT>></a></p>"""
+# Handelsvolumen des Markts. Steht auf der Seite, weil die Mindestschwelle
+# niedrig liegt: ein Preis aus 300 Dollar Umsatz sieht genauso aus wie einer
+# aus 167'000, sagt aber etwas voellig anderes. Die Klasse "duenn" markiert
+# die Faelle, bei denen das eine Rolle spielt.
+VOLUMEN_VORLAGE = """      <span class="trenner">/</span>
+      <span class="<<KLASSE>>"><<VOLUMEN_TEXT>></span>"""
 
 # Farbvariable je Prognostiker. Ein nicht eingetragener Schluessel bekommt die
 # neutrale Standardfarbe, statt die Legende unsichtbar zu machen.
@@ -597,6 +589,7 @@ def baue_karten_daten(markets, forecasts):
             "country": markt.get("country", ""),
             "market_p": market_p,
             "resolve_time": markt.get("resolve_time", ""),
+            "volume": markt.get("volume", 0.0),
             "url": markt.get("url", ""),
             "modelle": baue_modell_liste(prognose, market_p),
         })
@@ -776,29 +769,43 @@ def baue_skala(eintrag):
     return SKALA_VORLAGE.replace("<<PUNKTE>>", markierungen)
 
 
-def baue_quelllink(eintrag):
-    """Baut den Link auf die Frage bei der Quelle, oder leeren Text.
+# Ab welchem Umsatz ein Markt als belastbar gilt. Kein Ausschluss - nur die
+# Grenze, ab der die Zahl auf der Seite hervorgehoben wird. Der Wert liegt in
+# der Luecke der beobachteten Verteilung (vier Fragen um 1'400 bis 2'100,
+# darueber erst wieder ab 11'000).
+DUENN_AB = 3000
 
-    Der Text nennt den Grund, dort hinzugehen, und der haengt am
-    benchmark_type: bei Metaculus liegt hinter dem Link der Community-Median,
-    den unsere Zugriffsstufe nicht ausliefert. Bei einem Geldmarkt ist es der
-    Kursverlauf. "Siehe Quelle" waere in beiden Faellen richtig und in keinem
-    hilfreich.
 
-    Ohne url gibt es keinen Link - ein geratener fuehrte ins Leere.
+def baue_volumen(eintrag):
+    """Zeigt das Handelsvolumen eines Geldmarkts, sonst leeren Text.
+
+    Nur fuer market_price: bei einem Community-Median waere "USD" schlicht
+    falsch, dort zaehlen Prognostiker und keine Dollar.
+
+    Unter DUENN_AB bekommt die Angabe eine eigene Klasse. Ohne sie stuende
+    eine Quote aus 300 Dollar Umsatz optisch gleichwertig neben einer aus
+    167'000, und der Leser haette keine Moeglichkeit, das zu bemerken.
     """
-    if not eintrag.get("url"):
+    if eintrag["benchmark_type"] != "market_price":
         return ""
 
-    if eintrag["benchmark_type"] == "community_forecast":
-        text = "Community forecast on Metaculus"
+    volumen = eintrag.get("volume") or 0
+    if volumen <= 0:
+        return ""
+
+    # Erst ab 10'000 auf Tausender runden. Darunter steht die genaue Zahl:
+    # "USD 3k traded" neben der Duenn-Markierung sah aus wie ein Fehler, weil
+    # 2'999 und 3'400 beide als "3k" erscheinen, aber auf verschiedenen Seiten
+    # der Schwelle liegen.
+    if volumen >= 10000:
+        text = f"USD {round(volumen / 1000):,}k traded"
     else:
-        text = f"Price history on {quellen_name(eintrag['source'])}"
+        text = f"USD {round(volumen):,} traded"
 
     return (
-        QUELLLINK_VORLAGE
-        .replace("<<URL>>", html.escape(eintrag["url"], quote=True))
-        .replace("<<TEXT>>", html.escape(text))
+        VOLUMEN_VORLAGE
+        .replace("<<KLASSE>>", "duenn" if volumen < DUENN_AB else "")
+        .replace("<<VOLUMEN_TEXT>>", html.escape(text))
     )
 
 
@@ -821,9 +828,9 @@ def baue_karte(eintrag, nummer):
         .replace("<<KATEGORIE>>", html.escape(eintrag["category"]))
         .replace("<<QUELLE>>", html.escape(quellen_name(eintrag["source"])))
         .replace("<<LAND>>", html.escape(land))
+        .replace("<<VOLUMEN>>", baue_volumen(eintrag))
         .replace("<<DATUM>>", html.escape(formatiere_datum(eintrag["resolve_time"])))
         .replace("<<FRAGE>>", html.escape(eintrag["question"]))
-        .replace("<<QUELLLINK>>", baue_quelllink(eintrag))
         .replace("<<BENCHMARK_BLOCK>>", baue_benchmark_block(eintrag))
         .replace("<<AI_BLOCK>>", "\n".join(baue_ai_block(m) for m in eintrag["modelle"]))
         .replace("<<SKALA>>", baue_skala(eintrag))

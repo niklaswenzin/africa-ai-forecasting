@@ -181,21 +181,13 @@ h1 {
   margin-bottom: .55rem;
 }
 .meta .trenner { opacity: .45; }
+/* Duenn gehandelter Markt: der Preis daneben ruht auf wenig Umsatz. Bewusst
+   nicht in der Warnfarbe - es ist kein Fehler, sondern eine Eigenschaft, die
+   man beim Lesen kennen soll. */
+.meta .duenn { color: #a8580a; }
+@media (prefers-color-scheme: dark) { .meta .duenn { color: #e0a163; } }
 .meta .kat { color: var(--tinte-weich); }
 .meta .datum { margin-left: auto; white-space: nowrap; }
-
-.quelle { margin: -.75rem 0 1.1rem; }
-.quelle a {
-  font-family: var(--mono);
-  font-size: .66rem;
-  text-transform: uppercase;
-  letter-spacing: .09em;
-  color: var(--matt);
-  text-decoration: none;
-  border-bottom: 1px solid var(--linie);
-  padding-bottom: .1rem;
-}
-.quelle a:hover { color: var(--tinte); border-bottom-color: var(--tinte); }
 
 .frage {
   font-size: 1.17rem;
@@ -308,7 +300,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
 <div class="wrap">
 
 <header class="top">
-  <p class="kicker">Prediction markets &middot; Large language models &middot; 11 open questions</p>
+  <p class="kicker">Prediction markets &middot; Large language models &middot; 15 open questions</p>
   <h1>Can AI forecast African economics and politics?</h1>
   <p class="lede">Two language models estimate the probability of open questions
   on African economies and governments. Neither ever sees the market price it is
@@ -323,10 +315,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
 </header>
 
 <div class="leiste">
-  <nav class="tabs"><button class="tab active" data-filter="all">All<span class="zahl">11</span></button>
-<button class="tab" data-filter="elections">Elections<span class="zahl">5</span></button>
+  <nav class="tabs"><button class="tab active" data-filter="all">All<span class="zahl">15</span></button>
+<button class="tab" data-filter="elections">Elections<span class="zahl">8</span></button>
 <button class="tab" data-filter="security">Security<span class="zahl">1</span></button>
 <button class="tab" data-filter="diplomacy">Diplomacy<span class="zahl">4</span></button>
+<button class="tab" data-filter="economy">Economy<span class="zahl">1</span></button>
 <button class="tab" data-filter="other">Other<span class="zahl">1</span></button></nav>
   <span class="sortnote">Ordered by resolution date</span>
 </div>
@@ -341,14 +334,77 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Zambia</span>
+      <span class="trenner">/</span>
+      <span class="duenn">USD 2,543 traded</span>
       <span class="datum">Resolves 13 Aug 2026</span>
     </div>
     <h2 class="frage">Will UPND win the most seats in the 2026 Zambia National Assembly Election?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/zambia-national-assembly-election-party-winner-20260715200607239" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
-        <span class="v">97%</span>
+        <span class="v">96%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
+
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">02</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Zambia</span>
+      <span class="trenner">/</span>
+      <span class="duenn">USD 777 traded</span>
+      <span class="datum">Resolves 13 Aug 2026</span>
+    </div>
+    <h2 class="frage">Will NRPUP win the second-most seats in the 2026 Zambia National Assembly Election?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">95%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
+
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">03</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Guinea-Bissau</span>
+      <span class="trenner">/</span>
+      <span class="duenn">USD 773 traded</span>
+      <span class="datum">Resolves 30 Aug 2026</span>
+    </div>
+    <h2 class="frage">Will the 2026 Guinea-Bissau constitutional referendum pass?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">90%</span>
       </div>
       <div class="z z-claude">
         <span class="k">Claude</span>
@@ -363,7 +419,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="diplomacy">
-  <div class="nummer">02</div>
+  <div class="nummer">04</div>
   <div>
     <div class="meta">
       <span class="kat">Diplomacy</span>
@@ -371,10 +427,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Egypt</span>
+      <span class="trenner">/</span>
+      <span class="">USD 54k traded</span>
       <span class="datum">Resolves 30 Sep 2026</span>
     </div>
     <h2 class="frage">Will the next diplomatic US-Iran meeting be in Egypt by September 30, 2026?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/where-will-the-next-next-round-of-us-iran-peace-talks-beptptpt-20260623023740663" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -393,7 +450,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="diplomacy">
-  <div class="nummer">03</div>
+  <div class="nummer">05</div>
   <div>
     <div class="meta">
       <span class="kat">Diplomacy</span>
@@ -401,10 +458,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Somaliland</span>
+      <span class="trenner">/</span>
+      <span class="">USD 168k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Trump recognize Somaliland before 2027?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/will-trump-recognize-somaliland-before-2027" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -423,7 +481,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="elections">
-  <div class="nummer">04</div>
+  <div class="nummer">06</div>
   <div>
     <div class="meta">
       <span class="kat">Elections</span>
@@ -431,10 +489,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Morocco</span>
+      <span class="trenner">/</span>
+      <span class="">USD 167k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/aziz-akhannouch-out-as-morocco-prime-minister-by-december-31-2026" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -464,7 +523,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="diplomacy">
-  <div class="nummer">05</div>
+  <div class="nummer">07</div>
   <div>
     <div class="meta">
       <span class="kat">Diplomacy</span>
@@ -472,14 +531,15 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Somaliland</span>
+      <span class="trenner">/</span>
+      <span class="">USD 105k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Somaliland join the Abraham Accords before 2027?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/which-country-will-join-abraham-accords-before-2027" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
-        <span class="v">21%</span>
+        <span class="v">22%</span>
       </div>
       <div class="z z-claude">
         <span class="k">Claude</span>
@@ -497,7 +557,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <div class="tick" style="left: 25%"></div>
       <div class="tick" style="left: 50%"></div>
       <div class="tick" style="left: 75%"></div>
-      <div class="mk mk-bench" style="left: 21.0%" title="Market 21%"></div>
+      <div class="mk mk-bench" style="left: 21.5%" title="Market 22%"></div>
       <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
       <div class="mk mk-openai" style="left: 72.0%" title="ChatGPT 72%"></div>
     </div>
@@ -505,7 +565,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="elections">
-  <div class="nummer">06</div>
+  <div class="nummer">08</div>
   <div>
     <div class="meta">
       <span class="kat">Elections</span>
@@ -513,10 +573,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Somaliland</span>
+      <span class="trenner">/</span>
+      <span class="">USD 84k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will there be no Somaliland parliamentary election before 2027?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/somaliland-parliamentary-election-winner" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -546,7 +607,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="elections">
-  <div class="nummer">07</div>
+  <div class="nummer">09</div>
   <div>
     <div class="meta">
       <span class="kat">Elections</span>
@@ -554,10 +615,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Congo</span>
+      <span class="trenner">/</span>
+      <span class="">USD 15k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Nguesso out as President of the Republic of the Congo by December 31, 2026?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/nguesso-out-as-president-of-the-republic-of-the-congo-by-end-of-2026" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -587,7 +649,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="other">
-  <div class="nummer">08</div>
+  <div class="nummer">10</div>
   <div>
     <div class="meta">
       <span class="kat">Other</span>
@@ -595,14 +657,15 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Congo</span>
+      <span class="trenner">/</span>
+      <span class="">USD 11k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will the Republic of the Congo have an Ebola case in 2026?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/which-countries-will-have-an-ebola-case-in-2026" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
-        <span class="v">16%</span>
+        <span class="v">15%</span>
       </div>
       <div class="z z-claude">
         <span class="k">Claude</span>
@@ -620,7 +683,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <div class="tick" style="left: 25%"></div>
       <div class="tick" style="left: 50%"></div>
       <div class="tick" style="left: 75%"></div>
-      <div class="mk mk-bench" style="left: 16.0%" title="Market 16%"></div>
+      <div class="mk mk-bench" style="left: 15.0%" title="Market 15%"></div>
       <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
       <div class="mk mk-openai" style="left: 6.0%" title="ChatGPT 6%"></div>
     </div>
@@ -628,7 +691,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="security">
-  <div class="nummer">09</div>
+  <div class="nummer">11</div>
   <div>
     <div class="meta">
       <span class="kat">Security</span>
@@ -636,14 +699,46 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Sudan</span>
+      <span class="trenner">/</span>
+      <span class="duenn">USD 1,576 traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Sudan civil war ceasefire by December 31, 2026?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/sudan-civil-war-ceasefire-by" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
-        <span class="v">24%</span>
+        <span class="v">26%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
+
+  </div>
+</li>
+<li class="eintrag" data-category="economy">
+  <div class="nummer">12</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Economy</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>South Africa</span>
+      <span class="trenner">/</span>
+      <span class="duenn">USD 424 traded</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">U.S. agrees to a new trade deal with &quot;South Africa&quot; before 2027?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">12%</span>
       </div>
       <div class="z z-claude">
         <span class="k">Claude</span>
@@ -658,7 +753,7 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="diplomacy">
-  <div class="nummer">10</div>
+  <div class="nummer">13</div>
   <div>
     <div class="meta">
       <span class="kat">Diplomacy</span>
@@ -666,10 +761,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Tunisia</span>
+      <span class="trenner">/</span>
+      <span class="">USD 12k traded</span>
       <span class="datum">Resolves 31 Dec 2026</span>
     </div>
     <h2 class="frage">Will Tunisia recognize Israel by December 31?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/which-countries-will-recognize-israel-by-december-31" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -688,7 +784,38 @@ footer code { font-family: var(--mono); font-size: .93em; }
   </div>
 </li>
 <li class="eintrag" data-category="elections">
-  <div class="nummer">11</div>
+  <div class="nummer">14</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Mali</span>
+      <span class="trenner">/</span>
+      <span class="duenn">USD 675 traded</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">Will Assimi Goïta be out as President of Mali by December 31, 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">14%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
+
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">15</div>
   <div>
     <div class="meta">
       <span class="kat">Elections</span>
@@ -696,10 +823,11 @@ footer code { font-family: var(--mono); font-size: .93em; }
       <span>Polymarket</span>
       <span class="trenner">/</span>
       <span>Nigeria</span>
+      <span class="trenner">/</span>
+      <span class="">USD 52k traded</span>
       <span class="datum">Resolves 16 Jan 2027</span>
     </div>
     <h2 class="frage">Will Bola Tinubu win the 2027 Nigerian Presidential Election?</h2>
-    <p class="quelle"><a href="https://polymarket.com/event/nigerian-presidential-election-winner-20260602162945585" target="_blank" rel="noopener noreferrer">Price history on Polymarket</a></p>
     <div class="zahlen">
       <div class="z z-bench">
         <span class="k">Market</span>
@@ -727,7 +855,7 @@ blocked. The benchmark is never passed into the prompt.</p>
 median of volunteer forecasts with nothing at risk. The two are labelled
 differently for that reason. Where a benchmark is missing, the community median
 is not available at this account&#39;s access tier.</p>
-<p>Benchmarks from Polymarket &middot; last updated 31 July 2026, 08:31 UTC &middot;
+<p>Benchmarks from Polymarket &middot; last updated 31 July 2026, 08:42 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source code and method</a></p>
 </footer>
 

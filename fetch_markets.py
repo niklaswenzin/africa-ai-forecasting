@@ -58,25 +58,28 @@ AUSGESCHLOSSEN = {
 # uninformativ sein. Eine Metaculus-Frage ohne Community-Median bleibt also
 # unabhaengig von ihrer Beteiligung drin - dort zaehlt nur der Forecast.
 #
-# Polymarket, Einheit ist Handelsvolumen in Dollar. Am vollstaendigen Bestand
-# der 24 offenen Afrika-Fragen gemessen (31.07.2026) gibt es drei Gruppen:
-# neun Fragen ab 11'264, vier zwischen 1'399 und 2'142, und darunter nur noch
-# automatisch erzeugte Serien ("Will <Land> have an Ebola case in 2026?") mit
-# 24 bis 772 Dollar. Bei 24 Dollar Gesamtvolumen bewegt ein einziger
-# Kleinsttrade den Preis - das ist keine Marktmeinung.
+# Polymarket, Einheit ist Handelsvolumen in Dollar. Der Wert lag zuerst bei
+# 5'000, dann 1'200 und jetzt bei 250 - jede Senkung war eine Entscheidung
+# gegen Sauberkeit und fuer Anzahl, weil es zu Afrika schlicht wenige Fragen
+# mit Preis gibt.
 #
-# 1'200 liegt in der Luecke zwischen der zweiten und der dritten Gruppe. Der
-# Wert war zuvor 5'000 und schnitt damit auch die mittlere Gruppe weg,
-# darunter "Sudan civil war ceasefire by December 31, 2026?" - inhaltlich
-# eine der relevantesten Fragen des Projekts. Der Preis dieser vier Fragen
-# ruht auf duennem Handel und ist entsprechend vorsichtig zu lesen.
+# Die Verteilung der offenen Afrika-Fragen (31.07.2026): neun ab 11'264,
+# vier zwischen 1'399 und 2'142, der Rest zwischen 24 und 1'141. Bei 250
+# fallen nur noch die aeussersten weg. Ein Preis aus 300 Dollar Umsatz steht
+# dort, wo zufaellig zuletzt jemand gehandelt hat, und ist keine
+# Marktmeinung.
+#
+# Der Ausgleich dafuer steht auf der Seite: jede Frage zeigt ihr
+# Handelsvolumen. Wer "1%" neben "300 USD traded" sieht, kann den Wert selbst
+# einordnen - das ist ehrlicher, als die Frage stillschweigend wegzulassen
+# oder den duennen Preis wortlos wie einen belastbaren zu zeigen.
 #
 # Metaculus, Einheit ist Zahl der Prognostiker. Der Wert ist VORLAEUFIG und
 # ungetestet: solange der Community-Median gesperrt ist, greift die Regel dort
 # nie. Beobachtete Beteiligung liegt bei 0 bis 144 (Median 9). Sobald die
 # Zugriffsstufe steht, gehoert er an echten Daten geprueft.
 MIN_LIQUIDITAET = {
-    "polymarket": 1200,
+    "polymarket": 250,
     "metaculus": 15,
 }
 
@@ -666,6 +669,11 @@ def baue_eintrag(frage):
         "resolve_time": frage.get("resolve_time", ""),
         "description": frage.get("description", ""),
         "url": frage.get("url", ""),
+        # Handelsvolumen kommt mit auf die Seite. Die Schwelle liegt niedrig,
+        # damit moeglichst viele Fragen mit Zahl erscheinen; dann muss aber
+        # sichtbar sein, worauf ein Preis ruht. 24 Dollar Umsatz neben "1%" zu
+        # zeigen ist ehrlicher, als die Frage stillschweigend wegzulassen.
+        "volume": frage.get("volume", 0.0),
     }
 
 

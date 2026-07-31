@@ -12,7 +12,8 @@
     "event_title": "Will Trump recognize Somaliland before 2027?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if the United States formally recognizes the Republic of Somaliland as a sovereign state by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nOnly formal recognition of Somaliland will qualify. Statements/actions which acknowledge the Republic of Somaliland, or change its diplomatic status with the U.S. but do not formally recognize the country as a sovereign state will not qualify.\n\nThe primary resolution source for this market will be official information from the government of the United States, however a consensus of credible reporting will also be used.",
-    "url": "https://polymarket.com/event/will-trump-recognize-somaliland-before-2027"
+    "url": "https://polymarket.com/event/will-trump-recognize-somaliland-before-2027",
+    "volume": 167648.53183699996
   },
   {
     "id": "polymarket-620335",
@@ -27,13 +28,14 @@
     "event_title": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to “Yes” if Aziz Akhannouch ceases to be Prime Minister of Morocco for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Aziz Akhannouch's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes into effect.\n\nIf the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.\n\nThe resolution source for this market will be official information from Aziz Akhannouch and the government of Morocco; however, a consensus of credible reporting may also be used.",
-    "url": "https://polymarket.com/event/aziz-akhannouch-out-as-morocco-prime-minister-by-december-31-2026"
+    "url": "https://polymarket.com/event/aziz-akhannouch-out-as-morocco-prime-minister-by-december-31-2026",
+    "volume": 166679.88904100007
   },
   {
     "id": "polymarket-1076686",
     "source": "polymarket",
     "question": "Will Somaliland join the Abraham Accords before 2027?",
-    "market_p": 0.21,
+    "market_p": 0.215,
     "benchmark_type": "market_price",
     "africa": true,
     "country": "Somaliland",
@@ -42,7 +44,8 @@
     "event_title": "Which country will join Abraham Accords before 2027?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if the listed country formally signs a normalization agreement with Israel under the framework of the Abraham Accords by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nA formal signing refers to an official agreement between Israel and another country that is publicly acknowledged by both governments and clearly attributed to the Abraham Accords or their continuation.\n\nThe resolution source will be official government statements, however a consensus for credible reporting may also be used.",
-    "url": "https://polymarket.com/event/which-country-will-join-abraham-accords-before-2027"
+    "url": "https://polymarket.com/event/which-country-will-join-abraham-accords-before-2027",
+    "volume": 105294.67375499998
   },
   {
     "id": "polymarket-948391",
@@ -57,7 +60,8 @@
     "event_title": "Somaliland Parliamentary Election Winner",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.\n\nThis market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. \n\nIf no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to \"No election before 2027\".\n\nIf an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to \"Other\".\n\nIn the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.\n\nThis market's resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. \n\nThis market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net).",
-    "url": "https://polymarket.com/event/somaliland-parliamentary-election-winner"
+    "url": "https://polymarket.com/event/somaliland-parliamentary-election-winner",
+    "volume": 84367.307965
   },
   {
     "id": "polymarket-2420428",
@@ -72,7 +76,8 @@
     "event_title": "Nigerian Presidential Election Winner",
     "resolve_time": "2027-01-16T17:00:00Z",
     "description": "Presidential elections are scheduled to be held in Nigeria on January 16, 2027.\n\nThis market will resolve according to the listed candidate who wins the 2027 Nigerian presidential election. \n\nThis market includes any potential second round. \n\nIf the results are not known definitively by October 31, 2027, 11:59 PM ET, this market will resolve to \"Other\".\n\nThis market will resolve based on the results of this election, as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve solely based on official results as reported by Nigerian government sources, including the Independent National Electoral Commission (https://www.inecnigeria.org/).",
-    "url": "https://polymarket.com/event/nigerian-presidential-election-winner-20260602162945585"
+    "url": "https://polymarket.com/event/nigerian-presidential-election-winner-20260602162945585",
+    "volume": 52000.164756999984
   },
   {
     "id": "polymarket-921660",
@@ -87,7 +92,8 @@
     "event_title": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Denis Sassou Nguesso's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes into effect.\n\nIf the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.\n\nThe resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used.",
-    "url": "https://polymarket.com/event/nguesso-out-as-president-of-the-republic-of-the-congo-by-end-of-2026"
+    "url": "https://polymarket.com/event/nguesso-out-as-president-of-the-republic-of-the-congo-by-end-of-2026",
+    "volume": 15414.279564000004
   },
   {
     "id": "polymarket-2412368",
@@ -102,13 +108,14 @@
     "event_title": "Which countries will recognize Israel by December 31?",
     "resolve_time": "2026-12-31T17:00:00Z",
     "description": "This market will resolve to \"Yes\" if the listed country officially recognizes Israel as a state between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to “No”.\n\nAn announcement of intentions will not suffice to resolve this market to \"Yes.\" Only a government's formal recognition of the State of Israel will count toward a “Yes” resolution for this market.\n\nThe primary resolution source for this market will be official government information. However, a consensus of credible reporting will also be used.",
-    "url": "https://polymarket.com/event/which-countries-will-recognize-israel-by-december-31"
+    "url": "https://polymarket.com/event/which-countries-will-recognize-israel-by-december-31",
+    "volume": 11704.767085000076
   },
   {
     "id": "polymarket-2326375",
     "source": "polymarket",
     "question": "Will the Republic of the Congo have an Ebola case in 2026?",
-    "market_p": 0.16,
+    "market_p": 0.15,
     "benchmark_type": "market_price",
     "africa": true,
     "country": "Congo",
@@ -117,13 +124,14 @@
     "event_title": "Which countries will have an Ebola case in 2026?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nAny active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.\n\nThe primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice.",
-    "url": "https://polymarket.com/event/which-countries-will-have-an-ebola-case-in-2026"
+    "url": "https://polymarket.com/event/which-countries-will-have-an-ebola-case-in-2026",
+    "volume": 11264.955047999998
   },
   {
     "id": "polymarket-994859",
     "source": "polymarket",
     "question": "Sudan civil war ceasefire by December 31, 2026?",
-    "market_p": 0.245,
+    "market_p": 0.255,
     "benchmark_type": "market_price",
     "africa": true,
     "country": "Sudan",
@@ -132,13 +140,78 @@
     "event_title": "Sudan civil war ceasefire by...?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if there is an official ceasefire agreement, defined as a publicly announced and mutually agreed halt in military engagement, between the Rapid Support Forces (RSF) and the Sudanese Armed Forces (SAF) by the listed date, 11:59 PM ET.\n\nIf the agreement is officially reached before the resolution date, this market will resolve to \"Yes,\" regardless of whether the ceasefire officially starts afterward.\n\nAny form of informal agreement will not be considered an official ceasefire. Humanitarian pauses will not count toward the resolution of this market.\n\nA peace deal or political framework will qualify if it includes a publicly announced and mutually agreed halt in military engagement, effective on a specific date. Frameworks or agreements that outline terms for a future peace but do not include an explicit, dated commitment to stop fighting will not count.\n\nThis market's resolution will be based on official announcements from both the Rapid Support Forces and the Sudanese Armed Forces; however, a wide consensus of credible media reporting stating an official ceasefire agreement between the Rapid Support Forces and the Sudanese Armed Forces has been reached will suffice.",
-    "url": "https://polymarket.com/event/sudan-civil-war-ceasefire-by"
+    "url": "https://polymarket.com/event/sudan-civil-war-ceasefire-by",
+    "volume": 1576.4113129999996
+  },
+  {
+    "id": "polymarket-3081842",
+    "source": "polymarket",
+    "question": "Will NRPUP win the second-most seats in the 2026 Zambia National Assembly Election?",
+    "market_p": 0.9495,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Zambia",
+    "category": "elections",
+    "event_id": "polymarket-743521",
+    "event_title": "Zambia National Assembly Election: 2nd Place",
+    "resolve_time": "2026-08-13T23:59:00Z",
+    "description": "Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.\n\nThis market will resolve to the political party that wins the second-highest number of seats in the National Assembly of Zambia as a result of this election.\n\nThe number of seats will include all members of the National Assembly of Zambia serving as a result of this election, including appointed members and those elected by proportional representation.\n\nIf the results of the specified election are not definitively known by July 31, 2027, this market will resolve to \"Other\".\n\nThe named parties will be primarily ranked by the number of seats won in the specified election. If two or more parties are tied on seats, ties will be broken by the total number of valid votes received by each party’s candidates, with higher vote totals ranking higher. If parties remain tied, ties will be broken by alphabetical order of the listed party abbreviations. This market will resolve to the party that occupies the second finishing position after applying this ranking.\n\nA constituency-elected member will count towards the party they registered to contest the election with. A member elected by proportional representation will count towards the party whose list they were elected from. A member appointed by the President will count towards the party of their personal affiliation if such affiliation is clear. If their affiliation is ambiguous or unclear, they will count towards the party of the President.\n\nThis market's resolution will be based solely on the number of seats won by the named party. Independents will not count towards any party.\n\nThis market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government.",
+    "url": "https://polymarket.com/event/zambia-national-assembly-election-2nd-place-20260722145521018",
+    "volume": 776.5359880000002
+  },
+  {
+    "id": "polymarket-3073397",
+    "source": "polymarket",
+    "question": "Will the 2026 Guinea-Bissau constitutional referendum pass?",
+    "market_p": 0.905,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Guinea-Bissau",
+    "category": "elections",
+    "event_id": "polymarket-741020",
+    "event_title": "Guinea-Bissau Constitutional Referendum",
+    "resolve_time": "2026-08-30T23:59:00Z",
+    "description": "This market will resolve according to the outcome of the 2026 Guinea-Bissau constitutional referendum, currently scheduled to be held on August 30, 2026.\n\nIf the referendum occurs and results are known definitively by December 31, 2026, 11:59 PM ET, and the proposed constitution is approved, meeting any turnout quorum or other threshold legally required for the referendum to pass, this market will resolve to \"Passes.\"\n\nIf the referendum occurs and results are known definitively by December 31, 2026, 11:59 PM ET, and the proposed constitution is rejected by voters, or the referendum fails to meet any turnout quorum or other threshold legally required for the referendum to pass, this market will resolve to \"Fails.\"\n\nIf no constitutional referendum occurs in Guinea-Bissau by December 31, 2026, 11:59 PM ET, this market will resolve to \"No Referendum in 2026.\"\n\nIf the referendum occurs by December 31, 2026, 11:59 PM ET, but the results are not known definitively by that time, this market will resolve to \"Other.\"\n\nFor the purposes of this market, \"quorum\" refers to whatever participation or approval threshold, if any, is required under Guinea-Bissau's applicable law or the transitional authorities' referendum framework for the new constitution to enter into force. If no quorum requirement applies, resolution will be based solely on whether the affirmative vote prevails.\n\nThe primary resolution source will be a consensus of credible reporting. If there exists any ambiguity, this market will resolve solely according to official information from the entity responsible for conducting the referendum, including Guinea-Bissau's transitional authorities and electoral bodies (e.g., the National Electoral Commission or its successor under the military-led transitional government).",
+    "url": "https://polymarket.com/event/guinea-bissau-constitutional-referendum-20260723190646078",
+    "volume": 772.746513
+  },
+  {
+    "id": "polymarket-2871641",
+    "source": "polymarket",
+    "question": "Will Assimi Goïta be out as President of Mali by December 31, 2026?",
+    "market_p": 0.14,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Mali",
+    "category": "elections",
+    "event_id": "polymarket-688443",
+    "event_title": "Assimi Goïta out as President of Mali by...?",
+    "resolve_time": "2026-12-31T23:59:00Z",
+    "description": "This market resolves to “Yes” if Assimi Goïta’s departure as President of Mali is officially announced by the specified date, 11:59 PM ET. Otherwise, this market will resolve to “No”.\n\nThe departure will be considered to be announced when Assimi Goïta, the Government of Mali, or their authorized representatives publicly and definitively announce that Goïta has ceased or will cease to hold the position of President of Mali. Such an announcement will qualify regardless of when the specified person formally leaves the position. Announcements of the specified person’s resignation, removal, or departure through other means all qualify.\n\nOnly announcements which are framed as announcing a departure intended to be effective within 18 months of the date of the announcement will qualify (e.g., neither “I will leave office in 2 years,” nor “I will not be in office forever,” would qualify).\n\nAnnouncements of temporary leaves of absence, dated suspensions, indefinite suspensions, administrative leaves, or other temporary changes to the specified person’s duties in the specified position do not qualify.\n\nThe following do not qualify as public and definitive announcements: statements that the specified person is considering or open to departing; conditional statements that the specified person will depart only if certain conditions are met; the announcement of an offer of resignation that requires acceptance and remains pending or has been refused; media reports that the specified person plans to depart; statements made in sarcasm or jest; and statements by persons other than the specified person, the relevant authority governing the specified position, or their respective authorized representatives.\n\nIf the specified person holds the specified position on a predefined term with a scheduled end date, only announcements that they will depart the position prior to the scheduled end of their term qualify.\n\nIf the specified person formally ceases to hold the specified position before the end of their scheduled term without a qualifying announcement, the market will resolve to “Yes” if a consensus of credible reporting confirms the departure by the specified date, 11:59 PM ET.\n\nThe primary resolution sources for this market will be official information from Assimi Goïta, and the Government of Mali; however, a consensus of credible reporting may also be used.",
+    "url": "https://polymarket.com/event/assimi-goita-out-as-president-of-mali-byptptpt-20260706205743291",
+    "volume": 674.505384
+  },
+  {
+    "id": "polymarket-666832",
+    "source": "polymarket",
+    "question": "U.S. agrees to a new trade deal with \"South Africa\" before 2027?",
+    "market_p": 0.12,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "South Africa",
+    "category": "economy",
+    "event_id": "polymarket-73951",
+    "event_title": "Which countries will Trump make new trade deals with before 2027?",
+    "resolve_time": "2026-12-31T00:00:00Z",
+    "description": "This market will resolve to \"Yes\" if a free trade agreement with the specified country or entity becomes law in the United States by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nThis includes both agreements that become law through Senate ratification and Presidential approval, or through the enactment of a Congressional-Executive Agreement signed into law by the President.\n\nThe resolution source will be a consensus of credible reporting.",
+    "url": "https://polymarket.com/event/which-countries-will-trump-make-new-trade-deals-with-before-2027-921",
+    "volume": 424.10604400000005
   },
   {
     "id": "polymarket-3081797",
     "source": "polymarket",
     "question": "Will UPND win the most seats in the 2026 Zambia National Assembly Election?",
-    "market_p": 0.966,
+    "market_p": 0.963,
     "benchmark_type": "market_price",
     "africa": true,
     "country": "Zambia",
@@ -147,7 +220,8 @@
     "event_title": "Zambia National Assembly Election: Party Winner",
     "resolve_time": "2026-08-13T03:59:00Z",
     "description": "Parliamentary elections to elect the National Assembly of Zambia are scheduled to take place on August 13, 2026.\n\nThis market will resolve to the political party that wins the greatest number of seats in the National Assembly of Zambia as a result of this election.\n\nThe number of seats will include all members of the National Assembly of Zambia serving as a result of this election, including appointed members and those elected by proportional representation.\n\nIf the results of the specified election are not definitively known by July 31, 2027, this market will resolve to \"Other\".\n\nIn the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party whose name as listed in this market appears first in alphabetical order.\n\nA constituency-elected member will count towards the party they registered to contest the election with. A member elected by proportional representation will count towards the party whose list they were elected from. A member appointed by the President will count towards the party of their personal affiliation if such affiliation is clear. If their affiliation is ambiguous or unclear, they will count towards the party of the President.\n\nThis market's resolution will be based solely on the number of seats won by the named party. Independents will not count towards any party.\n\nThis market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Zambian government.",
-    "url": "https://polymarket.com/event/zambia-national-assembly-election-party-winner-20260715200607239"
+    "url": "https://polymarket.com/event/zambia-national-assembly-election-party-winner-20260715200607239",
+    "volume": 2542.6749640000007
   },
   {
     "id": "polymarket-2646924",
@@ -162,6 +236,7 @@
     "event_title": "Where will the next next round of US-Iran peace talks be...?",
     "resolve_time": "2026-09-30T23:59:00Z",
     "description": "On June 22, the first round of U.S.-Iran diplomatic talks in Switzerland concluded, with mediators reporting progress toward a roadmap for a final deal and follow-on technical talks expected to continue (see: https://www.aljazeera.com/news/2026/6/22/us-iran-agree-on-roadmap-towards-final-deal-in-switzerland-talks).\n\nThis market will resolve according to the country in which the next formal senior-level round of peace talks between representatives of the United States and Iran begins by September 30, 2026, 11:59 PM ET.\n\nA qualifying round must be a deliberate in-person diplomatic meeting or negotiating round concerning US-Iran relations, involving senior representatives of both the United States and Iran who are acting in an official capacity and are authorized to conduct or materially direct diplomacy on behalf of their governments.\n\nIndirect in-person diplomacy through designated mediators, facilitators, or interlocutors will qualify, provided senior representatives of both the United States and Iran are participating in the same formal diplomatic process with the knowledge and authorization of their respective governments. The representatives need not be in the same room at the same time.\n\nFollow-on technical talks from the June 22 Switzerland round will not qualify by themselves. Technical, staff-level, working-group, implementation, monitoring, preparatory, or deconfliction meetings will not qualify unless they occur as part of a new formally convened senior-level U.S.-Iran peace-talks round.\n\nBrief greetings, chance encounters, photo opportunities, ceremonial appearances, or talks not deliberately aimed at diplomacy or negotiation will not count.\n\nThe meeting must be in-person (including indirect in-person meetings) and must be publicly acknowledged by either government or reported by a consensus of credible media. Remote meetings, phone calls, or other meetings where the relevant parties are not present will not count.\n\nIf a qualifying round occurs in more than one country, resolution will be based on the country where the first qualifying senior-level diplomatic session begins.\n\nIf the next qualifying round begins in any country in the Middle East or North Africa other than the listed options, this market will resolve to “Other - Middle East/North Africa.”\n\nIf the next qualifying round begins in any country in Europe other than the listed options, this market will resolve to “Other - Europe.”\n\nFor purposes of this market, countries’ regions will be determined based on the U.S. State Department’s regional classifications in the “Countries and Areas List” (https://www.state.gov/countries-and-areas-list). Any country classified as part of “Europe and Eurasia” will be considered to be in Europe. Any country classified as part of “Near East (Middle East and North Africa)” will be considered to be in the Middle East/North Africa.\n\nIf the next qualifying round begins in any unlisted country that is not classified in either specified region, this market will resolve to “Other.”\n\nIf no qualifying round begins by September 30, 2026, 11:59 PM ET, this market will resolve to “No Meeting by September 30.”\n\nThe resolution sources for this market will be official information from the governments of the United States and Iran, and a consensus of credible reporting.\n",
-    "url": "https://polymarket.com/event/where-will-the-next-next-round-of-us-iran-peace-talks-beptptpt-20260623023740663"
+    "url": "https://polymarket.com/event/where-will-the-next-next-round-of-us-iran-peace-talks-beptptpt-20260623023740663",
+    "volume": 54352.104641000005
   }
 ]
