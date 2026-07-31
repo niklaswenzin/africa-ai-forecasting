@@ -24,6 +24,10 @@ Three scripts, run in order:
 python fetch_markets.py && python forecast.py && python build_site.py
 ```
 
+`forecast.py --nur-fehlende` only queries questions that have no forecast yet.
+Useful when a run is cut short — an exhausted API balance, a network failure —
+and the remainder should be filled in without paying for the finished ones again.
+
 `snapshot.py` is optional and runs after `forecast.py`. It appends the current
 state to `data/history/` so that a later evaluation can score each forecast
 against the information available when it was made. Nothing on the site depends
@@ -95,14 +99,18 @@ and if the contradiction survives, the card carries a visible warning.
 
 These are real and worth stating plainly.
 
-**Forecasts are not stable across runs.** The same question, with the same
-resolution criteria and an essentially unchanged news situation, can produce very
-different estimates. Measured across consecutive runs, Claude moved by 10.7
-percentage points on average and by 37 at most. Neither model accepts a
-temperature parameter, so sampling cannot be constrained; the larger cause is
-that server-side web search returns different results each time, which takes
-effect before sampling does. Averaging several runs per question would address
-this and is not implemented.
+**Forecasts are probably not stable across runs, and this has not been
+re-measured.** The same question, with the same resolution criteria and an
+essentially unchanged news situation, can produce very different estimates.
+Across consecutive runs on Claude Haiku 4.5, the estimate moved by 10.7
+percentage points on average and by 37 at most — and `temperature=0` was set at
+the time, which did nothing to prevent it.
+
+That measurement predates the switch to Sonnet 5 and has not been repeated, so
+the number above describes a model this project no longer uses. Neither current
+model accepts a temperature parameter, and the likely cause is upstream of
+sampling anyway: server-side web search returns different results on every call.
+Averaging several runs per question would address this and is not implemented.
 
 **There is no accuracy score.** Every question shown is still open, so nothing has
 been scored yet. `snapshot.py` records each run to `data/history/`, which is the
@@ -135,18 +143,22 @@ market. Ethiopia's June 2026 election is the clearest case: Abiy Ahmed won, and
 are excluded. A question whose event has already occurred but whose resolution
 date still lies ahead is not caught; the date is the only signal the sources give.
 
-**Minimum liquidity, and it is set low.** A benchmark nobody trades is not a
-benchmark. Across the 24 open African markets, volume falls into three groups:
-nine above 11,000 USD, four between 1,400 and 2,100, and eleven below 800 —
-almost all from one auto-generated series ("Will Nigeria have an Ebola case in
-2026?", 24 USD of total volume). The threshold sits at 1,200 USD, in the gap
-between the second and third group.
+**Minimum liquidity, and it is set deliberately low.** A benchmark nobody
+trades is not a benchmark. The threshold is 250 USD of total volume, which
+excludes almost nothing — it was lowered from 5,000 to 1,200 to 250 in
+successive steps, each time trading cleanliness for question count, because
+Polymarket lists so few African markets.
 
-That is a deliberate trade-off. At 5,000 the dashboard was cleaner but lost
-"Sudan civil war ceasefire by December 31, 2026?" — one of the most relevant
-questions available. Four questions on the page therefore carry a price resting
-on a few thousand dollars of trading, and should be read with that in mind. The
-rule applies only where a benchmark exists.
+What that costs is visible on the page. The fifteen questions span 424 USD to
+168,000 USD of volume; six sit below 3,000. A price resting on 424 USD moves on
+a single small trade and is closer to noise than to a market view. Nothing on
+the page hides this: the volume traded is printed next to every question, and it
+is the first number worth reading.
+
+What it buys is questions that would otherwise be gone. At 5,000 the dashboard
+lost "Sudan civil war ceasefire by December 31, 2026?" — one of the most
+relevant questions available, on 1,576 USD of volume. The rule applies only
+where a benchmark exists.
 
 **The two models are not price-matched.** Claude Sonnet 5 costs 3 USD per million
 input tokens and 15 per million output; the GPT model costs 1 and 6. The
