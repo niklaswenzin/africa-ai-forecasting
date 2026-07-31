@@ -173,7 +173,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 880px; margin: 0 auto; }
+.wrap { max-width: 1060px; margin: 0 auto; }
 
 /* --- Kopf --- */
 header.top { padding: 4rem 0 2.25rem; }
@@ -187,20 +187,25 @@ header.top { padding: 4rem 0 2.25rem; }
   padding-bottom: .75rem;
   border-bottom: 1px solid var(--tinte);
 }
+/* Ueberschrift ohne max-width: sie soll die volle Spaltenbreite einnehmen.
+   Vorher brach sie bei 15ch auf drei Zeilen um und liess rechts eine grosse
+   leere Flaeche stehen. Die Schriftgroesse waechst mit dem Fenster mit, damit
+   die Zeile bis zum Rand traegt statt bei halber Breite zu enden. */
 h1 {
-  font-size: clamp(2rem, 5.2vw, 3.05rem);
-  line-height: 1.06;
-  letter-spacing: -.035em;
+  font-size: clamp(2rem, 6.4vw, 4.1rem);
+  line-height: 1.02;
+  letter-spacing: -.04em;
   font-weight: 620;
-  margin: 0 0 1.1rem;
-  max-width: 15ch;
+  margin: 0 0 1.3rem;
 }
 .lede {
   color: var(--tinte-weich);
   margin: 0;
-  max-width: 56ch;
-  font-size: 1.02rem;
-  line-height: 1.6;
+  /* Ohne Begrenzung, damit der Absatz wie die Ueberschrift die volle
+     Spaltenbreite nutzt. Die Zeile wird dadurch lang; die etwas groessere
+     Schrift und der weitere Zeilenabstand halten sie lesbar. */
+  font-size: 1.12rem;
+  line-height: 1.65;
 }
 
 /* Legende: erklaert das Farbsystem genau einmal */
