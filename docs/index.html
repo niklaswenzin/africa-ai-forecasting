@@ -3,747 +3,1009 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Forecasting: African Economic and Political Development</title>
+<title>AI Forecasting: African Economics and Politics</title>
 <meta name="description" content="Two AI models forecast open questions on African
-politics and economics, shown next to prediction-market prices.">
+economics and politics, shown next to prediction-market prices.">
 <style>
+/* Register statt Kartenraster. Keine Schlagschatten, keine abgerundeten
+   Ecken, keine gefuellten Pillen: Trennung passiert ueber Haarlinien und
+   Weissraum. Alles Zaehlbare - Zahlen, Kuerzel, Datumsangaben - steht in
+   einer Festbreitenschrift, alles Gelesene in einer Grotesk. Das trennt
+   Messwert von Text, ohne dass es dafuer Farbe oder Rahmen braucht. */
 :root {
-  --bg: #fbfbfa;
-  --bg-akzent: #f4f4f2;
-  --card: #ffffff;
-  --text: #14171a;
-  --text-soft: #4b535b;
-  --muted: #7b848d;
-  --line: #e3e5e8;
-  --line-soft: #eeeff1;
-  --link: #1a5fd0;
+  --papier: #fcfcfa;
+  --ton: #f4f4f0;
+  --tinte: #16181a;
+  --tinte-weich: #454a4e;
+  --matt: #767b80;
+  --linie: #dedbd4;
+  --linie-fein: #ebe9e3;
+  --link: #1a4fb8;
 
-  /* Farbe bedeutet WER. Diese drei sind ueber die ganze Seite reserviert und
-     tauchen nirgends in anderer Bedeutung auf. */
-  --bench: #1d2530;      /* Benchmark: Tinte, er ist der Bezugspunkt */
-  --claude: #b8552f;
-  --gpt: #0e8f70;
-  --modell-standard: #6b7280;   /* faengt einen dritten Prognostiker ohne Regel ab */
+  /* Farbe bedeutet WER. Diese drei sind ueber die ganze Seite reserviert. */
+  --bench: #16181a;
+  --claude: #b4552e;
+  --gpt: #0c7f62;
+  --modell-standard: #6f7378;
 
-  --up: #12805c;
-  --down: #c0392b;
-  --flat: #8b949d;
-
-  --schatten: 0 1px 2px rgba(16, 20, 24, .04), 0 2px 8px rgba(16, 20, 24, .04);
-  --schatten-hover: 0 2px 4px rgba(16, 20, 24, .05), 0 8px 24px rgba(16, 20, 24, .09);
-
-  --kat: #64748b;
-  --kat-bg: #eef1f4;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          "Liberation Mono", monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b0d10;
-    --bg-akzent: #12151a;
-    --card: #14181e;
-    --text: #eceff3;
-    --text-soft: #b0b9c3;
-    --muted: #828d99;
-    --line: #242a33;
-    --line-soft: #1b2028;
-    --link: #6ba6ff;
+    --papier: #0c0d0e;
+    --ton: #141618;
+    --tinte: #e9eaeb;
+    --tinte-weich: #aeb3b8;
+    --matt: #838890;
+    --linie: #272a2e;
+    --linie-fein: #1c1f22;
+    --link: #7aa7ff;
 
-    --bench: #dbe2ea;
-    --claude: #e08a5f;
-    --gpt: #35c9a2;
-    --modell-standard: #9aa4b0;
-
-    --up: #3ecf8e;
-    --down: #ff6f61;
-    --flat: #7d8792;
-
-    --schatten: 0 1px 2px rgba(0, 0, 0, .5);
-    --schatten-hover: 0 8px 28px rgba(0, 0, 0, .6);
-
-    --kat: #94a3b8;
-    --kat-bg: #1c232c;
+    --bench: #e9eaeb;
+    --claude: #dd8a5e;
+    --gpt: #35c4a0;
+    --modell-standard: #939aa1;
   }
-}
-
-/* Kategorien: nur eine getoente Pille, keine Kartenfarbe. Sie ordnen ein,
-   sie sind nicht die Aussage der Karte. */
-.cat-elections { --kat: #1f5fd0; --kat-bg: #e9f0fd; }
-.cat-security  { --kat: #b8460c; --kat-bg: #fbeade; }
-.cat-diplomacy { --kat: #6b28c9; --kat-bg: #f0e9fd; }
-.cat-economy   { --kat: #0d6f66; --kat-bg: #e2f2f0; }
-.cat-other     { --kat: #5a6672; --kat-bg: #eef1f4; }
-@media (prefers-color-scheme: dark) {
-  .cat-elections { --kat: #7fb2ff; --kat-bg: #15243a; }
-  .cat-security  { --kat: #fb9a4c; --kat-bg: #331f10; }
-  .cat-diplomacy { --kat: #b195fb; --kat-bg: #241b3d; }
-  .cat-economy   { --kat: #3ad4bd; --kat-bg: #0b2b28; }
-  .cat-other     { --kat: #97a3b0; --kat-bg: #1c232c; }
 }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  padding: 0 1.15rem 4rem;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont,
-               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 0 1.3rem 5rem;
+  background: var(--papier);
+  color: var(--tinte);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
-.wrap { max-width: 1120px; margin: 0 auto; }
+.wrap { max-width: 880px; margin: 0 auto; }
 
 /* --- Kopf --- */
-header.top {
-  padding: 3.25rem 0 2rem;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 1.75rem;
-}
+header.top { padding: 4rem 0 2.25rem; }
 .kicker {
-  font-size: .68rem;
+  font-family: var(--mono);
+  font-size: .69rem;
   text-transform: uppercase;
-  letter-spacing: .16em;
-  font-weight: 600;
-  color: var(--muted);
-  margin: 0 0 .85rem;
+  letter-spacing: .13em;
+  color: var(--matt);
+  margin: 0 0 1.5rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--tinte);
 }
 h1 {
-  /* Serife nur fuer Ueberschrift und Fragetext. Sie trennt den Inhalt
-     sichtbar von der Bedienoberflaeche, die serifenlos bleibt. */
-  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  font-size: clamp(1.85rem, 4.2vw, 2.7rem);
-  line-height: 1.12;
-  letter-spacing: -.018em;
-  font-weight: 600;
-  margin: 0 0 .7rem;
-  max-width: 20ch;
+  font-size: clamp(2rem, 5.2vw, 3.05rem);
+  line-height: 1.06;
+  letter-spacing: -.035em;
+  font-weight: 620;
+  margin: 0 0 1.1rem;
+  max-width: 15ch;
 }
-.sub {
-  color: var(--text-soft);
+.lede {
+  color: var(--tinte-weich);
   margin: 0;
-  max-width: 60ch;
-  font-size: 1rem;
-  line-height: 1.55;
+  max-width: 56ch;
+  font-size: 1.02rem;
+  line-height: 1.6;
 }
 
 /* Legende: erklaert das Farbsystem genau einmal */
 .legende {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.1rem;
-  margin: 1.75rem 0 0;
-  font-size: .8rem;
-  color: var(--text-soft);
+  gap: 1.4rem;
+  margin: 2rem 0 0;
+  font-family: var(--mono);
+  font-size: .715rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--tinte-weich);
 }
-.legende span { display: inline-flex; align-items: center; gap: .42rem; }
-.swatch {
-  width: .68rem;
-  height: .68rem;
-  border-radius: 50%;
-  flex: none;
-}
+.legende span { display: inline-flex; align-items: center; gap: .45rem; }
+.strich { width: .85rem; height: 2px; background: currentColor; flex: none; }
 
 /* --- Steuerleiste --- */
-.controls {
+.leiste {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: .75rem;
-  margin: 0 0 1.15rem;
+  gap: .7rem;
+  margin-top: 2.75rem;
+  padding-bottom: .6rem;
+  border-bottom: 1px solid var(--tinte);
 }
-.tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: 1.25rem; }
 .tab {
-  font: inherit;
-  font-size: .845rem;
-  font-weight: 550;
-  color: var(--text-soft);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: .34rem .82rem;
+  font-family: var(--mono);
+  font-size: .715rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--matt);
+  background: none;
+  border: 0;
+  padding: 0 0 .12rem;
   cursor: pointer;
-  transition: background .13s, color .13s, border-color .13s;
+  border-bottom: 2px solid transparent;
+  transition: color .12s, border-color .12s;
 }
-.tab:hover { border-color: var(--kat); color: var(--text); }
-.tab.active { background: var(--kat-bg); border-color: var(--kat); color: var(--kat); }
-.tab[data-filter="all"].active {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--bg);
+.tab:hover { color: var(--tinte); }
+.tab.active { color: var(--tinte); border-bottom-color: var(--tinte); }
+.tab .zahl { color: var(--matt); margin-left: .35rem; }
+.sortnote {
+  font-family: var(--mono);
+  font-size: .69rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--matt);
 }
-.punkt {
-  width: .44rem;
-  height: .44rem;
-  border-radius: 50%;
-  background: var(--kat);
-  display: inline-block;
-  margin-right: .42rem;
-  vertical-align: middle;
-}
-.tab .count { opacity: .55; margin-left: .34rem; font-variant-numeric: tabular-nums; }
-.hinweis-sortierung { font-size: .76rem; color: var(--muted); }
 
-/* --- Raster --- */
-/* align-items bleibt auf dem Standard "stretch": Karten einer Zeile werden
-   gleich hoch. Bei "start" endeten nebeneinanderliegende Karten je nach
-   Laenge des Fragetexts auf unterschiedlicher Hoehe, was das Raster unruhig
-   wirken liess. */
-.grid {
+/* --- Register --- */
+.register { list-style: none; margin: 0; padding: 0; }
+.eintrag {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .95rem;
+  grid-template-columns: 3.1rem 1fr;
+  gap: 0 .5rem;
+  padding: 1.7rem 0 1.9rem;
+  border-bottom: 1px solid var(--linie-fein);
 }
-/* Die Skala sitzt am unteren Rand jeder Karte (margin-top: auto weiter
-   unten), damit sie in einer Zeile auf gleicher Hoehe liegt - egal ob der
-   Fragetext zwei oder vier Zeilen braucht. Sie ist das Element, das man ueber
-   die Karten hinweg vergleicht; verspringt es, vergleicht man schlechter. */
-.card { display: flex; flex-direction: column; }
-@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-
-/* --- Karte --- */
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 1.15rem 1.2rem 1.05rem;
-  box-shadow: var(--schatten);
-  transition: box-shadow .16s ease, transform .16s ease;
+/* Der letzte Eintrag braucht keine Trennlinie: direkt darunter beginnt die
+   Fusszeile mit ihrer eigenen, kraeftigeren Linie, und zwei Striche kurz
+   untereinander sehen nach einem Fehler aus. */
+.eintrag:last-child { border-bottom: 0; }
+@media (max-width: 620px) {
+  .eintrag { grid-template-columns: 1fr; }
+  .nummer { margin-bottom: .5rem; }
 }
-.card:hover { box-shadow: var(--schatten-hover); transform: translateY(-2px); }
+.nummer {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--matt);
+  padding-top: .3rem;
+  font-variant-numeric: tabular-nums;
+}
 
-.card-head {
+.meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: .4rem;
-  margin-bottom: .7rem;
-}
-.pill {
-  font-size: .655rem;
+  align-items: baseline;
+  gap: .55rem;
+  font-family: var(--mono);
+  font-size: .685rem;
   text-transform: uppercase;
   letter-spacing: .075em;
-  font-weight: 650;
-  border-radius: 999px;
-  padding: .16rem .52rem;
-  white-space: nowrap;
-  color: var(--kat);
-  background: var(--kat-bg);
+  color: var(--matt);
+  margin-bottom: .55rem;
 }
-.src {
-  font-size: .7rem;
-  font-weight: 550;
-  color: var(--muted);
-}
-.geo { font-size: .74rem; color: var(--text-soft); margin-left: auto; white-space: nowrap; }
+.meta .trenner { opacity: .45; }
+.meta .kat { color: var(--tinte-weich); }
+.meta .datum { margin-left: auto; white-space: nowrap; }
 
-.q {
-  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  font-size: 1.03rem;
+.frage {
+  font-size: 1.17rem;
   font-weight: 500;
-  line-height: 1.38;
-  margin: 0 0 1rem;
-  letter-spacing: -.004em;
+  line-height: 1.34;
+  letter-spacing: -.014em;
+  margin: 0 0 1.15rem;
+  max-width: 44ch;
 }
 
 /* Zahlenreihe. Jede Spalte traegt ihre Modellfarbe ueber --farbe. */
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
-  gap: .55rem;
-  /* Mindestabstand zur Skala. Der Rest des Platzes geht an margin-top: auto
-     der Skala, die dadurch nach unten wandert. */
-  margin-bottom: 1.1rem;
-}
-.m { min-width: 0; --farbe: var(--modell-standard); }
-.m-bench { --farbe: var(--bench); }
-.m-claude { --farbe: var(--claude); }
-.m-openai { --farbe: var(--gpt); }
-.lbl {
-  display: flex;
-  align-items: center;
-  gap: .32rem;
+.zahlen { display: flex; flex-wrap: wrap; gap: 2.2rem; margin-bottom: 1.35rem; }
+.z { --farbe: var(--modell-standard); min-width: 4.4rem; }
+.z-bench { --farbe: var(--bench); }
+.z-claude { --farbe: var(--claude); }
+.z-openai { --farbe: var(--gpt); }
+.k {
+  display: block;
+  font-family: var(--mono);
   font-size: .655rem;
   text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--muted);
-  font-weight: 650;
-  margin-bottom: .2rem;
+  letter-spacing: .1em;
+  color: var(--matt);
+  margin-bottom: .3rem;
 }
-.lbl::before {
-  content: "";
-  width: .42rem;
-  height: .42rem;
-  border-radius: 50%;
-  background: var(--farbe);
-  flex: none;
-}
-.val {
+.v {
   display: block;
-  font-size: 1.72rem;
-  font-weight: 680;
-  line-height: 1.05;
+  font-family: var(--mono);
+  font-size: 1.85rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.045em;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.03em;
   color: var(--farbe);
 }
 .leer {
   display: block;
-  font-size: .85rem;
-  color: var(--muted);
-  font-style: italic;
-  /* Gleiche Hoehe wie eine Zahl, damit die Spalten nicht verspringen, wenn
-     nur ein Teil von ihnen belegt ist. */
-  padding: .42rem 0 .5rem;
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--matt);
+  /* Auf die Grundlinie der Zahlen gesetzt, damit die Reihe nicht verspringt,
+     wenn nur ein Teil belegt ist. */
+  padding: .75rem 0 .28rem;
 }
 
-/* Gemeinsame Skala. Das eigentliche Bild der Karte: drei Punkte auf einer
-   Achse, Abstand gleich Uneinigkeit. */
-.skala {
-  position: relative;
-  height: 1.5rem;
-  margin: auto 0 .2rem;
-}
-.track {
+/* Gemeinsame Skala: Abstand gleich Uneinigkeit. */
+.skala { position: relative; height: 1.05rem; }
+.achse {
   position: absolute;
-  top: .58rem;
+  top: .5rem;
   left: 0;
   right: 0;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--line);
+  height: 1px;
+  background: var(--linie);
 }
-.tick {
-  position: absolute;
-  top: .24rem;
-  width: 1px;
-  height: .72rem;
-  background: var(--line);
-  transform: translateX(-50%);
-}
-.tick-mitte { background: var(--line); opacity: 1; height: 1rem; top: .1rem; }
+.tick { position: absolute; top: .24rem; width: 1px; height: .52rem; background: var(--linie); }
 .mk {
   position: absolute;
-  top: .22rem;
-  width: .78rem;
-  height: .78rem;
+  top: .16rem;
+  width: .72rem;
+  height: .72rem;
   border-radius: 50%;
   background: var(--farbe);
-  /* Ring in der Kartenfarbe: liegen zwei Punkte fast uebereinander, bleiben
+  /* Ring in der Papierfarbe: liegen zwei Punkte fast uebereinander, bleiben
      sie trotzdem als zwei erkennbar. */
-  box-shadow: 0 0 0 2.5px var(--card);
+  box-shadow: 0 0 0 2.5px var(--papier);
   transform: translateX(-50%);
 }
 .mk-bench { --farbe: var(--bench); z-index: 3; }
 .mk-claude { --farbe: var(--claude); z-index: 2; }
 .mk-openai { --farbe: var(--gpt); z-index: 1; }
-.skala-achse {
+.enden {
   display: flex;
   justify-content: space-between;
-  font-size: .62rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .04em;
+  margin-top: .95rem;
+  font-family: var(--mono);
+  font-size: .6rem;
+  color: var(--matt);
+  letter-spacing: .05em;
 }
 
-/* Widerspruch zwischen Zahl und Begruendung. Deutlich, aber nicht in der
-   Farbe der Differenz - sonst liest man es als Richtungsangabe. */
+/* Widerspruch zwischen Zahl und Begruendung. */
 .warnung {
-  margin: .3rem 0 0;
-  font-size: .7rem;
-  font-weight: 600;
+  margin: .35rem 0 0;
+  font-family: var(--mono);
+  font-size: .655rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
   color: #a8580a;
   cursor: help;
 }
-@media (prefers-color-scheme: dark) { .warnung { color: #f0a955; } }
+@media (prefers-color-scheme: dark) { .warnung { color: #e0a163; } }
 
 footer {
   margin-top: 3rem;
-  padding-top: 1.35rem;
-  border-top: 1px solid var(--line);
-  font-size: .81rem;
-  color: var(--muted);
-  max-width: 78ch;
-  line-height: 1.6;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--tinte);
+  font-size: .82rem;
+  color: var(--matt);
+  max-width: 68ch;
+  line-height: 1.65;
 }
 footer a { color: var(--link); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
-footer p { margin: 0 0 .5rem; }
-footer code {
-  font-size: .93em;
-  background: var(--bg-akzent);
-  padding: .06em .32em;
-  border-radius: 4px;
-}
+footer p { margin: 0 0 .55rem; }
+footer code { font-family: var(--mono); font-size: .93em; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header class="top">
-  <p class="kicker">Prediction markets &middot; Large language models</p>
-  <h1>Can AI forecast African politics?</h1>
-  <p class="sub">Two language models estimate the probability of open questions
-  on African politics and economics. Neither ever sees the market price it is
+  <p class="kicker">Prediction markets &middot; Large language models &middot; 20 open questions</p>
+  <h1>Can AI forecast African economics and politics?</h1>
+  <p class="lede">Two language models estimate the probability of open questions
+  on African economies and governments. Neither ever sees the market price it is
   placed next to, so each estimate is an independent claim rather than a
   restatement of the crowd.</p>
 
   <div class="legende">
-    <span><i class="swatch" style="background: var(--bench)"></i> Market or community benchmark</span>
-    <span><i class="swatch" style="background: var(--claude)"></i> Claude</span>
-    <span><i class="swatch" style="background: var(--gpt)"></i> ChatGPT</span>
+    <span><i class="strich" style="background: var(--bench)"></i> Market or community</span>
+    <span><i class="strich" style="background: var(--claude)"></i> Claude</span>
+    <span><i class="strich" style="background: var(--gpt)"></i> ChatGPT</span>
   </div>
 </header>
 
-<div class="controls">
-  <nav class="tabs"><button class="tab active" data-filter="all">All<span class="count">10</span></button>
-<button class="tab cat-elections" data-filter="elections"><span class="punkt"></span>Elections<span class="count">4</span></button>
-<button class="tab cat-security" data-filter="security"><span class="punkt"></span>Security<span class="count">3</span></button>
-<button class="tab cat-diplomacy" data-filter="diplomacy"><span class="punkt"></span>Diplomacy<span class="count">1</span></button>
-<button class="tab cat-economy" data-filter="economy"><span class="punkt"></span>Economy<span class="count">1</span></button>
-<button class="tab cat-other" data-filter="other"><span class="punkt"></span>Other<span class="count">1</span></button></nav>
-  <span class="hinweis-sortierung">Sorted by disagreement with the benchmark</span>
+<div class="leiste">
+  <nav class="tabs"><button class="tab active" data-filter="all">All<span class="zahl">20</span></button>
+<button class="tab" data-filter="elections">Elections<span class="zahl">6</span></button>
+<button class="tab" data-filter="security">Security<span class="zahl">4</span></button>
+<button class="tab" data-filter="diplomacy">Diplomacy<span class="zahl">4</span></button>
+<button class="tab" data-filter="economy">Economy<span class="zahl">1</span></button>
+<button class="tab" data-filter="other">Other<span class="zahl">5</span></button></nav>
+  <span class="sortnote">Ordered by resolution date</span>
 </div>
 
-<div class="grid">
-<article class="card cat-diplomacy" data-category="diplomacy">
-  <div class="card-head">
-    <span class="pill">Diplomacy</span>
-    <span class="src">Polymarket</span>
-    <span class="geo">Somaliland</span>
-  </div>
-  <h3 class="q">Will Somaliland join the Abraham Accords before 2027?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Market</span>
-      <span class="val">22%</span>
+<ol class="register">
+<li class="eintrag" data-category="elections">
+  <div class="nummer">01</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Zambia</span>
+      <span class="datum">Resolves 13 Aug 2026</span>
     </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">25%</span>
+    <h2 class="frage">Will UPND win the most seats in the 2026 Zambia National Assembly Election?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">96%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
 
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">02</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>Zambia</span>
+      <span class="datum">Resolves 14 Aug 2026</span>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">72%</span>
+    <h2 class="frage">Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia&#x27;s 2026 presidential election?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">25%</span>
 
-    </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-bench" style="left: 21.5%" title="Market 22%"></div>
-    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
-    <div class="mk mk-openai" style="left: 72.0%" title="ChatGPT 72%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="pill">Elections</span>
-    <span class="src">Polymarket</span>
-    <span class="geo">Morocco</span>
-  </div>
-  <h3 class="q">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Market</span>
-      <span class="val">90%</span>
-    </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">72%</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">23%</span>
 
+      </div>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">95%</span>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+      <div class="mk mk-openai" style="left: 23.0%" title="ChatGPT 23%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="other">
+  <div class="nummer">03</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Other</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>South Africa</span>
+      <span class="datum">Resolves 01 Sep 2026</span>
+    </div>
+    <h2 class="frage">Will Starlink&#x27;s website show South Africa as a country with Starlink availability before September 1, 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
 
+  </div>
+</li>
+<li class="eintrag" data-category="diplomacy">
+  <div class="nummer">04</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Diplomacy</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Egypt</span>
+      <span class="datum">Resolves 30 Sep 2026</span>
     </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-bench" style="left: 89.8%" title="Market 90%"></div>
-    <div class="mk mk-claude" style="left: 72.0%" title="Claude 72%"></div>
-    <div class="mk mk-openai" style="left: 95.0%" title="ChatGPT 95%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="pill">Elections</span>
-    <span class="src">Polymarket</span>
-    <span class="geo">Congo</span>
-  </div>
-  <h3 class="q">Nguesso out as President of the Republic of the Congo by December 31, 2026?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Market</span>
-      <span class="val">14%</span>
+    <h2 class="frage">Will the next diplomatic US-Iran meeting be in Egypt by September 30, 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">1%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
     </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">2%</span>
 
+  </div>
+</li>
+<li class="eintrag" data-category="other">
+  <div class="nummer">05</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Other</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>Sudan</span>
+      <span class="datum">Resolves 11 Oct 2026</span>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">10%</span>
+    <h2 class="frage">Will Sudan&#x27;s Emergency Response Rooms win the Nobel Peace Prize in 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
 
+  </div>
+</li>
+<li class="eintrag" data-category="diplomacy">
+  <div class="nummer">06</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Diplomacy</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Somaliland</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
     </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-bench" style="left: 13.5%" title="Market 14%"></div>
-    <div class="mk mk-claude" style="left: 2.0%" title="Claude 2%"></div>
-    <div class="mk mk-openai" style="left: 10.0%" title="ChatGPT 10%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-other" data-category="other">
-  <div class="card-head">
-    <span class="pill">Other</span>
-    <span class="src">Polymarket</span>
-    <span class="geo">Congo</span>
-  </div>
-  <h3 class="q">Will the Republic of the Congo have an Ebola case in 2026?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Market</span>
-      <span class="val">16%</span>
+    <h2 class="frage">Will Trump recognize Somaliland before 2027?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">9%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
     </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">25%</span>
 
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">07</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Morocco</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">6%</span>
+    <h2 class="frage">Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">90%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">72%</span>
 
-    </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-bench" style="left: 15.5%" title="Market 16%"></div>
-    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
-    <div class="mk mk-openai" style="left: 6.0%" title="ChatGPT 6%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="pill">Elections</span>
-    <span class="src">Polymarket</span>
-    <span class="geo">Somaliland</span>
-  </div>
-  <h3 class="q">Will there be no Somaliland parliamentary election before 2027?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Market</span>
-      <span class="val">94%</span>
-    </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">92%</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">95%</span>
 
+      </div>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">100%</span>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-bench" style="left: 89.8%" title="Market 90%"></div>
+      <div class="mk mk-claude" style="left: 72.0%" title="Claude 72%"></div>
+      <div class="mk mk-openai" style="left: 95.0%" title="ChatGPT 95%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="diplomacy">
+  <div class="nummer">08</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Diplomacy</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Somaliland</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">Will Somaliland join the Abraham Accords before 2027?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">21%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">25%</span>
 
-    </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-bench" style="left: 94.5%" title="Market 94%"></div>
-    <div class="mk mk-claude" style="left: 92.0%" title="Claude 92%"></div>
-    <div class="mk mk-openai" style="left: 98.5%" title="ChatGPT 100%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-elections" data-category="elections">
-  <div class="card-head">
-    <span class="pill">Elections</span>
-    <span class="src">Metaculus</span>
-    <span class="geo">Zambia</span>
-  </div>
-  <h3 class="q">Will Hakainde Hichilema receive at least 65% of the vote in the first round of Zambia&#x27;s 2026 presidential election?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Community</span>
-      <span class="leer">median locked</span>
-    </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">25%</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">72%</span>
 
+      </div>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">23%</span>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-bench" style="left: 21.0%" title="Market 21%"></div>
+      <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+      <div class="mk mk-openai" style="left: 72.0%" title="ChatGPT 72%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">09</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Somaliland</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">Will there be no Somaliland parliamentary election before 2027?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">94%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">92%</span>
 
-    </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
-    <div class="mk mk-openai" style="left: 23.0%" title="ChatGPT 23%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-security" data-category="security">
-  <div class="card-head">
-    <span class="pill">Security</span>
-    <span class="src">Metaculus</span>
-    <span class="geo">South Africa</span>
-  </div>
-  <h3 class="q">Will Israel be found guilty in South Africa&#x27;s genocide case by the ICJ before 2027?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Community</span>
-      <span class="leer">median locked</span>
-    </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">2%</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">100%</span>
 
+      </div>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">2%</span>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-bench" style="left: 94.5%" title="Market 94%"></div>
+      <div class="mk mk-claude" style="left: 92.0%" title="Claude 92%"></div>
+      <div class="mk mk-openai" style="left: 98.5%" title="ChatGPT 100%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">10</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Congo</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">Nguesso out as President of the Republic of the Congo by December 31, 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">14%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">2%</span>
 
-    </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-claude" style="left: 2.0%" title="Claude 2%"></div>
-    <div class="mk mk-openai" style="left: 2.0%" title="ChatGPT 2%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-security" data-category="security">
-  <div class="card-head">
-    <span class="pill">Security</span>
-    <span class="src">Metaculus</span>
-    <span class="geo">Sudan</span>
-  </div>
-  <h3 class="q">Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Community</span>
-      <span class="leer">median locked</span>
-    </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">25%</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">10%</span>
 
+      </div>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">65%</span>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-bench" style="left: 13.5%" title="Market 14%"></div>
+      <div class="mk mk-claude" style="left: 2.0%" title="Claude 2%"></div>
+      <div class="mk mk-openai" style="left: 10.0%" title="ChatGPT 10%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="other">
+  <div class="nummer">11</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Other</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Congo</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">Will the Republic of the Congo have an Ebola case in 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">14%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">25%</span>
 
-    </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
-    <div class="mk mk-openai" style="left: 65.0%" title="ChatGPT 65%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-security" data-category="security">
-  <div class="card-head">
-    <span class="pill">Security</span>
-    <span class="src">Metaculus</span>
-    <span class="geo">Sudan</span>
-  </div>
-  <h3 class="q">Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Community</span>
-      <span class="leer">median locked</span>
-    </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">25%</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">6%</span>
 
+      </div>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">35%</span>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-bench" style="left: 14.5%" title="Market 14%"></div>
+      <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+      <div class="mk mk-openai" style="left: 6.0%" title="ChatGPT 6%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="security">
+  <div class="nummer">12</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Security</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Sudan</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
+    </div>
+    <h2 class="frage">Sudan civil war ceasefire by December 31, 2026?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">26%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
 
+  </div>
+</li>
+<li class="eintrag" data-category="other">
+  <div class="nummer">13</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Other</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Sudan</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
     </div>
-  </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
-    <div class="mk mk-openai" style="left: 35.0%" title="ChatGPT 35%"></div>
-  </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-<article class="card cat-economy" data-category="economy">
-  <div class="card-head">
-    <span class="pill">Economy</span>
-    <span class="src">Metaculus</span>
-    <span class="geo">Senegal</span>
-  </div>
-  <h3 class="q">Will Senegal formally restructure its external debt before 2028?</h3>
-  <div class="metrics">
-    <div class="m m-bench">
-      <span class="lbl">Community</span>
-      <span class="leer">median locked</span>
+    <h2 class="frage">Will Sudan make Eric Adams a citizen?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">4%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
     </div>
-    <div class="m m-claude">
-      <span class="lbl">Claude</span>
-      <span class="val">62%</span>
 
+  </div>
+</li>
+<li class="eintrag" data-category="diplomacy">
+  <div class="nummer">14</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Diplomacy</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Tunisia</span>
+      <span class="datum">Resolves 31 Dec 2026</span>
     </div>
-    <div class="m m-openai">
-      <span class="lbl">ChatGPT</span>
-      <span class="val">52%</span>
+    <h2 class="frage">Will Tunisia recognize Israel by December 31?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">6%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
 
+  </div>
+</li>
+<li class="eintrag" data-category="security">
+  <div class="nummer">15</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Security</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>South Africa</span>
+      <span class="datum">Resolves 01 Jan 2027</span>
     </div>
+    <h2 class="frage">Will Israel be found guilty in South Africa&#x27;s genocide case by the ICJ before 2027?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">2%</span>
+
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">2%</span>
+
+      </div>
+    </div>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-claude" style="left: 2.0%" title="Claude 2%"></div>
+      <div class="mk mk-openai" style="left: 2.0%" title="ChatGPT 2%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
   </div>
-  <div class="skala">
-    <div class="track"></div>
-    <div class="tick" style="left: 25%"></div>
-    <div class="tick tick-mitte" style="left: 50%"></div>
-    <div class="tick" style="left: 75%"></div>
-    <div class="mk mk-claude" style="left: 62.0%" title="Claude 62%"></div>
-    <div class="mk mk-openai" style="left: 52.0%" title="ChatGPT 52%"></div>
+</li>
+<li class="eintrag" data-category="security">
+  <div class="nummer">16</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Security</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>Sudan</span>
+      <span class="datum">Resolves 02 Jan 2027</span>
+    </div>
+    <h2 class="frage">Will the next IPC Sudan acute food insecurity analysis classify at least one area in Famine (IPC Phase 5)?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">25%</span>
+
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">65%</span>
+
+      </div>
+    </div>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+      <div class="mk mk-openai" style="left: 65.0%" title="ChatGPT 65%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
   </div>
-  <div class="skala-achse"><span>0%</span><span>50%</span><span>100%</span></div>
-</article>
-</div>
+</li>
+<li class="eintrag" data-category="elections">
+  <div class="nummer">17</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Elections</span>
+      <span class="trenner">/</span>
+      <span>Polymarket</span>
+      <span class="trenner">/</span>
+      <span>Nigeria</span>
+      <span class="datum">Resolves 16 Jan 2027</span>
+    </div>
+    <h2 class="frage">Will Bola Tinubu win the 2027 Nigerian Presidential Election?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Market</span>
+        <span class="v">68%</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
+
+  </div>
+</li>
+<li class="eintrag" data-category="security">
+  <div class="nummer">18</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Security</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>Sudan</span>
+      <span class="datum">Resolves 31 Jan 2027</span>
+    </div>
+    <h2 class="frage">Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">25%</span>
+
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">35%</span>
+
+      </div>
+    </div>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-claude" style="left: 25.0%" title="Claude 25%"></div>
+      <div class="mk mk-openai" style="left: 35.0%" title="ChatGPT 35%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="economy">
+  <div class="nummer">19</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Economy</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>Senegal</span>
+      <span class="datum">Resolves 01 Jan 2028</span>
+    </div>
+    <h2 class="frage">Will Senegal formally restructure its external debt before 2028?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="v">62%</span>
+
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="v">52%</span>
+
+      </div>
+    </div>
+    <div class="skala">
+      <div class="achse"></div>
+      <div class="tick" style="left: 25%"></div>
+      <div class="tick" style="left: 50%"></div>
+      <div class="tick" style="left: 75%"></div>
+      <div class="mk mk-claude" style="left: 62.0%" title="Claude 62%"></div>
+      <div class="mk mk-openai" style="left: 52.0%" title="ChatGPT 52%"></div>
+    </div>
+    <div class="enden"><span>0%</span><span>100%</span></div>
+  </div>
+</li>
+<li class="eintrag" data-category="other">
+  <div class="nummer">20</div>
+  <div>
+    <div class="meta">
+      <span class="kat">Other</span>
+      <span class="trenner">/</span>
+      <span>Metaculus</span>
+      <span class="trenner">/</span>
+      <span>Nigeria</span>
+      <span class="datum">Resolves 01 Jan 2030</span>
+    </div>
+    <h2 class="frage">Will at least 200 Benin Bronzes go from the British Museum to Nigeria before 2030?</h2>
+    <div class="zahlen">
+      <div class="z z-bench">
+        <span class="k">Community</span>
+        <span class="leer">median locked</span>
+      </div>
+      <div class="z z-claude">
+        <span class="k">Claude</span>
+        <span class="leer">pending</span>
+      </div>
+      <div class="z z-openai">
+        <span class="k">ChatGPT</span>
+        <span class="leer">pending</span>
+      </div>
+    </div>
+
+  </div>
+</li>
+</ol>
 
 <footer>
 <p>Forecasts come from Claude (<code>claude-sonnet-5</code>) and ChatGPT (<code>gpt-5.6-luna</code>). Both receive the same question, the same
@@ -753,16 +1015,16 @@ blocked. The benchmark is never passed into the prompt.</p>
 median of volunteer forecasts with nothing at risk. The two are labelled
 differently for that reason. Where a benchmark is missing, the community median
 is not available at this account&#39;s access tier.</p>
-<p>Benchmarks from Metaculus and Polymarket &middot; last updated 31 July 2026, 07:26 UTC &middot;
+<p>Benchmarks from Metaculus and Polymarket &middot; last updated 31 July 2026, 08:15 UTC &middot;
 <a href="https://github.com/niklaswenzin/africa-ai-forecasting">source code and method</a></p>
 </footer>
 
 </div>
 
 <script>
-// Tab-Filter. Jede Karte traegt ihre Kategorie als data-category, jeder Tab
+// Tab-Filter. Jeder Eintrag traegt seine Kategorie als data-category, jeder Tab
 // den gewuenschten Filter als data-filter. Es wird nichts nachgeladen, wir
-// blenden nur aus - ohne JavaScript bleiben darum alle Karten sichtbar.
+// blenden nur aus - ohne JavaScript bleiben darum alle Eintraege sichtbar.
 document.querySelectorAll(".tab").forEach(function (tab) {
   tab.addEventListener("click", function () {
     var filter = tab.getAttribute("data-filter");
@@ -772,9 +1034,9 @@ document.querySelectorAll(".tab").forEach(function (tab) {
     });
     tab.classList.add("active");
 
-    document.querySelectorAll(".card").forEach(function (karte) {
-      var passt = (filter === "all") || (karte.getAttribute("data-category") === filter);
-      karte.style.display = passt ? "" : "none";
+    document.querySelectorAll(".eintrag").forEach(function (eintrag) {
+      var passt = (filter === "all") || (eintrag.getAttribute("data-category") === filter);
+      eintrag.style.display = passt ? "" : "none";
     });
   });
 });

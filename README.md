@@ -120,11 +120,17 @@ market. Ethiopia's June 2026 election is the clearest case: Abiy Ahmed won, and
 are excluded. A question whose event has already occurred but whose resolution
 date still lies ahead is not caught; the date is the only signal the sources give.
 
-**Minimum liquidity.** A benchmark nobody trades is not a benchmark. One Zambian
-market showed a price of 0.4% on 1,141 USD of total volume; a single small trade
-moves a price like that. Questions whose benchmark falls below 5,000 USD of volume
-are excluded — a threshold read off the actual distribution, where the usable
-range starts around 6,500 and an isolated cluster sits between 71 and 4,200. The
+**Minimum liquidity, and it is set low.** A benchmark nobody trades is not a
+benchmark. Across the 24 open African markets, volume falls into three groups:
+nine above 11,000 USD, four between 1,400 and 2,100, and eleven below 800 —
+almost all from one auto-generated series ("Will Nigeria have an Ebola case in
+2026?", 24 USD of total volume). The threshold sits at 1,200 USD, in the gap
+between the second and third group.
+
+That is a deliberate trade-off. At 5,000 the dashboard was cleaner but lost
+"Sudan civil war ceasefire by December 31, 2026?" — one of the most relevant
+questions available. Four questions on the page therefore carry a price resting
+on a few thousand dollars of trading, and should be read with that in mind. The
 rule applies only where a benchmark exists.
 
 **The two models are not price-matched.** Claude Sonnet 5 costs 3 USD per million

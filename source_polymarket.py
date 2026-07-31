@@ -52,15 +52,14 @@ VERSUCHE = 3               # so oft probieren wir eine Anfrage bei Timeout erneu
 MAX_SEITEN = 300
 
 # Vorfilter auf dem Server, rein zur Beschleunigung. Ohne ihn sind es ueber
-# 25'000 Markets und der Abruf bricht nicht mehr sauber ab; mit ihm rund
-# 10'500 in etwa 47 Sekunden.
+# 25'000 Markets und der Abruf bricht nicht mehr sauber ab.
 #
-# Der Wert MUSS deutlich unter MIN_LIQUIDITAET in fetch_markets.py (5000)
+# Der Wert MUSS deutlich unter MIN_LIQUIDITAET in fetch_markets.py (1200)
 # bleiben. Dort steht die eigentliche Regel, hier nur eine Grobsiebung - sonst
 # liefe eine spaetere Senkung der Schwelle stillschweigend ins Leere, weil die
-# Fragen die Quelle nie verlassen haetten. Gegengeprueft: 11 Afrika-Fragen
-# liegen unter 1000, alle scheitern ohnehin an der echten Schwelle.
-VORFILTER_VOLUMEN = 1000
+# Fragen die Quelle nie verlassen haetten. Genau deshalb wurde dieser Wert
+# mitgesenkt, als die Schwelle von 5000 auf 1200 ging.
+VORFILTER_VOLUMEN = 400
 
 # Zweiter Vorfilter: Fragen, deren Aufloesungsdatum vorbei ist, verwirft
 # fetch_markets.py ohnehin (loest_noch_auf) - sie sind keine Prognosefragen

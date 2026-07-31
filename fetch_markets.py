@@ -43,18 +43,25 @@ MODERAT_MAX = 0.95
 # uninformativ sein. Eine Metaculus-Frage ohne Community-Median bleibt also
 # unabhaengig von ihrer Beteiligung drin - dort zaehlt nur der Forecast.
 #
-# Polymarket, Einheit ist Handelsvolumen in Dollar. An den echten Afrika-
-# Fragen gemessen: der Bestand liegt zwischen 6'500 und 167'000 (Median rund
-# 20'000), darunter sitzt isoliert eine Gruppe mit 71 bis 4'200. Bei 90 Dollar
-# Gesamtvolumen bewegt ein einziger Kleinsttrade den Preis - das ist keine
-# Marktmeinung. 5'000 liegt in der Luecke zwischen beiden Gruppen.
+# Polymarket, Einheit ist Handelsvolumen in Dollar. Am vollstaendigen Bestand
+# der 24 offenen Afrika-Fragen gemessen (31.07.2026) gibt es drei Gruppen:
+# neun Fragen ab 11'264, vier zwischen 1'399 und 2'142, und darunter nur noch
+# automatisch erzeugte Serien ("Will <Land> have an Ebola case in 2026?") mit
+# 24 bis 772 Dollar. Bei 24 Dollar Gesamtvolumen bewegt ein einziger
+# Kleinsttrade den Preis - das ist keine Marktmeinung.
+#
+# 1'200 liegt in der Luecke zwischen der zweiten und der dritten Gruppe. Der
+# Wert war zuvor 5'000 und schnitt damit auch die mittlere Gruppe weg,
+# darunter "Sudan civil war ceasefire by December 31, 2026?" - inhaltlich
+# eine der relevantesten Fragen des Projekts. Der Preis dieser vier Fragen
+# ruht auf duennem Handel und ist entsprechend vorsichtig zu lesen.
 #
 # Metaculus, Einheit ist Zahl der Prognostiker. Der Wert ist VORLAEUFIG und
 # ungetestet: solange der Community-Median gesperrt ist, greift die Regel dort
 # nie. Beobachtete Beteiligung liegt bei 0 bis 144 (Median 9). Sobald die
 # Zugriffsstufe steht, gehoert er an echten Daten geprueft.
 MIN_LIQUIDITAET = {
-    "polymarket": 5000,
+    "polymarket": 1200,
     "metaculus": 15,
 }
 
@@ -70,14 +77,14 @@ MAX_OHNE_BENCHMARK = 15
 # Wirtschaft und Politik. Ohne Benchmark ist der Forecast die einzige Aussage
 # der Karte, und die soll zum Thema des Projekts passen - ein Ebola-Fall oder
 # eine Sportfrage gehoert dann nicht dazu.
-KATEGORIEN_OHNE_BENCHMARK = ("elections", "security", "diplomacy", "economy")
+KATEGORIEN_OHNE_BENCHMARK = ("elections", "security", "diplomacy", "economy", "other")
 
 # Zeithorizont fuer Fragen ohne Vergleichszahl, in Tagen. Metaculus fuehrt
 # Fragen mit sehr fernem Aufloesungsdatum ("Will X be elected President of
 # South Africa before 2065?"). Eine Prognose, deren Ausgang in 39 Jahren
 # feststeht, ist auf einem Dashboard wertlos: sie laesst sich nie ueberpruefen
 # und verdraengt eine Frage, die naechsten Monat faellig ist.
-MAX_HORIZONT_TAGE = 1095   # rund drei Jahre
+MAX_HORIZONT_TAGE = 1460   # rund vier Jahre
 
 # Alle angebundenen Quellen. Metaculus liefert Fragen, aber keinen
 # Community-Median: der ist fuer unsere Zugriffsstufe gesperrt. Solche Fragen
