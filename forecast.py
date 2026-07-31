@@ -32,7 +32,11 @@ import pruefung
 # bewusste Preisparitaet der beiden Prognostiker ist damit aufgehoben - das
 # gehoert in jede Auswertung, sonst vergleicht man auch Preisklassen.
 MODEL = "claude-sonnet-5"
-PROGNOSTIKER = "claude"         # Schluessel im forecasts.json-Eintrag
+PROGNOSTIKER = "claude"
+
+# Schalter fuer den Nachhol-Lauf: nur Fragen anfragen, die noch keine Prognose
+# haben. Siehe main().
+NUR_FEHLENDE = "--nur-fehlende"         # Schluessel im forecasts.json-Eintrag
 
 # KEIN temperature: Sonnet 5 weist Sampling-Parameter mit HTTP 400 ab
 # (verifiziert). Auf Haiku 4.5 war temperature=0 gesetzt, hat aber nachweislich
@@ -383,6 +387,29 @@ def main():
     # behalten wir ihren letzten guten Stand, statt sie ersatzlos zu verlieren.
     alte = lade_alte_forecasts()
 
+    # Mit --nur-fehlende werden nur Fragen ohne Prognose angefragt. Gedacht
+    # fuer den Fall, der hier mehrfach eingetreten ist: das Guthaben endet
+    # mitten im Lauf, und danach soll der Rest nachgeholt werden, ohne die
+    # fertigen Prognosen noch einmal zu bezahlen.
+    #
+    # Der Preis dafuer ist, dass die Prognosen dann aus zwei Zeitpunkten
+    # stammen. Das ist vertretbar, weil jede Prognose ohnehin ihren eigenen
+    # Zeitpunkt hat und die Aufnahmen in data/history/ ihn festhalten.
+    # WICHTIG: alle_markets bleibt die vollstaendige Liste. Die Uebernahme am
+    # Ende laeuft ueber sie, nicht ueber die verkuerzte - sonst fielen die
+    # bereits fertigen Prognosen aus der Datei, und --nur-fehlende wuerde
+    # genau das zerstoeren, was es schonen soll.
+    alle_markets = markets
+
+    if NUR_FEHLENDE in sys.argv:
+        markets = [m for m in markets if m["id"] not in alte]
+        print(f"{NUR_FEHLENDE}: {len(markets)} von {len(alle_markets)} Fragen "
+              f"ohne Prognose werden angefragt.")
+
+    if not markets:
+        print("Keine Frage ohne Prognose, es gibt nichts zu tun.")
+        return
+
     # Zweiter Prognostiker. Fehlt sein Token, laeuft der Lauf einfach nur mit
     # Claude weiter - eine halbe Vergleichstabelle ist besser als gar keine.
     openai_token = forecaster_openai.lade_token()
@@ -480,7 +507,7 @@ def main():
     # scheitert; veraltete Eintraege sind besser als fehlende Karten.
     frisch = {f["id"] for f in forecasts}
     uebernommen = 0
-    for markt in markets:
+    for markt in alle_markets:
         if markt["id"] not in frisch and markt["id"] in alte:
             forecasts.append(alte[markt["id"]])
             uebernommen += 1

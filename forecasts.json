@@ -1,5 +1,120 @@
 [
   {
+    "id": "polymarket-3073397",
+    "question": "Will the 2026 Guinea-Bissau constitutional referendum pass?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.85,
+        "reasoning": "Guinea-Bissau's military junta, led by transitional President General Horta N'Tam, has already set the referendum for August 30, 2026 by decree, with the Supreme Court's favorable opinion secured, indicating strong institutional momentum for the vote to occur as planned. Military-junta-organized constitutional referendums historically (e.g., Guinea 2020, Mali 2023, Chad 2023) tend to pass by wide margins since the ruling authorities control the electoral apparatus, media, and campaign process, and the junta has a clear incentive to secure approval to legitimize the shift to a presidential system. Main residual risks are potential postponement beyond year-end or an unexpected failure to meet turnout/quorum thresholds, but these appear less likely given the process is well underway and the junta has strong control over outcomes.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.64,
+        "reasoning": "The referendum has been formally called by presidential decree for August 30, 2026, under a recently adopted referendum law, and the transitional council approved the proposed constitution unanimously—factors favoring both occurrence and passage. ([ang.gw](https://ang.gw/proposta-da-nova-constituicao-da-republica-aprovada-pelo-conselho-nacional-de-transicao-contempla-164-artigos-contra-162-do-anterior/?utm_source=openai)) However, opposition groups are demanding postponement and the process is viewed as insufficiently inclusive, creating a meaningful risk that the vote is delayed or rejected. ([constitutionnet.org](https://constitutionnet.org/news/guinea-bissaus-opposition-demands-postponement-constitutional-referendum?utm_source=openai))",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 2
+      }
+    }
+  },
+  {
+    "id": "polymarket-2871641",
+    "question": "Will Assimi Goïta be out as President of Mali by December 31, 2026?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.08,
+        "reasoning": "Mali's transitional legislature granted Goïta a renewable five-year presidential term in 2025, effectively postponing any scheduled election or departure until around 2030, and he has consolidated control by sidelining rivals within the junta. While Sahel juntas face coup risk (Mali itself saw two coups in 2020-2021), there is currently no indication of an imminent qualifying resignation, removal, or official departure announcement before the end of 2026. Given the entrenched power structure and lack of any announced exit plan, a Yes resolution by end of 2026 appears unlikely though not negligible given regional instability.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.12,
+        "reasoning": "Assimi Goïta remains actively identified as Mali’s president as of July 2026, and the 2025 legal changes granted him a renewable five-year mandate, making an announced departure by December 31, 2026 unlikely. Ongoing insurgency and elite instability create a non-trivial coup or resignation risk, but there is no current official indication of a qualifying departure announcement. ([gouvernement.ml](https://gouvernement.ml/a-la-presidence-de-la-republique-le-president-de-la-transition-son-excellence-le-general-darmee-assimi-goita-honore-les-couleurs/?utm_source=openai))",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 1
+      }
+    }
+  },
+  {
+    "id": "polymarket-666832",
+    "question": "U.S. agrees to a new trade deal with \"South Africa\" before 2027?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.02,
+        "reasoning": "US-South Africa relations are currently strained, with Trump imposing 30% tariffs and political disputes over land policy and foreign relations; there is no formal free trade agreement under negotiation, only preliminary talk of 'formal negotiations' for a possible deal. Even AGOA, a much narrower unilateral preference program (not an FTA), lapsed in September 2025 with South Africa's inclusion in any renewal actively contested by USTR. A full FTA requiring congressional/presidential enactment by end of 2026 is highly unlikely given the current adversarial trajectory.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.04,
+        "reasoning": "A formal U.S.–South Africa free trade agreement appears very unlikely by December 31, 2026: current ties consist mainly of the 2012 TIFA and AGOA, which Congress extended only through the end of 2026, while South Africa is still discussing tariffs and market-access issues rather than reporting a completed FTA. Even if negotiations accelerate, completing and enacting a new agreement within roughly five months is improbable. ([ustr.gov](https://www.ustr.gov/trade-agreements/trade-investment-framework-agreements?utm_source=openai))",
+        "confidence": "high",
+        "searched": true,
+        "num_searches": 2
+      }
+    }
+  },
+  {
+    "id": "polymarket-3081797",
+    "question": "Will UPND win the most seats in the 2026 Zambia National Assembly Election?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.9,
+        "reasoning": "UPND enters the August 2026 election with strong structural advantages: it already holds a majority of seats from 2021 (82/156 FPTP seats vs PF's 60), controls key state institutions, and has expanded the National Assembly with 55 new constituencies concentrated in its strongholds. Polling consistently shows Hichilema leading with 58-63% support versus a fragmented opposition (~35% combined across Mundubile's Tonse-Pamodzi Alliance, Kalaba, M'membe, etc.), and since the 40 new PR seats are allocated based on presidential vote share, UPND is well positioned there too. Despite a late opposition consolidation around Mundubile making some provinces competitive, the combination of incumbency, institutional control, favorable redistricting, and opposition fragmentation makes a UPND plurality of seats highly likely.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.46,
+        "reasoning": "UPND benefits from incumbency, a strong presidential campaign, and dominant support in Southern, Western, North-Western, and parts of Central Province. However, a recent projection gives the opposition’s NRPUP/Resolute forces a large combined constituency advantage, and UPND’s probability is reduced by economic dissatisfaction and the expanded, highly competitive 226-seat map; because those opposition forces are separate parties for resolution purposes, UPND still has a substantial chance to be the largest individual party.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 4
+      }
+    }
+  },
+  {
+    "id": "polymarket-2646924",
+    "question": "Will the next diplomatic US-Iran meeting be in Egypt by September 30, 2026?",
+    "forecasts": {
+      "claude": {
+        "model": "claude-sonnet-5",
+        "probability": 0.05,
+        "reasoning": "Reporting indicates the negotiating process after the June 22 Switzerland round continued at the same Burgenstock venue (with a next session reportedly planned for June 28-29 there), and follow-on technical talks from that round are explicitly excluded from qualifying under the resolution criteria. There is no evidence in current reporting that Egypt has been designated as the venue for the next senior-level US-Iran round; the established pattern (Oman, Rome, Geneva, Switzerland) points elsewhere, making Egypt an unlikely host.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 3,
+        "flagged": null
+      },
+      "openai": {
+        "model": "gpt-5.6-luna",
+        "probability": 0.16,
+        "reasoning": "As of July 31, 2026, diplomacy appears stalled: a senior U.S. official said the administration was not actively pursuing talks, while Egypt’s official statements describe mediation and efforts to prepare for resumed negotiations but do not identify Cairo as the venue. ([apnews.com](https://apnews.com/article/cbb2c3f49f3072c542fc6395468b64b5?utm_source=openai)) Egypt is a plausible regional host if senior-level talks restart before September 30, but Doha, Oman, Switzerland, or no qualifying meeting appear more likely overall.",
+        "confidence": "medium",
+        "searched": true,
+        "num_searches": 2
+      }
+    }
+  },
+  {
     "id": "polymarket-1029715",
     "question": "Will Trump recognize Somaliland before 2027?",
     "forecasts": {
