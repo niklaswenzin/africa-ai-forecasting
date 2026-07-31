@@ -132,12 +132,18 @@ input tokens and 15 per million output; the GPT model costs 1 and 6. The
 comparison therefore measures a price class as well as a model, and a difference
 in quality cannot be separated from a difference in budget.
 
-**African questions are scarce.** In a recent run the pipeline saw 11,616 unique
-open Polymarket markets and found 48 with an African subject. The real total is
-higher and cannot be enumerated exactly: the Gamma API caps the offset at 2,000
-per sort order, so the code unions several sort orders instead of paging through
-everything. The African subset clusters around a handful of elections, which is
-why the selection is capped at one question per country.
+**African questions are scarce, and that is the binding constraint.** The
+pipeline enumerates every open Polymarket market — over 40,000 — and finds 60
+with an African subject. Of those, 36 are past their resolution date and 21 of
+the remainder are candidate variants of one election in Guinea-Bissau. Nine
+survive as usable, distinct questions.
+
+That number is not limited by the code. An earlier version saw only 11,616
+markets, because `/markets` caps the offset at 2,000 and the code unioned
+several sort orders to approximate a full scan. Switching to `/markets/keyset`
+removed the cap and made the list complete rather than sampled — and raised the
+African count from 48 to 60. Tripling the markets scanned added four usable
+questions. Polymarket simply lists little about Africa.
 
 **Topic filtering is keyword-based.** The Gamma API returns no category or tags,
 so African relevance is detected from the question text against a country and

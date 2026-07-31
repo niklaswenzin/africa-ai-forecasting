@@ -1,5 +1,19 @@
 [
   {
+    "id": "polymarket-1029715",
+    "source": "polymarket",
+    "question": "Will Trump recognize Somaliland before 2027?",
+    "market_p": 0.082,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Somaliland",
+    "category": "diplomacy",
+    "event_id": "polymarket-125443",
+    "event_title": "Will Trump recognize Somaliland before 2027?",
+    "resolve_time": "2026-12-31T00:00:00Z",
+    "description": "This market will resolve to \"Yes\" if the United States formally recognizes the Republic of Somaliland as a sovereign state by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nOnly formal recognition of Somaliland will qualify. Statements/actions which acknowledge the Republic of Somaliland, or change its diplomatic status with the U.S. but do not formally recognize the country as a sovereign state will not qualify.\n\nThe primary resolution source for this market will be official information from the government of the United States, however a consensus of credible reporting will also be used."
+  },
+  {
     "id": "polymarket-620335",
     "source": "polymarket",
     "question": "Aziz Akhannouch out as Morocco Prime Minister by December 31, 2026?",
@@ -42,6 +56,20 @@
     "description": "Parliamentary elections are to be scheduled to be held in Somaliland in late March 2026.\n\nThis market will resolve according to the political party that wins the greatest number of seats in the next Somaliland House of Representatives (Golaha Wakiilada) election. \n\nIf no election takes place by December 31, 2026, 11:59 PM ET, this market will resolve to \"No election before 2027\".\n\nIf an election takes place but the results are not known definitively by December 31, 2026, 11:59 PM ET, this market will remain open until the certified results are released. If the results are not known definitively by March 31, 2027, 11:59 PM ET, this market will resolve to \"Other\".\n\nIn the event of a tie between multiple parties for the most seats won, this market will resolve in favor of the party that received a greater number of valid votes. In the event that results in a tie, this market will resolve in favor of the party or coalition whose listed abbreviation appears first in alphabetical order.\n\nThis market's resolution will be based solely on the number of seats won by the named party in the Somaliland Parliament. \n\nThis market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Somaliland government, specifically the Somaliland National Electoral Commission (Komishanka Doorashooyinka Qaranka) (slnec.net)."
   },
   {
+    "id": "polymarket-2420428",
+    "source": "polymarket",
+    "question": "Will Bola Tinubu win the 2027 Nigerian Presidential Election?",
+    "market_p": 0.685,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Nigeria",
+    "category": "elections",
+    "event_id": "polymarket-552316",
+    "event_title": "Nigerian Presidential Election Winner",
+    "resolve_time": "2027-01-16T17:00:00Z",
+    "description": "Presidential elections are scheduled to be held in Nigeria on January 16, 2027.\n\nThis market will resolve according to the listed candidate who wins the 2027 Nigerian presidential election. \n\nThis market includes any potential second round. \n\nIf the results are not known definitively by October 31, 2027, 11:59 PM ET, this market will resolve to \"Other\".\n\nThis market will resolve based on the results of this election, as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve solely based on official results as reported by Nigerian government sources, including the Independent National Electoral Commission (https://www.inecnigeria.org/)."
+  },
+  {
     "id": "polymarket-921660",
     "source": "polymarket",
     "question": "Nguesso out as President of the Republic of the Congo by December 31, 2026?",
@@ -56,10 +84,24 @@
     "description": "This market will resolve to “Yes” if Denis Sassou Nguesso ceases to be President of the Republic of the Congo for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Denis Sassou Nguesso's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes into effect.\n\nIf the specified individual is detained, effectively removed from the specified position, or otherwise permanently prevented from fulfilling the duties of the specified position within this market’s timeframe, it will qualify for a “Yes” resolution.\n\nThe resolution source for this market will be official information from Denis Sassou Nguesso and the government of the Republic of the Congo; however, a consensus of credible reporting may also be used."
   },
   {
+    "id": "polymarket-2412368",
+    "source": "polymarket",
+    "question": "Will Tunisia recognize Israel by December 31?",
+    "market_p": 0.065,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Tunisia",
+    "category": "diplomacy",
+    "event_id": "polymarket-548796",
+    "event_title": "Which countries will recognize Israel by December 31?",
+    "resolve_time": "2026-12-31T17:00:00Z",
+    "description": "This market will resolve to \"Yes\" if the listed country officially recognizes Israel as a state between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to “No”.\n\nAn announcement of intentions will not suffice to resolve this market to \"Yes.\" Only a government's formal recognition of the State of Israel will count toward a “Yes” resolution for this market.\n\nThe primary resolution source for this market will be official government information. However, a consensus of credible reporting will also be used."
+  },
+  {
     "id": "polymarket-2326375",
     "source": "polymarket",
     "question": "Will the Republic of the Congo have an Ebola case in 2026?",
-    "market_p": 0.155,
+    "market_p": 0.18,
     "benchmark_type": "market_price",
     "africa": true,
     "country": "Congo",
@@ -68,6 +110,20 @@
     "event_title": "Which countries will have an Ebola case in 2026?",
     "resolve_time": "2026-12-31T00:00:00Z",
     "description": "This market will resolve to \"Yes\" if there is a confirmed case of Ebola in the territory of the specified country reported between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nAny active laboratory-confirmed, or otherwise officially confirmed, Ebola infection identified within the territory of the specified country will qualify, regardless of where exposure, symptom onset, or testing occurred.\n\nThe primary resolution sources for this market will be official information from the relevant national and international health authorities; however, an overwhelming consensus of credible reporting will also suffice."
+  },
+  {
+    "id": "polymarket-2646924",
+    "source": "polymarket",
+    "question": "Will the next diplomatic US-Iran meeting be in Egypt by September 30, 2026?",
+    "market_p": 0.006,
+    "benchmark_type": "market_price",
+    "africa": true,
+    "country": "Egypt",
+    "category": "diplomacy",
+    "event_id": "polymarket-624242",
+    "event_title": "Where will the next next round of US-Iran peace talks be...?",
+    "resolve_time": "2026-09-30T23:59:00Z",
+    "description": "On June 22, the first round of U.S.-Iran diplomatic talks in Switzerland concluded, with mediators reporting progress toward a roadmap for a final deal and follow-on technical talks expected to continue (see: https://www.aljazeera.com/news/2026/6/22/us-iran-agree-on-roadmap-towards-final-deal-in-switzerland-talks).\n\nThis market will resolve according to the country in which the next formal senior-level round of peace talks between representatives of the United States and Iran begins by September 30, 2026, 11:59 PM ET.\n\nA qualifying round must be a deliberate in-person diplomatic meeting or negotiating round concerning US-Iran relations, involving senior representatives of both the United States and Iran who are acting in an official capacity and are authorized to conduct or materially direct diplomacy on behalf of their governments.\n\nIndirect in-person diplomacy through designated mediators, facilitators, or interlocutors will qualify, provided senior representatives of both the United States and Iran are participating in the same formal diplomatic process with the knowledge and authorization of their respective governments. The representatives need not be in the same room at the same time.\n\nFollow-on technical talks from the June 22 Switzerland round will not qualify by themselves. Technical, staff-level, working-group, implementation, monitoring, preparatory, or deconfliction meetings will not qualify unless they occur as part of a new formally convened senior-level U.S.-Iran peace-talks round.\n\nBrief greetings, chance encounters, photo opportunities, ceremonial appearances, or talks not deliberately aimed at diplomacy or negotiation will not count.\n\nThe meeting must be in-person (including indirect in-person meetings) and must be publicly acknowledged by either government or reported by a consensus of credible media. Remote meetings, phone calls, or other meetings where the relevant parties are not present will not count.\n\nIf a qualifying round occurs in more than one country, resolution will be based on the country where the first qualifying senior-level diplomatic session begins.\n\nIf the next qualifying round begins in any country in the Middle East or North Africa other than the listed options, this market will resolve to “Other - Middle East/North Africa.”\n\nIf the next qualifying round begins in any country in Europe other than the listed options, this market will resolve to “Other - Europe.”\n\nFor purposes of this market, countries’ regions will be determined based on the U.S. State Department’s regional classifications in the “Countries and Areas List” (https://www.state.gov/countries-and-areas-list). Any country classified as part of “Europe and Eurasia” will be considered to be in Europe. Any country classified as part of “Near East (Middle East and North Africa)” will be considered to be in the Middle East/North Africa.\n\nIf the next qualifying round begins in any unlisted country that is not classified in either specified region, this market will resolve to “Other.”\n\nIf no qualifying round begins by September 30, 2026, 11:59 PM ET, this market will resolve to “No Meeting by September 30.”\n\nThe resolution sources for this market will be official information from the governments of the United States and Iran, and a consensus of credible reporting.\n"
   },
   {
     "id": "metaculus-43844",

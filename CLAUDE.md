@@ -26,7 +26,9 @@ Vor jeder Erweiterung fragen, ob sie diesen Rahmen sprengt.
 - Kein `temperature` mehr: beide Modelle lehnen Sampling-Parameter ab. Auf Haiku 4.5 war `temperature=0` gesetzt und hat messbar nichts stabilisiert (Ø 10.7 Punkte Bewegung zwischen zwei Läufen, mehr als beim OpenAI-Modell ohne jede Steuerung) — die Web-Suche liefert je Lauf andere Treffer, und das wirkt vor dem Sampling.
 - Jede Prognose trägt die Modell-ID im Feld `model`. Nach einem Modellwechsel oder einem abgebrochenen Lauf stehen sonst Werte verschiedener Modelle unter demselben Schlüssel, ohne dass es erkennbar wäre.
 - API-Keys über Umgebungsvariablen oder die lokale .env-Datei (durch .gitignore ausgeschlossen): ANTHROPIC_API_KEY, OPENAI_API_KEY, METACULUS_API_TOKEN. Nie im Code, nie in Commits.
-- Polymarket Gamma API: Basis https://gamma-api.polymarket.com, Endpoint /markets, öffentlich ohne Key. Query-Parameter vor der Implementierung in der offiziellen Doku (docs.polymarket.com) verifizieren, nicht raten.
+- Polymarket Gamma API: Basis https://gamma-api.polymarket.com, öffentlich ohne Key. Verwendet wird `/markets/keyset`, nicht `/markets`: letzteres deckelt den Offset bei 2000 und liefert damit nur eine Stichprobe. Der Cursor-Parameter heisst `after_cursor`.
+- Query-Parameter verifizieren, nicht raten — und zwar an der Quelle, die erreichbar ist: die API liefert ihre eigene OpenAPI-Beschreibung unter `/openapi.json`. docs.polymarket.com ist von diesem Anschluss aus gesperrt (siehe unten). Geratene Cursor-Namen quittiert die API NICHT mit einem Fehler, sie ignoriert sie und gibt stumm immer die erste Seite zurück — ohne Gegenprobe auf die zurückgegebenen IDs fällt das nicht auf.
+- Netzsperre am Entwicklungsanschluss: der Provider (WWZ) biegt die DNS-Auflösung um, `kalshi.com`, `api.elections.kalshi.com` und `docs.polymarket.com` zeigen auf 212.4.64.206 mit einem Zertifikat für `*.wwz.ch`. `gamma-api.polymarket.com` wird durchgelassen. Kalshi ist von hier aus weder per API noch über die Website erreichbar — das ist keine Sache des Codes.
 
 ## Struktur
 Drei Skripte in dieser Reihenfolge: `fetch_markets.py`, `forecast.py`, `build_site.py`.

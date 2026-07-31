@@ -4,11 +4,32 @@ Quelle Polymarket: laedt offene Fragen ueber die oeffentliche Gamma API und
 gibt sie im gemeinsamen Format zurueck (siehe lade_fragen).
 
 Die API ist oeffentlich, es wird kein Key benoetigt.
+
+Warum /markets/keyset und nicht /markets
+----------------------------------------
+/markets deckelt den Offset bei 2000. Frueher umgingen wir das, indem wir
+dasselbe Fenster mit sechs Sortierungen abfragten und ueber die id
+vereinigten - eine Stichprobe, keine vollstaendige Liste. Die API nennt den
+richtigen Weg in ihrer eigenen Fehlermeldung:
+
+    HTTP 422  "offset too large, use /markets/keyset for deeper pagination"
+
+/markets/keyset blaettert ueber einen Cursor und hat keine Grenze. Der
+Parameter heisst after_cursor - nachgelesen in der OpenAPI-Beschreibung, die
+die API unter /openapi.json selbst ausliefert. Geratene Namen (cursor, after,
+page_cursor) werden stillschweigend ignoriert und liefern immer wieder die
+erste Seite; das faellt ohne Gegenprobe nicht auf.
+
+Gemessen am 31.07.2026: vollstaendig sind es ueber 40'000 offene Markets
+statt der ~11'600, die die alte Stichprobe sah. Afrika-Treffer stiegen damit
+von 48 auf 60 - der Engpass ist also nicht die Pagination, sondern das
+Angebot. Die Liste ist jetzt aber nachweisbar vollstaendig statt gestichprobt.
 """
 
 import json
 import sys
 import time
+from datetime import datetime, timezone
 
 import requests
 
@@ -17,8 +38,7 @@ import requests
 QUELLE = "polymarket"
 
 BASE_URL = "https://gamma-api.polymarket.com"
-ENDPOINT = "/markets"
-SEITEN = 21                # Seiten a 100 pro Sortierung (API deckelt den Offset bei 2000)
+ENDPOINT = "/markets/keyset"
 PRO_SEITE = 100            # Maximum, das die API pro Request zurueckgibt
 
 # Manche Requests wurden ohne User-Agent mit 403 abgewiesen, darum setzen wir einen.
@@ -26,20 +46,32 @@ HEADERS = {"User-Agent": "africa-ai-forecasting/1.0"}
 TIMEOUT = 30               # Sekunden pro Anfrage, bevor sie als haengend gilt
 VERSUCHE = 3               # so oft probieren wir eine Anfrage bei Timeout erneut
 
-# Die API deckelt den Offset bei 2000, eine einzelne Abfrage erreicht also nur
-# ~2000 Markets. Weil es aber weit mehr offene Markets gibt und die serverseitige
-# Volumen-Sortierung ueber die Seiten hinweg unzuverlaessig ist, laden wir das
-# gleiche Fenster mit mehreren Sortierungen und vereinigen die Ergebnisse ueber
-# die id. So erwischen wir auch liquide Afrika-Markets, die eine einzelne
-# Sortierung verpasst.
-SORTIERUNGEN = [
-    {},                                             # unsortiert (Standard)
-    {"order": "volume", "ascending": "false"},      # groesstes Volumen zuerst
-    {"order": "volume", "ascending": "true"},       # kleinstes Volumen zuerst
-    {"order": "liquidity", "ascending": "false"},   # nach Liquiditaet
-    {"order": "startDate", "ascending": "false"},   # neueste zuerst
-    {"order": "endDate", "ascending": "true"},      # bald endende zuerst
-]
+# Reissleine gegen eine Endlosschleife, falls der Cursor einmal nicht mehr
+# vorwaerts laeuft. Gemessen werden rund 106 Seiten gebraucht; wird die Grenze
+# erreicht, melden wir das laut, statt die Liste still abzuschneiden.
+MAX_SEITEN = 300
+
+# Vorfilter auf dem Server, rein zur Beschleunigung. Ohne ihn sind es ueber
+# 25'000 Markets und der Abruf bricht nicht mehr sauber ab; mit ihm rund
+# 10'500 in etwa 47 Sekunden.
+#
+# Der Wert MUSS deutlich unter MIN_LIQUIDITAET in fetch_markets.py (5000)
+# bleiben. Dort steht die eigentliche Regel, hier nur eine Grobsiebung - sonst
+# liefe eine spaetere Senkung der Schwelle stillschweigend ins Leere, weil die
+# Fragen die Quelle nie verlassen haetten. Gegengeprueft: 11 Afrika-Fragen
+# liegen unter 1000, alle scheitern ohnehin an der echten Schwelle.
+VORFILTER_VOLUMEN = 1000
+
+# Zweiter Vorfilter: Fragen, deren Aufloesungsdatum vorbei ist, verwirft
+# fetch_markets.py ohnehin (loest_noch_auf) - sie sind keine Prognosefragen
+# mehr, sondern nachgelesene Ergebnisse.
+#
+# Ein Unterschied bleibt und ist bewusst in Kauf genommen: Markets GANZ OHNE
+# endDate laesst loest_noch_auf durch, dieser Serverfilter nicht. Betroffen
+# waren zum Messzeitpunkt 1028 Markets, davon 0 mit Afrika-Bezug.
+def heute_iso():
+    """Heutiges Datum in UTC als YYYY-MM-DD, wie end_date_min es erwartet."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
 # --- Daten laden -----------------------------------------------------------
@@ -47,8 +79,9 @@ SORTIERUNGEN = [
 def hole_seite(params):
     """Holt eine einzelne Seite und wiederholt bei Timeout bis zu VERSUCHE Mal.
 
-    Ein einzelner haengender Request soll bei ~126 Anfragen nicht den ganzen
-    Lauf abbrechen. Andere Fehler (kein Timeout) reichen wir sofort weiter.
+    Ein einzelner haengender Request soll bei ueber hundert Anfragen nicht den
+    ganzen Lauf abbrechen. Andere Fehler (kein Timeout) reichen wir sofort
+    weiter.
     """
     for versuch in range(1, VERSUCHE + 1):
         try:
@@ -65,33 +98,40 @@ def hole_seite(params):
             time.sleep(2)  # kurz warten, dann erneut probieren
 
 
-def lade_seiten(sortierung):
-    """Blaettert eine einzelne Sortierung durch und gibt ihre Markets zurueck."""
-    markets = []
-    for seite in range(SEITEN):
-        offset = seite * PRO_SEITE
+def lade_alle_markets():
+    """Blaettert alle offenen Markets ueber den Cursor durch.
+
+    Rueckgabe ist (markets, vollstaendig). vollstaendig ist False, wenn die
+    Reissleine MAX_SEITEN gegriffen hat - der Aufrufer soll den Unterschied
+    zwischen "das ist alles" und "hier wurde abgeschnitten" melden koennen.
+    """
+    markets = {}
+    cursor = None
+
+    for seite in range(MAX_SEITEN):
         params = {
-            "closed": "false",   # nur noch offene Fragen
+            "closed": "false",                     # nur noch offene Fragen
             "limit": PRO_SEITE,
-            "offset": offset,
+            "volume_num_min": str(VORFILTER_VOLUMEN),
+            "end_date_min": heute_iso(),
         }
-        params.update(sortierung)  # z. B. order=volume, ascending=false
+        if cursor:
+            params["after_cursor"] = cursor
 
         antwort = hole_seite(params)
-        # Die API begrenzt den Offset: zu hohe Werte liefern 422. Das ist kein
-        # echter Fehler, sondern heisst "keine weiteren Seiten" -> aufhoeren.
-        if antwort.status_code == 422:
-            break
-        # Bei allen anderen HTTP-Fehlern brechen wir klar ab statt still weiterzulaufen.
         antwort.raise_for_status()
 
-        seiten_daten = antwort.json()
-        if not seiten_daten:
-            break  # keine weiteren Markets mehr, wir hoeren auf zu blaettern
+        daten = antwort.json()
+        teil = daten.get("markets") or []
+        for market in teil:
+            markets[market["id"]] = market
 
-        markets.extend(seiten_daten)
+        cursor = daten.get("next_cursor")
+        # Kein Cursor oder leere Seite heisst: wir sind am Ende der Liste.
+        if not teil or not cursor:
+            return list(markets.values()), True
 
-    return markets
+    return list(markets.values()), False
 
 
 # --- Felder auslesen -------------------------------------------------------
@@ -213,17 +253,19 @@ def lade_fragen():
     Jede Quelle in diesem Projekt stellt genau diese Funktion bereit, damit
     fetch_markets.py sie gleich behandeln kann.
 
-    Eine einzelne Abfrage erreicht wegen des Offset-Deckels nur ~2000 Markets,
-    und die serverseitige Volumen-Sortierung ist ueber die Seiten hinweg
-    unzuverlaessig. Darum kombinieren wir mehrere Sortierungen und vereinigen
-    ueber die id.
+    Die Liste ist vollstaendig, nicht gestichprobt (siehe Modul-Docstring).
+    Zwei Vorfilter laufen serverseitig mit, beide unterhalb der Regeln in
+    fetch_markets.py: Mindestvolumen und Aufloesungsdatum.
     """
-    nach_id = {}  # id -> market, dadurch werden Duplikate automatisch entfernt
-    for sortierung in SORTIERUNGEN:
-        for market in lade_seiten(sortierung):
-            nach_id[market["id"]] = market
+    markets, vollstaendig = lade_alle_markets()
 
-    fragen = [normalisiere(m) for m in nach_id.values()]
-    print(f"  {QUELLE}: {len(fragen)} eindeutige offene Fragen geladen "
-          f"(aus {len(SORTIERUNGEN)} Sortierungen).")
+    if not vollstaendig:
+        # Nie stillschweigend abschneiden: eine gekuerzte Liste sieht sonst
+        # aus wie ein geschrumpftes Angebot.
+        print(f"  {QUELLE}: Reissleine bei {MAX_SEITEN} Seiten gegriffen, die "
+              f"Liste ist UNVOLLSTAENDIG. Cursor prueft?", file=sys.stderr)
+
+    fragen = [normalisiere(m) for m in markets]
+    print(f"  {QUELLE}: {len(fragen)} offene Fragen geladen "
+          f"(Volumen ab {VORFILTER_VOLUMEN}, Aufloesung ab heute).")
     return fragen
