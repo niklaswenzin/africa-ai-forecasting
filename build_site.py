@@ -226,47 +226,12 @@ h1 {
   line-height: 1.55;
 }
 
-/* Kennzahlenband */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0;
-  margin-top: 2rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--card);
-  box-shadow: var(--schatten);
-  overflow: hidden;
-}
-.stat { padding: .95rem 1.15rem; }
-.stat + .stat { border-left: 1px solid var(--line); }
-@media (max-width: 620px) {
-  .stat + .stat { border-left: none; border-top: 1px solid var(--line); }
-}
-.stat-value {
-  display: block;
-  font-size: 1.55rem;
-  font-weight: 680;
-  line-height: 1.1;
-  letter-spacing: -.025em;
-  font-variant-numeric: tabular-nums;
-}
-.stat-label {
-  display: block;
-  font-size: .68rem;
-  text-transform: uppercase;
-  letter-spacing: .085em;
-  color: var(--muted);
-  font-weight: 600;
-  margin-top: .3rem;
-}
-
 /* Legende: erklaert das Farbsystem genau einmal */
 .legende {
   display: flex;
   flex-wrap: wrap;
   gap: 1.1rem;
-  margin: 1.4rem 0 0;
+  margin: 1.75rem 0 0;
   font-size: .8rem;
   color: var(--text-soft);
 }
@@ -522,13 +487,6 @@ footer code {
   on African politics and economics. Neither ever sees the market price it is
   placed next to, so each estimate is an independent claim rather than a
   restatement of the crowd.</p>
-
-  <div class="stats">
-    <div class="stat"><span class="stat-value"><<ANZAHL>></span><span class="stat-label">Questions</span></div>
-    <div class="stat"><span class="stat-value"><<ANZAHL_BENCHMARK>></span><span class="stat-label">With a benchmark</span></div>
-    <div class="stat"><span class="stat-value"><<DURCHSCHNITT>></span><span class="stat-label">Avg. model &ndash; market gap</span></div>
-    <div class="stat"><span class="stat-value"><<MODELL_DIFFERENZ>></span><span class="stat-label">Avg. gap between models</span></div>
-  </div>
 
   <div class="legende">
     <span><i class="swatch" style="background: var(--bench)"></i> Market or community benchmark</span>
@@ -953,41 +911,6 @@ def hat_prognose(eintrag):
     return any(m["model_p"] is not None for m in eintrag["modelle"])
 
 
-def mittlere_abweichung(eintraege):
-    """Durchschnittliche absolute Abweichung vom Benchmark, in Prozentpunkten.
-
-    Gemittelt ueber alle Modell-Benchmark-Paare, nicht ueber Karten: bei zwei
-    Modellen zaehlt jede Karte doppelt, wenn beide geschaetzt haben. Gibt es
-    kein einziges Paar, steht ein Strich - eine 0 waere eine Falschaussage,
-    sie hiesse "Modelle und Benchmark sind sich einig".
-    """
-    diffs = [abs(d) for e in eintraege for d in alle_diffs(e)]
-    if not diffs:
-        return "&ndash;"
-    return f"{round(sum(diffs) / len(diffs) * 100)} pts"
-
-
-def mittlerer_modellabstand(eintraege):
-    """Durchschnittlicher Abstand der Modelle untereinander, in Prozentpunkten.
-
-    Bewusst unabhaengig vom Benchmark: dieser Wert gibt es auch fuer Fragen
-    ohne Vergleichszahl, und er beantwortet eine eigene Frage - sind sich zwei
-    Modelle mit derselben Aufgabe ueberhaupt einig? Bei mehr als zwei
-    Prognostikern zaehlt die Spanne zwischen dem hoechsten und dem
-    niedrigsten Wert.
-    """
-    spannen = []
-    for eintrag in eintraege:
-        werte = [m["model_p"] for m in eintrag["modelle"] if m["model_p"] is not None]
-        if len(werte) < 2:
-            continue
-        spannen.append(max(werte) - min(werte))
-
-    if not spannen:
-        return "&ndash;"
-    return f"{round(sum(spannen) / len(spannen) * 100)} pts"
-
-
 def sortierschluessel(eintrag):
     """Sortierung der Karten.
 
@@ -1005,19 +928,14 @@ def sortierschluessel(eintrag):
 
 
 def baue_seite(eintraege, zeitstempel):
-    """Setzt Kopf, Kennzahlen, Tab-Leiste, Karten und Fusszeile zusammen."""
+    """Setzt Kopf, Legende, Tab-Leiste, Karten und Fusszeile zusammen."""
     sortiert = sorted(eintraege, key=sortierschluessel)
-    mit_benchmark = sum(1 for e in sortiert if e["market_p"] is not None)
 
     return (
         SEITEN_VORLAGE
         .replace("<<LEGENDE_MODELLE>>", baue_legende())
         .replace("<<MODELL_LISTE>>", nenne_modelle())
-        .replace("<<MODELL_DIFFERENZ>>", mittlerer_modellabstand(sortiert))
         .replace("<<ZEITSTEMPEL>>", zeitstempel)
-        .replace("<<ANZAHL_BENCHMARK>>", str(mit_benchmark))
-        .replace("<<ANZAHL>>", str(len(sortiert)))
-        .replace("<<DURCHSCHNITT>>", mittlere_abweichung(sortiert))
         .replace("<<TABS>>", baue_tabs(sortiert))
         .replace("<<KARTEN>>", "\n".join(baue_karte(e) for e in sortiert))
         .replace("<<QUELLEN_LISTE>>", nenne_quellen(sortiert))
